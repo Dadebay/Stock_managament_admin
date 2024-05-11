@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
 SnackbarController showSnackBar(String title, String subtitle, Color color) {
@@ -66,14 +67,20 @@ Text filterTextWidget(String name) {
   );
 }
 
-Widget imageView({
-  required String imageURl,
-}) {
+Widget imageView({required String imageURl}) {
   return ClipRRect(
     borderRadius: borderRadius10,
     child: Image.network(
       imageURl,
       fit: BoxFit.fill,
+      errorBuilder: (context, error, stackTrace) {
+        return Center(
+            child: Text(
+          'noImage'.tr,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white, fontFamily: gilroyBold, fontSize: 15.sp),
+        ));
+      },
       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
         if (loadingProgress == null) return child;
         return Center(
@@ -119,4 +126,80 @@ Future<DateTime?> showDateTimePickerWidget({
           selectedTime.hour,
           selectedTime.minute,
         );
+}
+
+Padding topWidgetTextPart(bool addMorePadding) {
+  final SeacrhViewController searchController = Get.put(SeacrhViewController());
+  bool sortValue = false;
+  return Padding(
+    padding: EdgeInsets.only(left: addMorePadding ? 60.w : 30.w, right: 20.w, top: 10.h, bottom: 10.h),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            "Product Name",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
+          ),
+        ),
+        const Expanded(child: SizedBox()),
+        button(searchController, sortValue, true, '   Cost', 'cost'),
+        button(searchController, sortValue, true, 'Sell Price', 'sell_price'),
+        button(searchController, sortValue, false, 'Brand', 'brand'),
+        button(searchController, sortValue, false, 'Category', 'category'),
+      ],
+    ),
+  );
+}
+
+Expanded button(SeacrhViewController searchController, bool sortValue, bool sortDoubleValue, String text, String sortText) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: () {
+        List productList = [];
+        productList = searchController.productsList;
+
+        if (sortValue == false) {
+          if (sortDoubleValue) {
+            productList.sort((a, b) {
+              final String first = a[sortText] ?? '0.0';
+              final String second = b[sortText] ?? '0.0';
+              final double firstCost = double.tryParse(first.replaceAll(',', '.')) ?? 0.0;
+              final double secondCost = double.tryParse(second.replaceAll(',', '.')) ?? 0.0;
+              return firstCost.compareTo(secondCost);
+            });
+          } else {
+            productList.sort((a, b) {
+              return a[sortText].compareTo(b[sortText]);
+            });
+          }
+        } else {
+          if (sortDoubleValue) {
+            productList.sort((a, b) {
+              final String first = a['cost'] ?? '0.0';
+              final String second = b['cost'] ?? '0.0';
+              final double firstCost = double.tryParse(first.replaceAll(',', '.')) ?? 0.0;
+              final double secondCost = double.tryParse(second.replaceAll(',', '.')) ?? 0.0;
+              return secondCost.compareTo(firstCost);
+            });
+          } else {
+            print("Gymmatdan arzana");
+            productList.sort((a, b) {
+              return b[sortText].compareTo(a[sortText]);
+            });
+          }
+        }
+        sortValue = !sortValue;
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.start,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
+      ),
+    ),
+  );
 }

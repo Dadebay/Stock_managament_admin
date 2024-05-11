@@ -113,55 +113,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
       body: Obx(() {
         return Column(
           children: [
-            _productsPageController.showInGrid.value
-                ? Padding(
-                    padding: EdgeInsets.only(left: 30.w, right: 20.w, top: 10.h, bottom: 10.h),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            "Product Name",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
-                          ),
-                        ),
-                        const Expanded(child: SizedBox()),
-                        Expanded(
-                          child: Text(
-                            "  Cost",
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Sell price",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Brand",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Category",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
+            _productsPageController.showInGrid.value ? topWidgetTextPart(false) : const SizedBox.shrink(),
             _productsPageController.showInGrid.value
                 ? const Divider(
                     color: Colors.grey,

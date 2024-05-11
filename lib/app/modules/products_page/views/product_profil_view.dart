@@ -12,6 +12,7 @@ import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
+import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
@@ -297,6 +298,8 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     );
   }
 
+  final SeacrhViewController searchViewController = Get.put(SeacrhViewController());
+
   CustomAppBar appBarCustom(BuildContext context) {
     return CustomAppBar(
         backArrow: true,
@@ -318,8 +321,18 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                       onPressed: () async {
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
+                        print(widget.product.image);
 
-                        await FirebaseFirestore.instance.collection('products').doc(widget.product.documentID).delete().then((value) {
+                        await FirebaseFirestore.instance.collection('products').doc(widget.product.documentID).delete().then((value) async {
+                          if (widget.product.image == '' || widget.product.image == null) {
+                          } else {
+                            var storageRef = FirebaseStorage.instance.refFromURL(widget.product.image!);
+                            await storageRef.delete().then((value) {});
+                          }
+                          print(searchViewController.productsList.length);
+                          searchViewController.productsList.removeWhere((element) => element['name'] == widget.product.name);
+                          print(searchViewController.productsList.length);
+
                           showSnackBar("Deleted", "Succesfully deleted your product", Colors.green);
                         });
                       },

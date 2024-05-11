@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
+import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
@@ -72,22 +74,20 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     await storageRef.putString(base64Image, format: PutStringFormat.base64, metadata: SettableMetadata(contentType: 'image/png')).then((p0) async {
       var dowurl = await storageRef.getDownloadURL();
       String url = dowurl.toString();
-      print(url);
-      print(url);
-      print(url);
-      print(url);
-
       addData(url);
     });
   }
 
+  final SeacrhViewController searchViewController = Get.put(SeacrhViewController());
+
   addData(String imageURL) async {
+    String documentID = '';
+
     try {
       if (textControllers[9].text.isEmpty || textControllers[9].text == "") {
         showSnackBar("Error", "Add Product Quantity", Colors.red);
       } else {
         _homeController.agreeButton.value = !_homeController.agreeButton.value;
-
         await FirebaseFirestore.instance.collection('products').add({
           'image': imageURL,
           'name': textControllers[0].text,
@@ -100,11 +100,10 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
           'note': textControllers[7].text,
           'package': textControllers[8].text,
           'quantity': int.parse(textControllers[9].text.toString()),
-          'cost': textControllers[10].text,
+          'cost': textControllers[10].text == '' ? '0.0' : textControllers[10].text,
           'sell_price': textControllers[11].text,
         }).then((value) {
-          Get.back();
-          showSnackBar("Done", "Product added succesfully", Colors.green);
+          documentID = value.id;
           _homeController.agreeButton.value = !_homeController.agreeButton.value;
         });
       }
@@ -116,12 +115,21 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
 
       showSnackBar("Error", e.toString(), Colors.red);
     }
+    await FirebaseFirestore.instance.collection('products').doc(documentID).get().then((value22) {
+      searchViewController.productsList.add(value22);
+      Get.back();
+      showSnackBar("Done", "Product added succesfully", Colors.green);
+    });
+    searchViewController.productsList.sort(
+      (a, b) {
+        return b['date'].compareTo(a['date']);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     textControllers[6].text = DateTime.now().toString().substring(0, 16);
-
     return Scaffold(
       appBar: const CustomAppBar(backArrow: true, actionIcon: false, centerTitle: true, name: "Add product"),
       body: ListView(

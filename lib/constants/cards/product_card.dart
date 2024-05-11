@@ -113,7 +113,9 @@ class SecondProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => ProductProfilView(product: product));
+        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+          return ProductProfilView(product: product);
+        }));
       },
       child: Container(
           width: 50.w,
@@ -125,6 +127,14 @@ class SecondProductCard extends StatelessWidget {
             child: Image.network(
               product.image!,
               fit: BoxFit.fill,
+              errorBuilder: (context, error, stackTrace) {
+                return Center(
+                    child: Text(
+                  'noImage'.tr,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontFamily: gilroyBold, fontSize: 25.sp),
+                ));
+              },
               loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Center(

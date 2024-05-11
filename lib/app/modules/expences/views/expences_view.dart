@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:flutter/cupertino.dart';
@@ -196,7 +194,22 @@ class _ExpencesViewState extends State<ExpencesView> {
                           style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
                         ),
                       ),
-                      const Icon(IconlyLight.arrowRightCircle)
+                      IconButton(
+                          onPressed: () async {
+                            await FirebaseFirestore.instance.collection('expences').doc(documentSnapshot.id).delete().then((value) {
+                              sumPrice -= double.parse(expence.cost.toString());
+                              showSnackBar("Done", "${expence.name} deleted succefully", Colors.green);
+                              setState(() {});
+                            });
+                          },
+                          icon: const Icon(
+                            IconlyLight.delete,
+                            color: Colors.red,
+                          )),
+                      SizedBox(
+                        width: 20.w,
+                      ),
+                      const Icon(IconlyLight.editSquare)
                     ],
                   ),
                 ),
@@ -293,6 +306,7 @@ class _ExpencesViewState extends State<ExpencesView> {
                         homeController.agreeButton.value = !homeController.agreeButton.value;
                       });
                     }
+                    sumPrice += double.parse(costEditingController.text.toString());
                   },
                   text: edit ? "Edit" : "add".tr)
             ],
