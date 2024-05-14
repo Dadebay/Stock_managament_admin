@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -221,7 +220,6 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
           CustomTextField(labelName: "Sell Price", borderRadius: true, controller: textControllers[11], focusNode: focusNodes[11], requestfocusNode: focusNodes[1], unFocus: false, readOnly: true),
           AgreeButton(
               onTap: () {
-                print(_photo);
                 _photo == null ? addData("") : uploadFile();
               },
               text: "add_product")

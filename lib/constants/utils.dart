@@ -9,6 +9,7 @@ class MyTranslations extends Translations {
           'select_language': 'Dil saýlaň',
           'selectMoreProducts': 'Bir ýa-da birnäçe önümi saýlamagyňyzy haýyş edýäris',
           'done': "Soňy",
+          'sumCost': "Jemi cykdaýjy",
           'cannotChangeOrderStatus': "Sargyt ýagdaýyny üýtgedip bilmersiňiz",
           "notHigherThanSumPrice": "Arzanladyş bahasy Jemi bahasyndan ýokary bolup bilmez",
           "createOrder": "Sargyt döretmek",
@@ -174,6 +175,7 @@ class MyTranslations extends Translations {
           'yes': 'Hawwa',
         },
         'ru': {
+          'sumCost': "Сумма стоимости",
           'select_language': 'Выберите язык',
           'selectMoreProducts': "Пожалуйста, выберите один или несколько продуктов",
           'done': "Выполнено",
@@ -335,6 +337,7 @@ class MyTranslations extends Translations {
           'waitMyManSubtitle': 'Подождите, пока загрузится информация',
         },
         'en': {
+          'sumCost': "Sum cost",
           'select_language': 'Select a language',
           'selectMoreProducts': 'Please select one or more products',
           'done': "Done",

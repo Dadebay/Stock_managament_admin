@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
 
 class SeacrhViewController extends GetxController {
   RxList searchResult = [].obs;
@@ -9,17 +8,25 @@ class SeacrhViewController extends GetxController {
   RxList filteredProductsList = [].obs;
   RxBool loadingData = false.obs;
   RxBool showInGrid = false.obs;
-
+  RxDouble sumSell = 0.0.obs;
+  RxDouble sumCost = 0.0.obs;
+  RxInt sumCount = 0.obs;
+  RxInt sumQuantity = 0.obs;
   getClientStream() async {
     loadingData.value = true;
     await FirebaseFirestore.instance.collection('products').orderBy('date', descending: true).get().then((value) {
       for (var element in value.docs) {
         productsList.add(element);
         collectAllProducts.add(element);
+        final String cost = element['cost'] ?? '0.0';
+        final String sell = element['sell_price'] ?? '0.0';
+        sumCost.value += double.tryParse(cost.replaceAll(',', '.')) ?? 0.0;
+        sumSell.value += double.tryParse(sell.replaceAll(',', '.')) ?? 0.0;
+        sumQuantity.value += int.parse(element['quantity'].toString());
       }
-      // productsList.value = value.docs;
-      // collectAllProducts.value = value.docs;
     });
+    sumCount.value = productsList.length;
+
     loadingData.value = false;
     searchResult.clear();
   }

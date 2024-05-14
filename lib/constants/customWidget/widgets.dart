@@ -4,9 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
+List statusList = [
+  {'name': 'Shipped', 'statusName': 'shipped'},
+  {'name': 'Canceled', 'statusName': 'canceled'},
+  {'name': 'Refund', 'statusName': 'refund'},
+  {'name': 'Preparing', 'statusName': 'preparing'},
+  {'name': 'Ready to ship', 'statusName': 'ready to ship'},
+];
+List topPartNames = [
+  {'name': 'Order Name', 'sortName': ""},
+  {'name': 'Date', 'sortName': "date"},
+  {'name': 'Product count', 'sortName': "product_count"},
+  {'name': '   Sum Price', 'sortName': "sum_price"},
+  {'name': ' Sum Cost', 'sortName': "sum_cost"},
+  {'name': 'Status', 'sortName': "status"},
+];
 SnackbarController showSnackBar(String title, String subtitle, Color color) {
   if (SnackbarController.isSnackbarBeingShown) {
     SnackbarController.cancelAllSnackbars();
@@ -128,39 +144,68 @@ Future<DateTime?> showDateTimePickerWidget({
         );
 }
 
-Padding topWidgetTextPart(bool addMorePadding) {
-  final SeacrhViewController searchController = Get.put(SeacrhViewController());
+final SalesController salesController = Get.put(SalesController());
+final SeacrhViewController searchController = Get.put(SeacrhViewController());
+
+Padding topWidgetTextPart(bool addMorePadding, List names, bool ordersView) {
   bool sortValue = false;
   return Padding(
-    padding: EdgeInsets.only(left: addMorePadding ? 60.w : 30.w, right: 20.w, top: 10.h, bottom: 10.h),
+    padding: EdgeInsets.only(left: addMorePadding ? 60.w : 30.w, right: ordersView ? 0.0 : 20.w, top: 10.h, bottom: 10.h),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           flex: 2,
           child: Text(
-            "Product Name",
+            names[0]['name'],
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
           ),
         ),
-        const Expanded(child: SizedBox()),
-        button(searchController, sortValue, true, '   Cost', 'cost'),
-        button(searchController, sortValue, true, 'Sell Price', 'sell_price'),
-        button(searchController, sortValue, false, 'Brand', 'brand'),
-        button(searchController, sortValue, false, 'Category', 'category'),
+        const Expanded(child: SizedBox.shrink()),
+        button(sortValue, true, names[1]['name'], names[1]['sortName'], ordersView),
+        button(sortValue, true, names[2]['name'], names[2]['sortName'], ordersView),
+        button(sortValue, false, names[3]['name'], names[3]['sortName'], ordersView),
+        button(sortValue, false, names[4]['name'], names[4]['sortName'], ordersView),
+        ordersView ? button(sortValue, true, names[5]['name'], names[5]['sortName'], ordersView) : const SizedBox.shrink(),
       ],
     ),
   );
 }
 
-Expanded button(SeacrhViewController searchController, bool sortValue, bool sortDoubleValue, String text, String sortText) {
+Widget textWidgetPrice(String text1, String text2) {
+  return Expanded(
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            text1,
+            maxLines: 1,
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            text2,
+            textAlign: TextAlign.start,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Expanded button(bool sortValue, bool sortDoubleValue, String text, String sortText, bool orderView) {
   return Expanded(
     child: GestureDetector(
       onTap: () {
         List productList = [];
-        productList = searchController.productsList;
+        productList = orderView ? salesController.orderCardList : searchController.productsList;
 
         if (sortValue == false) {
           if (sortDoubleValue) {
@@ -179,8 +224,8 @@ Expanded button(SeacrhViewController searchController, bool sortValue, bool sort
         } else {
           if (sortDoubleValue) {
             productList.sort((a, b) {
-              final String first = a['cost'] ?? '0.0';
-              final String second = b['cost'] ?? '0.0';
+              final String first = a[sortText] ?? '0.0';
+              final String second = b[sortText] ?? '0.0';
               final double firstCost = double.tryParse(first.replaceAll(',', '.')) ?? 0.0;
               final double secondCost = double.tryParse(second.replaceAll(',', '.')) ?? 0.0;
               return secondCost.compareTo(firstCost);

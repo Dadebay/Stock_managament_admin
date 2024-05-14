@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
@@ -28,16 +29,17 @@ class _SearchViewState extends State<SearchView> {
     {'name': 'Locations', 'searchName': 'location'},
     {'name': 'Materials', 'searchName': 'material'}
   ];
+  List topPartNames = [
+    {'name': 'Product Name', 'sortName': ""},
+    {'name': '   Cost', 'sortName': "cost"},
+    {'name': 'Sell Price', 'sortName': "sell_price"},
+    {'name': 'Brand', 'sortName': "brand"},
+    {'name': 'Category', 'sortName': "category"},
+  ];
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    searchViewController.getClientStream();
   }
 
   Future<dynamic> filter() {
@@ -92,10 +94,34 @@ class _SearchViewState extends State<SearchView> {
         ));
   }
 
+  final ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
+        bottomNavigationBar: ScrollToHide(
+            scrollController: _scrollController,
+            height: 60, // Initial height of the bottom navigation bar.
+            hideDirection: Axis.vertical,
+            child: Column(
+              children: [
+                const Divider(
+                  color: Colors.grey,
+                  thickness: 1,
+                ),
+                Obx(() {
+                  return Row(
+                    children: [
+                      textWidgetPrice('In Hand :   ', searchViewController.sumCount.value.toString()),
+                      textWidgetPrice('In Stock :   ', searchViewController.sumQuantity.value.toString()),
+                      textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value} \$'),
+                      textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value} \$'),
+                    ],
+                  );
+                })
+              ],
+            )),
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -137,7 +163,7 @@ class _SearchViewState extends State<SearchView> {
           children: [
             searchWidget(),
             Obx(() {
-              return Center(child: searchViewController.showInGrid.value ? const SizedBox.shrink() : topWidgetTextPart(true));
+              return Center(child: searchViewController.showInGrid.value ? const SizedBox.shrink() : topWidgetTextPart(true, topPartNames, false));
             }),
             MainBody()
           ],
@@ -255,6 +281,7 @@ class _SearchViewState extends State<SearchView> {
               ),
               Expanded(
                 child: ProductCard(
+                  addCounterWidget: false,
                   product: product,
                 ),
               )

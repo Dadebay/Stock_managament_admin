@@ -6,10 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/products_page/views/product_profil_view.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
 import 'package:stock_managament_admin/constants/cards/product_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 import '../controllers/products_page_controller.dart';
@@ -113,7 +111,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
       body: Obx(() {
         return Column(
           children: [
-            _productsPageController.showInGrid.value ? topWidgetTextPart(false) : const SizedBox.shrink(),
+            _productsPageController.showInGrid.value ? topWidgetTextPart(false, [], false) : const SizedBox.shrink(),
             _productsPageController.showInGrid.value
                 ? const Divider(
                     color: Colors.grey,
@@ -147,7 +145,12 @@ class ProductsPageView extends GetView<ProductsPageController> {
                     note: data['note'].toString(),
                     package: data['package'].toString(),
                     documentID: documentSnapshot.id);
-                return _productsPageController.showInGrid.value ? ProductCard(product: product) : SecondProductCard(product: product);
+                return _productsPageController.showInGrid.value
+                    ? ProductCard(
+                        product: product,
+                        addCounterWidget: false,
+                      )
+                    : SecondProductCard(product: product);
               },
               separatorBuilder: (context, index) {
                 return const Divider(

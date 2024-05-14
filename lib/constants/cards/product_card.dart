@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/product_profil_view.dart';
@@ -10,7 +9,9 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.product});
+  const ProductCard({super.key, required this.product, required this.addCounterWidget, this.disableOnTap});
+  final bool addCounterWidget;
+  final bool? disableOnTap;
 
   final ProductModel product;
 
@@ -19,13 +20,34 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
+  int selectedCount = 0;
+
+  changeData() {
+    selectedCount = 0;
+    for (var element in salesController.selectedProductsToOrder) {
+      final ProductModel data = element['product'];
+      if (widget.product.documentID == data.documentID) {
+        selectedCount = int.parse(element['count'].toString());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    changeData();
+
+    return noCounterWidget();
+  }
+
+  GestureDetector noCounterWidget() {
     return GestureDetector(
       onTap: () {
-        Get.to(() => ProductProfilView(
-              product: widget.product,
-            ));
+        if (widget.disableOnTap!) {
+        } else {
+          Get.to(() => ProductProfilView(
+                product: widget.product,
+              ));
+        }
       },
       child: Container(
         color: Colors.white,
@@ -93,7 +115,47 @@ class _ProductCardState extends State<ProductCard> {
                 ],
               ),
             ),
-            const Icon(IconlyLight.arrowRightCircle)
+            widget.addCounterWidget
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.minus_circle, color: Colors.black),
+                        onPressed: () {
+                          if (selectedCount > 0) {
+                            selectedCount--;
+                          }
+                          salesController.decreaseCount(widget.product.documentID.toString(), selectedCount);
+                          setState(() {});
+                        },
+                      ),
+                      Text(
+                        selectedCount.toString(),
+                        style: TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 18.sp),
+                        maxLines: 1,
+                      ), // Yeni: Sayıcıyı göster
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.add_circled, color: Colors.black),
+                        onPressed: () {
+                          if (selectedCount >= widget.product.quantity!) {
+                            showSnackBar("Error", "Not in stock", Colors.red);
+                          } else {
+                            if (selectedCount == 0) {
+                              selectedCount++;
+
+                              salesController.addProduct(product: widget.product, count: selectedCount);
+                            } else {
+                              selectedCount++;
+
+                              salesController.upgradeCount(widget.product.documentID.toString(), selectedCount);
+                            }
+                          }
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  )
+                : const Icon(IconlyLight.arrowRightCircle)
           ],
         ),
       ),
