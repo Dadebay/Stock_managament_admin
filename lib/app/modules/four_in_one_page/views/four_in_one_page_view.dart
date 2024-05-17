@@ -4,8 +4,8 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
@@ -25,6 +25,14 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
     {'name': 'locations', 'pageView': "Locations", "countName": 'location'},
     {'name': 'materials', 'pageView': "Materials", "countName": 'material'},
   ];
+  final FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
+
+  @override
+  void initState() {
+    super.initState();
+    fourInOnePageController.findData();
+  }
+
   FloatingActionButton addDataButtonFourInONe() {
     return FloatingActionButton(
         onPressed: () {
@@ -58,8 +66,6 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
         child: const Icon(IconlyLight.plus));
   }
 
-  final SeacrhViewController seacrhViewController = Get.put(SeacrhViewController());
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,14 +90,8 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
                       shrinkWrap: true,
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (BuildContext context, int indexx) {
-                        double sumProductCount = 0;
-                        for (int i = 0; i < seacrhViewController.productsList.length; i++) {
-                          if (seacrhViewController.productsList[i][four_in_one_names[index]['countName']] == snapshot.data!.docs[indexx]['name']) {
-                            sumProductCount += seacrhViewController.productsList[i]['quantity'].toDouble();
-                          }
-                        }
                         return ListTile(
-                          title: Text(snapshot.data!.docs[indexx]['name'] + "  -  " + sumProductCount.toString() + " sany "),
+                          title: Text(snapshot.data!.docs[indexx]['name'] + "  -  " + snapshot.data!.docs[indexx]['quantity'].toString() + " sany "),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

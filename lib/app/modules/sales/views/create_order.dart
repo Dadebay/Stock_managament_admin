@@ -1,11 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/select_order_products.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
@@ -100,7 +97,6 @@ class _CreateOrderViewState extends State<CreateOrderView> {
                   } else {
                     salesController.sumbitSale(textControllers: textControllers, status: selectedStatus);
                     Navigator.of(context).pop();
-                    // FirebaseFirestore.instance.collection('clients').where('number',isEqualTo: );
                   }
                 } else {
                   showSnackBar('errorTitle', 'loginErrorFillBlanks', Colors.red);
@@ -133,7 +129,11 @@ class _CreateOrderViewState extends State<CreateOrderView> {
                   shrinkWrap: true,
                   itemBuilder: (BuildContext context, int index) {
                     final ProductModel product = salesController.selectedProductsToOrder[index]['product'];
-                    return ProductCard(product: product, addCounterWidget: true);
+                    return ProductCard(
+                      product: product,
+                      addCounterWidget: true,
+                      disableOnTap: false,
+                    );
                   },
                 ),
               ],

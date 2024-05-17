@@ -19,6 +19,7 @@ dependencies:
   intl: ^0.19.0
   image_picker_web: ^3.1.1
   firebase_pagination: ^3.1.0
+  firebase_auth:
   scroll_to_hide: ^2.1.0
   path:
   flutter:

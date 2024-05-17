@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/product_profil_view.dart';
+import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.product, required this.addCounterWidget, this.disableOnTap});
+  const ProductCard({super.key, required this.product, required this.addCounterWidget, required this.disableOnTap});
   final bool addCounterWidget;
-  final bool? disableOnTap;
+  final bool disableOnTap;
 
   final ProductModel product;
 
@@ -21,6 +22,7 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   int selectedCount = 0;
+  final SalesController salesController = Get.put(SalesController());
 
   changeData() {
     selectedCount = 0;
@@ -42,7 +44,7 @@ class _ProductCardState extends State<ProductCard> {
   GestureDetector noCounterWidget() {
     return GestureDetector(
       onTap: () {
-        if (widget.disableOnTap!) {
+        if (widget.disableOnTap) {
         } else {
           Get.to(() => ProductProfilView(
                 product: widget.product,

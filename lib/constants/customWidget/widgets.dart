@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stock_managament_admin/app/data/models/client_model.dart';
+import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
@@ -16,7 +18,7 @@ List statusList = [
   {'name': 'Ready to ship', 'statusName': 'ready to ship'},
 ];
 List topPartNames = [
-  {'name': 'Order Name', 'sortName': ""},
+  {'name': 'Order Name', 'sortName': "client_number"},
   {'name': 'Date', 'sortName': "date"},
   {'name': 'Product count', 'sortName': "product_count"},
   {'name': '   Sum Price', 'sortName': "sum_price"},
@@ -144,31 +146,23 @@ Future<DateTime?> showDateTimePickerWidget({
         );
 }
 
-final SalesController salesController = Get.put(SalesController());
 final SeacrhViewController searchController = Get.put(SeacrhViewController());
 
-Padding topWidgetTextPart(bool addMorePadding, List names, bool ordersView) {
+Container topWidgetTextPart(bool addMorePadding, List names, bool ordersView, bool clientView) {
   bool sortValue = false;
-  return Padding(
+  return Container(
+    color: Colors.white,
     padding: EdgeInsets.only(left: addMorePadding ? 60.w : 30.w, right: ordersView ? 0.0 : 20.w, top: 10.h, bottom: 10.h),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            names[0]['name'],
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
-          ),
-        ),
-        const Expanded(child: SizedBox.shrink()),
-        button(sortValue, true, names[1]['name'], names[1]['sortName'], ordersView),
-        button(sortValue, true, names[2]['name'], names[2]['sortName'], ordersView),
-        button(sortValue, false, names[3]['name'], names[3]['sortName'], ordersView),
-        button(sortValue, false, names[4]['name'], names[4]['sortName'], ordersView),
-        ordersView ? button(sortValue, true, names[5]['name'], names[5]['sortName'], ordersView) : const SizedBox.shrink(),
+        button(sortValue, false, names[0]['name'], names[0]['sortName'], ordersView, 2, clientView),
+        clientView ? const SizedBox.shrink() : const Expanded(child: SizedBox.shrink()),
+        button(sortValue, clientView ? false : !ordersView, names[1]['name'], names[1]['sortName'], ordersView, clientView ? 2 : 1, clientView),
+        button(sortValue, clientView ? false : true, names[2]['name'], names[2]['sortName'], ordersView, 1, clientView),
+        button(sortValue, false, names[3]['name'], names[3]['sortName'], ordersView, 1, clientView),
+        button(sortValue, false, names[4]['name'], names[4]['sortName'], ordersView, 1, clientView),
+        ordersView ? button(sortValue, true, names[5]['name'], names[5]['sortName'], ordersView, 1, clientView) : const SizedBox.shrink(),
       ],
     ),
   );
@@ -200,13 +194,22 @@ Widget textWidgetPrice(String text1, String text2) {
   );
 }
 
-Expanded button(bool sortValue, bool sortDoubleValue, String text, String sortText, bool orderView) {
+final ClientsController clientsController = Get.put(ClientsController());
+Expanded button(bool sortValue, bool sortDoubleValue, String text, String sortText, bool orderView, int flex, bool clientView) {
+  final SalesController salesController = Get.put(SalesController());
+
   return Expanded(
+    flex: flex,
     child: GestureDetector(
       onTap: () {
         List productList = [];
-        productList = orderView ? salesController.orderCardList : searchController.productsList;
-
+        if (orderView == true) {
+          productList = salesController.orderCardList;
+        } else if (clientView == true) {
+          productList = clientsController.clients;
+        } else {
+          productList = searchController.productsList;
+        }
         if (sortValue == false) {
           if (sortDoubleValue) {
             productList.sort((a, b) {
@@ -231,7 +234,6 @@ Expanded button(bool sortValue, bool sortDoubleValue, String text, String sortTe
               return secondCost.compareTo(firstCost);
             });
           } else {
-            print("Gymmatdan arzana");
             productList.sort((a, b) {
               return b[sortText].compareTo(a[sortText]);
             });

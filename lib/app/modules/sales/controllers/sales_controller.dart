@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
+import 'package:stock_managament_admin/app/data/models/client_model.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
@@ -118,6 +119,7 @@ class SalesController extends GetxController {
     if (discountPrice >= sumPrice) {
       showSnackBar("Error", "A discount price cannot be greater than the sum price.", Colors.red);
     } else {
+      sumPrice -= discountPrice;
       await FirebaseFirestore.instance.collection('sales').add({
         'client_address': textControllers[4].text,
         'client_name': textControllers[3].text,
@@ -152,6 +154,25 @@ class SalesController extends GetxController {
         }
       });
       homeController.agreeButton.value = !homeController.agreeButton.value;
+      FirebaseFirestore.instance.collection('clients').get().then((value) {
+        bool valueAddClient = false;
+        for (var element in value.docs) {
+          if (element['number'] == textControllers[2].text) {
+            valueAddClient = true;
+            double sumClientPrice = double.parse(element['sum_price'].toString()) + double.parse(sumPrice.toString());
+            element.reference.update({'sum_price': sumClientPrice, 'order_count': element['order_count'] + 1, 'name': textControllers[3].text});
+          }
+        }
+        if (valueAddClient == false) {
+          FirebaseFirestore.instance.collection('clients').add({
+            'address': textControllers[4].text,
+            'name': textControllers[3].text,
+            'number': textControllers[2].text,
+            'sum_price': sumPrice.toString(),
+            'order_count': 1,
+          });
+        }
+      });
 
       showSnackBar("Done", "Your purchase submitted ", Colors.green);
     }

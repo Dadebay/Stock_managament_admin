@@ -205,7 +205,7 @@ class _SalesViewState extends State<SalesView> {
           ],
         ),
         body: Column(
-          children: [searchWidget(), topWidgetTextPart(true, topPartNames, true), MainBody()],
+          children: [searchWidget(), topWidgetTextPart(true, topPartNames, true, false), MainBody()],
         ));
   }
 }

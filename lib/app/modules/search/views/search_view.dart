@@ -30,7 +30,7 @@ class _SearchViewState extends State<SearchView> {
     {'name': 'Materials', 'searchName': 'material'}
   ];
   List topPartNames = [
-    {'name': 'Product Name', 'sortName': ""},
+    {'name': 'Product Name', 'sortName': "quantity"},
     {'name': '   Cost', 'sortName': "cost"},
     {'name': 'Sell Price', 'sortName': "sell_price"},
     {'name': 'Brand', 'sortName': "brand"},
@@ -40,6 +40,12 @@ class _SearchViewState extends State<SearchView> {
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    searchViewController.getClientStream();
   }
 
   Future<dynamic> filter() {
@@ -113,10 +119,10 @@ class _SearchViewState extends State<SearchView> {
                 Obx(() {
                   return Row(
                     children: [
-                      textWidgetPrice('In Hand :   ', searchViewController.sumCount.value.toString()),
+                      textWidgetPrice('Products :   ', searchViewController.sumCount.value.toString()),
                       textWidgetPrice('In Stock :   ', searchViewController.sumQuantity.value.toString()),
-                      textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value} \$'),
-                      textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value} \$'),
+                      textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value.toStringAsFixed(0)} \$'),
+                      textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value.toStringAsFixed(0)} \$'),
                     ],
                   );
                 })
@@ -163,7 +169,7 @@ class _SearchViewState extends State<SearchView> {
           children: [
             searchWidget(),
             Obx(() {
-              return Center(child: searchViewController.showInGrid.value ? const SizedBox.shrink() : topWidgetTextPart(true, topPartNames, false));
+              return Center(child: searchViewController.showInGrid.value ? const SizedBox.shrink() : topWidgetTextPart(true, topPartNames, false, false));
             }),
             MainBody()
           ],
@@ -282,6 +288,7 @@ class _SearchViewState extends State<SearchView> {
               Expanded(
                 child: ProductCard(
                   addCounterWidget: false,
+                  disableOnTap: false,
                   product: product,
                 ),
               )
@@ -311,7 +318,8 @@ class _SearchViewState extends State<SearchView> {
             icon: const Icon(CupertinoIcons.xmark_circle),
             onPressed: () {
               controller.clear();
-              searchViewController.onSearchTextChanged('');
+              // searchViewController.onSearchTextChanged('');
+              searchViewController.clearFilter();
             },
           ),
         ),

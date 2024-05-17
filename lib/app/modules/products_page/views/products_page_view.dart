@@ -111,7 +111,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
       body: Obx(() {
         return Column(
           children: [
-            _productsPageController.showInGrid.value ? topWidgetTextPart(false, [], false) : const SizedBox.shrink(),
+            _productsPageController.showInGrid.value ? topWidgetTextPart(false, [], false, false) : const SizedBox.shrink(),
             _productsPageController.showInGrid.value
                 ? const Divider(
                     color: Colors.grey,
@@ -149,6 +149,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
                     ? ProductCard(
                         product: product,
                         addCounterWidget: false,
+                        disableOnTap: false,
                       )
                     : SecondProductCard(product: product);
               },

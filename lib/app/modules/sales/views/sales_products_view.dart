@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/order_model.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
+import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/cards/product_card.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
@@ -61,21 +62,45 @@ class _SalesProductsViewState extends State<SalesProductsView> {
     setState(() {});
   }
 
+  final SeacrhViewController seacrhViewController = Get.put(SeacrhViewController());
   Widget radioButton(SortOptions option, String text) {
     return RadioListTile(
       title: Text(text),
       value: option,
       groupValue: _selectedSortOption,
-      onChanged: (SortOptions? value) {
+      onChanged: (SortOptions? value) async {
+        if (option == SortOptions.canceled || option == SortOptions.refund) {
+          FirebaseFirestore.instance.collection('clients').get().then((value) {
+            for (var element in value.docs) {
+              if (element['number'] == widget.order.clientNumber) {
+                double sumClientPrice = double.parse(element['sum_price'].toString()) - double.parse(widget.order.sumPrice.toString());
+                element.reference.update({'sum_price': sumClientPrice, 'order_count': element['order_count'] - 1});
+              }
+            }
+          });
+
+          await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).collection('products').get().then((value) async {
+            for (var element in value.docs) {
+              await FirebaseFirestore.instance.collection('products').where('name', isEqualTo: element['name']).get().then((value2) {
+                FirebaseFirestore.instance
+                    .collection('products')
+                    .doc(value2.docs[0].id)
+                    .update({'quantity': int.parse(value2.docs[0]['quantity'].toString()) + int.parse(element['quantity'].toString())}).then((value3) {
+                  return value3;
+                });
+              });
+            }
+          });
+        }
         _selectedSortOption = value!;
         doStatusFunction(statusMapping[_selectedSortOption.name.toString()].toString());
-        FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({
+        await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({
           "status": statusMapping[_selectedSortOption.name.toString()].toString(),
         }).then((value) {
+          Navigator.of(context).pop();
           showSnackBar("Done", "Status changed succefully", Colors.green);
         });
-        salesController.getData();
-        Get.back();
+        // salesController.getData();
       },
     );
   }
@@ -169,6 +194,13 @@ class _SalesProductsViewState extends State<SalesProductsView> {
     );
   }
 
+  final List _topPartNames = [
+    {'name': 'Product Name', 'sortName': "quantity"},
+    {'name': '   Cost', 'sortName': "cost"},
+    {'name': 'Sell Price', 'sortName': "sell_price"},
+    {'name': 'Brand', 'sortName': "brand"},
+    {'name': 'Category', 'sortName': "category"},
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +223,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                     padding: EdgeInsets.symmetric(horizontal: 30.w),
                     child: textsWidgetsListview(context, snapshot),
                   ),
-                  topWidgetTextPart(false, topPartNames, false),
+                  topWidgetTextPart(false, _topPartNames, false, false),
                   productsListview()
                 ],
               );
@@ -222,6 +254,10 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                       onPressed: () async {
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
+                        final snapshot = await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).collection('products').get();
+                        for (var doc in snapshot.docs) {
+                          doc.reference.delete();
+                        }
 
                         await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).delete().then((value) async {
                           salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
@@ -355,6 +391,31 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                       });
                     }
                   } else {
+                    if (firebaseName == 'client_number') {
+                      FirebaseFirestore.instance.collection('clients').get().then((value) {
+                        bool clientAddValue = false;
+                        for (var element in value.docs) {
+                          if (element['number'] == textEditingController.text) {
+                            clientAddValue = true;
+                            double sumClientPrice = double.parse(element['sum_price'].toString()) + double.parse(widget.order.sumPrice.toString());
+                            element.reference.update({'sum_price': sumClientPrice, 'order_count': element['order_count'] + 1});
+                            FirebaseFirestore.instance.collection('clients').where('number', isEqualTo: text2).get().then((valueaa) {
+                              for (var element22 in valueaa.docs) {
+                                element22.reference.delete();
+                              }
+                            });
+                          }
+                        }
+                        if (clientAddValue == false) {
+                          for (var element in value.docs) {
+                            if (element['number'] == text2) {
+                              element.reference.update({'number': textEditingController.text});
+                            }
+                          }
+                        }
+                      });
+                    }
+
                     await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({firebaseName: textEditingController.text}).then((value) {
                       showSnackBar("copySucces", "changesUpdated", Colors.green);
                     });

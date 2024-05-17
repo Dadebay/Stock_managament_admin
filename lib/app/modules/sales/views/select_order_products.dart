@@ -22,6 +22,13 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
   final SeacrhViewController seacrhViewController = Get.put(SeacrhViewController());
   TextEditingController controller = TextEditingController();
   List _searchResult = [];
+  @override
+  void initState() {
+    super.initState();
+    if (seacrhViewController.productsList.isEmpty) {
+      seacrhViewController.getClientStream();
+    }
+  }
 
   onSearchTextChanged(String word) async {
     salesController.loadingDataOrders.value = true;
@@ -97,6 +104,7 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                           );
                           return ProductCard(
                             addCounterWidget: true,
+                            disableOnTap: false,
                             product: product,
                           );
                         },
@@ -125,6 +133,7 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                               );
                               return ProductCard(
                                 addCounterWidget: true,
+                                disableOnTap: false,
                                 product: product,
                               );
                             },
