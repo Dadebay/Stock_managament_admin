@@ -83,14 +83,11 @@ class SeacrhViewController extends GetxController {
     sumSell.value = 0.0;
     sumQuantity.value = 0;
     sumCount.value = 0;
-    print(productsList.length);
     productsList = collectAllProducts;
     loadingData.value = true;
-    print(filteredProductsList.length);
 
     for (var element in productsList) {
       if (element[filterName].toString().toLowerCase() == filterSearchName.toLowerCase()) {
-        print(element['name']);
         filteredProductsList.add(element);
         countAllPricesNSells(element);
       }
@@ -98,7 +95,6 @@ class SeacrhViewController extends GetxController {
 
     productsList = filteredProductsList;
     sumCount.value = productsList.length;
-    print(filteredProductsList.length);
     Get.back();
     Get.back();
     loadingData.value = false;

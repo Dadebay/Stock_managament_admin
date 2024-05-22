@@ -13,6 +13,7 @@ import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 import '../controllers/login_controller.dart';
 
+// ignore: must_be_immutable
 class LoginView extends GetView<LoginController> {
   FocusNode focusNode = FocusNode();
   FocusNode focusNode1 = FocusNode();
@@ -102,6 +103,7 @@ class LoginView extends GetView<LoginController> {
                                     FirebaseFirestore.instance.collection('users').doc(element.id).update({'active': true});
                                     await storage.write('login', true);
 
+                                    // ignore: use_build_context_synchronously
                                     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => const NavBarPageView()));
                                     valueLogin = true;
                                     homeController.agreeButton.value = !homeController.agreeButton.value;

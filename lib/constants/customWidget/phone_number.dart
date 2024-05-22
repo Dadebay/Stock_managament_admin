@@ -59,8 +59,6 @@ class PhoneNumber extends StatelessWidget {
           prefixIconConstraints: const BoxConstraints(minWidth: 80),
           isDense: true,
           hintText: '65 656565 ',
-          filled: style,
-          fillColor: kPrimaryColor,
           alignLabelWithHint: true,
           hintStyle: TextStyle(color: Colors.grey.shade400, fontFamily: gilroyMedium),
           border: OutlineInputBorder(
@@ -72,8 +70,8 @@ class PhoneNumber extends StatelessWidget {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: style ? borderRadius10 : borderRadius20,
-            borderSide: BorderSide(
-              color: Colors.grey.shade200,
+            borderSide: const BorderSide(
+              color: Colors.grey,
               width: 2,
             ),
           ),

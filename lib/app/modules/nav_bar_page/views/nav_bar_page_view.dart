@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:get/get.dart';
@@ -39,7 +37,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
           Expanded(
             flex: 6,
             child:
-                //  Container(color: Colors.white, child: const ClientsView()),
+                //Container(color: Colors.white, child: const ClientsView()),
                 Container(
               color: Colors.white,
               child: pages[selecedIndex],

@@ -63,7 +63,6 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
   final HomeController _homeController = Get.put(HomeController());
 
   Uint8List? _photo;
-  final ImagePickerWeb _picker = ImagePickerWeb();
   Future uploadFile() async {
     _homeController.agreeButton.value = !_homeController.agreeButton.value;
     DateTime now = DateTime.now();

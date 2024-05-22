@@ -1,10 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:stock_managament_admin/app/data/models/client_model.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
@@ -131,6 +128,7 @@ Future<DateTime?> showDateTimePickerWidget({
   if (selectedDate == null) return null;
 
   final TimeOfDay? selectedTime = await showTimePicker(
+    // ignore: use_build_context_synchronously
     context: context,
     initialTime: TimeOfDay.fromDateTime(selectedDate),
   );

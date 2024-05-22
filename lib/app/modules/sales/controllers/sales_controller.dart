@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
-import 'package:stock_managament_admin/app/data/models/client_model.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
@@ -96,7 +93,6 @@ class SalesController extends GetxController {
       if (product.documentID.toString() == id.toString()) {
         element['count'] = count;
         selectedProductsToOrder.removeWhere((element) => element['count'].toString() == '0');
-        print(selectedProductsToOrder);
         selectedProductsToOrder.refresh();
       }
     }
@@ -170,6 +166,7 @@ class SalesController extends GetxController {
             'number': textControllers[2].text,
             'sum_price': sumPrice.toString(),
             'order_count': 1,
+            'date': textControllers[0].text,
           });
         }
       });

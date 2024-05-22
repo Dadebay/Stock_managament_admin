@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
@@ -63,6 +62,7 @@ class _SalesViewState extends State<SalesView> {
         ));
   }
 
+  // ignore: non_constant_identifier_names
   Expanded MainBody() {
     return Expanded(
       child: Obx(() {

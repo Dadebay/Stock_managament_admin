@@ -19,6 +19,7 @@ class FourInOnePageView extends StatefulWidget {
 }
 
 class _FourInOnePageViewState extends State<FourInOnePageView> {
+  // ignore: non_constant_identifier_names
   List four_in_one_names = [
     {'name': 'brands', 'pageView': "Brands", "countName": 'brand'},
     {'name': 'categories', 'pageView': "Categories", "countName": 'category'},

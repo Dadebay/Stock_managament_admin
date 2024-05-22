@@ -4,6 +4,7 @@ import 'package:stock_managament_admin/app/data/models/order_model.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/sales_products_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
+// ignore: must_be_immutable
 class OrderedCard extends StatelessWidget {
   OrderedCard({super.key, required this.order});
   final OrderModel order;

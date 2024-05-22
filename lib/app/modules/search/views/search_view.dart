@@ -10,7 +10,6 @@ import 'package:stock_managament_admin/app/modules/products_page/views/web_add_p
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/cards/product_card.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class SearchView extends StatefulWidget {
@@ -176,6 +175,7 @@ class _SearchViewState extends State<SearchView> {
         ));
   }
 
+  // ignore: non_constant_identifier_names
   Expanded MainBody() {
     return Expanded(
       child: Obx(() {

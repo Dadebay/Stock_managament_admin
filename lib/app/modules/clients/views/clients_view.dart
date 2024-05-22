@@ -7,7 +7,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/client_model.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
+import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
+import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
+import 'package:stock_managament_admin/constants/customWidget/phone_number.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 import '../controllers/clients_controller.dart';
@@ -29,9 +32,68 @@ class _ClientsViewState extends State<ClientsView> {
     clientsController.getAllClients();
   }
 
+  final TextEditingController _userNameEditingController = TextEditingController();
+  final TextEditingController _addressEditingController = TextEditingController();
+  final TextEditingController _phoneNumberEditingController = TextEditingController();
+  FocusNode focusNode = FocusNode();
+  FocusNode focusNode1 = FocusNode();
+  FocusNode focusNode2 = FocusNode();
   @override
   Widget build(BuildContext context) {
-    return mineBody();
+    return Scaffold(
+        backgroundColor: Colors.white,
+        floatingActionButton: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: 'button1',
+              onPressed: () {
+                clientsController.exportToExcel();
+              },
+              child: const Icon(CupertinoIcons.doc_person),
+            ),
+            SizedBox(
+              width: 30.w,
+            ),
+            addButton(),
+          ],
+        ),
+        body: mineBody());
+  }
+
+  FloatingActionButton addButton() {
+    return FloatingActionButton(
+      heroTag: "button",
+      onPressed: () {
+        Get.defaultDialog(
+          title: "Add client",
+          contentPadding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+          content: SizedBox(
+            width: Get.size.width / 3,
+            height: Get.size.height / 3,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                CustomTextField(labelName: 'Client name', controller: _userNameEditingController, focusNode: focusNode, requestfocusNode: focusNode1, unFocus: false, readOnly: true),
+                CustomTextField(labelName: 'Address', controller: _addressEditingController, focusNode: focusNode1, requestfocusNode: focusNode2, unFocus: false, readOnly: true),
+                PhoneNumber(mineFocus: focusNode2, controller: _phoneNumberEditingController, requestFocus: focusNode, style: true, unFocus: false),
+                SizedBox(
+                  height: 20.h,
+                ),
+                AgreeButton(
+                    onTap: () {
+                      clientsController.addClient(clientName: _userNameEditingController.text, clientAddress: _addressEditingController.text, clientPhoneNumber: _phoneNumberEditingController.text);
+                    },
+                    text: "Add client")
+              ],
+            ),
+          ),
+        );
+      },
+      child: const Icon(IconlyLight.plus),
+    );
   }
 
   List clientNames = [
@@ -41,7 +103,7 @@ class _ClientsViewState extends State<ClientsView> {
     {'name': 'Order count', 'sortName': "order_count"},
     {'name': 'Sum price', 'sortName': "sum_price"},
   ];
-  TextEditingController controller = TextEditingController();
+  TextEditingController searchEditingController = TextEditingController();
 
   Padding searchWidget() {
     return Padding(
@@ -53,7 +115,7 @@ class _ClientsViewState extends State<ClientsView> {
             color: Colors.black,
           ),
           title: TextField(
-            controller: controller,
+            controller: searchEditingController,
             decoration: InputDecoration(hintText: 'search'.tr, border: InputBorder.none),
             onChanged: (String value) {
               clientsController.onSearchTextChanged(value);
@@ -63,7 +125,7 @@ class _ClientsViewState extends State<ClientsView> {
           trailing: IconButton(
             icon: const Icon(CupertinoIcons.xmark_circle),
             onPressed: () {
-              controller.clear();
+              searchEditingController.clear();
               clientsController.clearFilter();
             },
           ),
@@ -138,6 +200,7 @@ class _ClientsViewState extends State<ClientsView> {
                       style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
                     ),
                   ),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: Text(
                       clinet.number,
@@ -150,7 +213,7 @@ class _ClientsViewState extends State<ClientsView> {
                     child: Text(
                       clinet.orderCount.toString(),
                       overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
                     ),
                   ),
@@ -158,10 +221,22 @@ class _ClientsViewState extends State<ClientsView> {
                     child: Text(
                       "${clinet.sumPrice} \$",
                       overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
                     ),
                   ),
+                  const SizedBox(width: 20),
+                  IconButton(
+                      onPressed: () async {
+                        await FirebaseFirestore.instance.collection('clients').doc(list[index]['docID']).delete().then((value) {
+                          showSnackBar("Done", "${clinet.name} deleted succesfully", Colors.green);
+                        });
+                        clientsController.clients.removeWhere((element) => element['number'] == clinet.number);
+                      },
+                      icon: const Icon(
+                        IconlyLight.delete,
+                        color: Colors.red,
+                      )),
                 ],
               ),
             ),

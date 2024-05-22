@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 
 class FourInOnePageController extends GetxController {
+  // ignore: non_constant_identifier_names
   List four_in_one_names = [
     {'name': 'brands', 'pageView': "Brands", "countName": 'brand'},
     {'name': 'categories', 'pageView': "Categories", "countName": 'category'},

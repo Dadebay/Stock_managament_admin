@@ -12,6 +12,7 @@ import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 import '../controllers/products_page_controller.dart';
 
+// ignore: must_be_immutable
 class ProductsPageView extends GetView<ProductsPageController> {
   List filters = [
     {'name': 'Brands', 'searchName': 'brand'},

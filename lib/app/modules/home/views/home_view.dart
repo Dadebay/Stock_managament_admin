@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-
-import '../controllers/home_controller.dart';
-
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
