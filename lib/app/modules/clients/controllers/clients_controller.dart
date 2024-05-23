@@ -85,6 +85,7 @@ class ClientsController extends GetxController {
           return a['date'].compareTo(b['date']);
         });
         Get.back();
+        Get.back();
 
         showSnackBar("Done", "Client succesfully added", Colors.green);
       });
@@ -100,10 +101,12 @@ class ClientsController extends GetxController {
             address: element['address'],
             orderCount: int.parse(element['order_count'].toString()),
             name: element['name'],
+            date: element['date'],
             number: element['number'],
             sumPrice: double.parse(element['sum_price'].toString()));
 
-        clients.add({'name': clinet.name, 'number': clinet.number, 'address': clinet.address, 'order_count': clinet.orderCount, "docID": element.id, 'sum_price': clinet.sumPrice});
+        clients
+            .add({'name': clinet.name, 'number': clinet.number, 'date': clinet.date, 'address': clinet.address, 'order_count': clinet.orderCount, "docID": element.id, 'sum_price': clinet.sumPrice});
       }
     });
     loadData.value = false;

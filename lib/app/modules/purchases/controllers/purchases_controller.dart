@@ -1,0 +1,94 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:stock_managament_admin/app/data/models/product_model.dart';
+import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
+import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+
+class PurchasesController extends GetxController {
+  RxList filteredOrderedProducts = [].obs;
+  RxList purchasesSaveProductsList = [].obs;
+  RxBool loadingDataOrders = false.obs;
+  RxList purchasesMainList = [].obs;
+  RxDouble sumCost = 0.0.obs;
+  final SalesController salesController = Get.put(SalesController());
+  getData() async {
+    loadingDataOrders.value = true;
+    purchasesMainList.clear();
+    sumCost.value = 0.0;
+    await FirebaseFirestore.instance.collection('purchases').orderBy("date", descending: true).get().then((value) {
+      for (var element in value.docs) {
+        sumCost.value += double.parse(element['cost'].toString());
+        purchasesMainList.add(element);
+        purchasesSaveProductsList.add(element);
+      }
+      loadingDataOrders.value = false;
+    });
+  }
+
+  filterProductsMine(String filterName, String filterSearchName) {
+    // filteredOrderedProducts.clear();
+    // purchasesMainList = purchasesSaveProductsList;
+    // loadingDataOrders.value = true;
+    // for (var element in purchasesMainList) {
+    //   if (element[filterName].toString().toLowerCase() == filterSearchName.toLowerCase()) {
+    //     filteredOrderedProducts.add(element);
+    //   }
+    // }
+
+    // purchasesMainList = filteredOrderedProducts;
+    // Get.back();
+    // Get.back();
+    // loadingDataOrders.value = false;
+  }
+
+  sumbitSale({required List<TextEditingController> textControllers}) async {
+    double sumCost = 0.0;
+    for (var element in salesController.selectedProductsToOrder) {
+      final ProductModel product = element['product'];
+      sumCost += double.parse(product.cost.toString()).toDouble() * int.parse(element['count'].toString());
+      await FirebaseFirestore.instance.collection('products').doc(product.documentID).update({'quantity': int.parse(product.quantity.toString()) + int.parse(element['count'].toString())});
+    }
+    await FirebaseFirestore.instance.collection('purchases').add({
+      'date': textControllers[0].text,
+      'title': textControllers[1].text,
+      'source': textControllers[2].text,
+      'note': textControllers[3].text,
+      'product_count': salesController.selectedProductsToOrder.length.toString(),
+      'cost': sumCost.toString(),
+    }).then((value) async {
+      await FirebaseFirestore.instance.collection('purchases').doc(value.id).get().then((valueMine) {
+        purchasesMainList.add(valueMine);
+      });
+      for (var element in salesController.selectedProductsToOrder) {
+        final ProductModel product = element['product'];
+        await FirebaseFirestore.instance.collection('products').doc(product.documentID).collection('purchases').add({
+          'date': textControllers[0].text,
+          'title': textControllers[1].text,
+          'source': textControllers[2].text,
+          'note': textControllers[3].text,
+          'product_count': element['count'].toString(),
+          'cost': sumCost.toString(),
+          'purchase_id': value.id,
+        });
+        await FirebaseFirestore.instance.collection('purchases').doc(value.id).collection('products').add({
+          'brand': product.brandName,
+          'category': product.category,
+          'cost': product.cost,
+          'gramm': product.gramm,
+          'image': product.image,
+          'location': product.location,
+          'date': product.date,
+          'material': product.material,
+          'name': product.name,
+          'note': product.note,
+          'package': product.package,
+          'quantity': element['count'],
+          'sell_price': product.sellPrice,
+        });
+      }
+      Get.back();
+      showSnackBar("Done", "Succesfully created Purchase", Colors.green);
+    });
+  }
+}

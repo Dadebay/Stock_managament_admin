@@ -138,7 +138,7 @@ class _ClientsViewState extends State<ClientsView> {
     return Column(
       children: [
         searchWidget(),
-        topWidgetTextPart(true, clientNames, false, true),
+        topWidgetTextPart(addMorePadding: true, names: clientNames, ordersView: false, clientView: true, purchasesView: false),
         const Divider(
           color: Colors.grey,
           thickness: 1,
@@ -161,6 +161,7 @@ class _ClientsViewState extends State<ClientsView> {
       itemCount: list.length,
       itemBuilder: (BuildContext context, int index) {
         Client clinet = Client(
+            date: list[index]['date'],
             address: list[index]['address'],
             orderCount: int.parse(list[index]['order_count'].toString()),
             name: list[index]['name'],
@@ -251,6 +252,4 @@ class _ClientsViewState extends State<ClientsView> {
       },
     );
   }
-
-  void addExpences({required BuildContext context, required bool edit, required String docID, required String cost, required String name, required String note, required String date}) {}
 }

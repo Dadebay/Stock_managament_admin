@@ -223,7 +223,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                     padding: EdgeInsets.symmetric(horizontal: 30.w),
                     child: textsWidgetsListview(context, snapshot),
                   ),
-                  topWidgetTextPart(false, _topPartNames, false, false),
+                  topWidgetTextPart(addMorePadding: false, names: _topPartNames, ordersView: false, clientView: false, purchasesView: false),
                   productsListview()
                 ],
               );

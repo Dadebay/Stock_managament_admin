@@ -3,16 +3,20 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
+import 'package:stock_managament_admin/app/data/models/purchases_model.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
+import 'package:stock_managament_admin/constants/cards/purchase_card.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
@@ -160,7 +164,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
               if (result != null) {
                 setState(() {
                   selectedDateTime = result;
-                  textControllers[11].text = DateFormat('HH:mm, MMM d, yyyy').format(selectedDateTime!);
+                  textControllers[11].text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
                 });
               }
             },
@@ -224,76 +228,124 @@ class _ProductProfilViewState extends State<ProductProfilView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: appBarCustom(context),
-      body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('products').doc(widget.product.documentID!).snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return spinKit();
-            } else if (snapshot.hasError) {
-              return errorData();
-            } else if (snapshot.hasData) {
-              final product = ProductModel(
-                name: snapshot.data!['name'] == null ? '' : snapshot.data!['name'].toString(),
-                date: snapshot.data!['date'].toString(),
-                brandName: snapshot.data!['brand'].toString(),
-                category: snapshot.data!['category'].toString(),
-                cost: snapshot.data!['cost'].toString(),
-                gramm: snapshot.data!['gramm'].toString(),
-                image: snapshot.data!['image'].toString(),
-                location: snapshot.data!['location'].toString(),
-                material: snapshot.data!['material'].toString(),
-                quantity: snapshot.data!['quantity'],
-                sellPrice: snapshot.data!['sell_price'].toString(),
-                note: snapshot.data!['note'].toString(),
-                package: snapshot.data!['package'].toString(),
-                documentID: snapshot.data!.id,
-              );
-              changeData(product);
-              return ListView(
-                padding: EdgeInsets.symmetric(horizontal: Get.size.width / 4),
-                children: [
-                  Container(
-                    width: Get.size.width / 3,
-                    height: Get.size.height / 3,
-                    decoration: const BoxDecoration(color: Colors.grey, borderRadius: borderRadius25),
-                    child: ClipRRect(
-                      borderRadius: borderRadius25,
-                      child: _photo == null
-                          ? Image.network(
-                              product.image!,
-                              fit: BoxFit.fill,
-                              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
-                                  ),
-                                );
-                              },
-                            )
-                          : SizedBox(
-                              width: Get.size.width / 3,
-                              height: Get.size.height / 3,
-                              child: ClipRRect(
-                                borderRadius: borderRadius20,
-                                child: Image.memory(
-                                  _photo!,
-                                  width: 300,
-                                  height: 300,
-                                  fit: BoxFit.fill,
+      body: Row(
+        children: [
+          Expanded(child: productView()),
+          Expanded(
+            child: Column(
+              children: [
+                topWidgetPurchases(true),
+                Expanded(
+                  child: FirestorePagination(
+                    limit: 20, // Defaults to 10.
+                    isLive: true, // Defaults to false.
+                    viewType: ViewType.list,
+                    reverse: false,
+                    query: FirebaseFirestore.instance.collection('products').doc(widget.product.documentID).collection('purchases').orderBy("date", descending: true),
+                    itemBuilder: (context, documentSnapshot, index) {
+                      final data = documentSnapshot.data() as Map<String, dynamic>?;
+                      if (data == null) return Container();
+
+                      final purchases = PurchasesModel(
+                          title: data['title'].toString(),
+                          date: data['date'].toString(),
+                          note: data['note'].toString(),
+                          cost: data['cost'].toString(),
+                          productsCount: data['product_count'].toString(),
+                          source: data['source'].toString(),
+                          purchasesID: data['purchase_id'].toString());
+                      return PurchaseCard(
+                        showInProductProfil: true,
+                        purchasesModel: purchases,
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Divider(
+                        height: 5,
+                        thickness: 1,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> productView() {
+    return StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('products').doc(widget.product.documentID!).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return spinKit();
+          } else if (snapshot.hasError) {
+            return errorData();
+          } else if (snapshot.hasData) {
+            final product = ProductModel(
+              name: snapshot.data!['name'] == null ? '' : snapshot.data!['name'].toString(),
+              date: snapshot.data!['date'].toString(),
+              brandName: snapshot.data!['brand'].toString(),
+              category: snapshot.data!['category'].toString(),
+              cost: snapshot.data!['cost'].toString(),
+              gramm: snapshot.data!['gramm'].toString(),
+              image: snapshot.data!['image'].toString(),
+              location: snapshot.data!['location'].toString(),
+              material: snapshot.data!['material'].toString(),
+              quantity: snapshot.data!['quantity'],
+              sellPrice: snapshot.data!['sell_price'].toString(),
+              note: snapshot.data!['note'].toString(),
+              package: snapshot.data!['package'].toString(),
+              documentID: snapshot.data!.id,
+            );
+            changeData(product);
+            return ListView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              children: [
+                Container(
+                  width: Get.size.width / 3,
+                  height: Get.size.height / 3,
+                  decoration: const BoxDecoration(color: Colors.grey, borderRadius: borderRadius25),
+                  child: ClipRRect(
+                    borderRadius: borderRadius25,
+                    child: _photo == null
+                        ? Image.network(
+                            product.image!,
+                            fit: BoxFit.fill,
+                            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
                                 ),
+                              );
+                            },
+                          )
+                        : SizedBox(
+                            width: Get.size.width / 3,
+                            height: Get.size.height / 3,
+                            child: ClipRRect(
+                              borderRadius: borderRadius20,
+                              child: Image.memory(
+                                _photo!,
+                                width: 300,
+                                height: 300,
+                                fit: BoxFit.fill,
                               ),
                             ),
-                    ),
+                          ),
                   ),
-                  textFields(context)
-                ],
-              );
-            }
-            return const Text("No data");
-          }),
-    );
+                ),
+                textFields(context)
+              ],
+            );
+          }
+          return const Text("No data");
+        });
   }
 
   final SeacrhViewController searchViewController = Get.put(SeacrhViewController());

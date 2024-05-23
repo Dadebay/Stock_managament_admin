@@ -168,7 +168,11 @@ class _SearchViewState extends State<SearchView> {
           children: [
             searchWidget(),
             Obx(() {
-              return Center(child: searchViewController.showInGrid.value ? const SizedBox.shrink() : topWidgetTextPart(true, topPartNames, false, false));
+              return Center(
+                child: searchViewController.showInGrid.value
+                    ? const SizedBox.shrink()
+                    : topWidgetTextPart(addMorePadding: true, names: topPartNames, ordersView: false, clientView: false, purchasesView: false),
+              );
             }),
             MainBody()
           ],

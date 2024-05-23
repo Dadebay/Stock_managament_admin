@@ -85,8 +85,8 @@ class _MyAppState extends State<MyApp> {
               locale: storage.read('langCode') != null ? Locale(storage.read('langCode')) : const Locale('tm'),
               translations: MyTranslations(),
               defaultTransition: Transition.fade,
-              home: loginValue == false ? LoginView() : const NavBarPageView());
-              // home: const NavBarPageView());
+              // home: loginValue == false ? LoginView() : const NavBarPageView());
+              home: const NavBarPageView());
           // home: const NavBarPageView());
         });
   }

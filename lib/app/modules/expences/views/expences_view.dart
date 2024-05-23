@@ -248,7 +248,7 @@ class _ExpencesViewState extends State<ExpencesView> {
       if (result != null) {
         setState(() {
           selectedDateTime = result;
-          dateEditingController.text = DateFormat('HH:mm, MMM d, yyyy').format(selectedDateTime!);
+          dateEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
         });
       }
     }

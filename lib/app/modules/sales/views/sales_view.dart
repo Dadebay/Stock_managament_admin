@@ -174,7 +174,7 @@ class _SalesViewState extends State<SalesView> {
                 Obx(() {
                   return Row(
                     children: [
-                      textWidgetPrice('Products count :   ', salesController.sumProductCount.value.toString()),
+                      textWidgetPrice('Sold Products :   ', salesController.sumProductCount.value.toString()),
                       textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value} \$'),
                       textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value}  \$'),
                     ],
@@ -205,7 +205,7 @@ class _SalesViewState extends State<SalesView> {
           ],
         ),
         body: Column(
-          children: [searchWidget(), topWidgetTextPart(true, topPartNames, true, false), MainBody()],
+          children: [searchWidget(), topWidgetTextPart(addMorePadding: true, names: topPartNames, ordersView: true, clientView: false, purchasesView: false), MainBody()],
         ));
   }
 }
