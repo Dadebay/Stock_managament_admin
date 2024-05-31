@@ -304,8 +304,10 @@ class _SalesProductsViewState extends State<SalesProductsView> {
             (index) => textWidgetOrderedPage(
                 text1: namesList[index]['text1'],
                 text2: namesList[index]['text1'] == 'priceProduct'
-                    ? "${snapshot.data!['product_count']}  x  ${double.parse(snapshot.data![namesList[index]['text2']].toString()) / double.parse(snapshot.data!['product_count'].toString())}\$ =${snapshot.data![namesList[index]['text2']]}\$"
-                    : snapshot.data![namesList[index]['text2']].toString(),
+                    ? "${snapshot.data![namesList[index]['text2']]}\$"
+                    : namesList[index]['text1'] == 'sumCost'
+                        ? "${double.parse(snapshot.data![namesList[index]['text2']].toString()).toStringAsFixed(2)}\$"
+                        : snapshot.data![namesList[index]['text2']].toString(),
                 firebaseName: namesList[index]['text2'])));
   }
 
@@ -426,6 +428,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                     salesController.orderCardList.sort((a, b) => b['date'].compareTo(a['date']));
                   }
 
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pop();
                 },
               ),

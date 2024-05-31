@@ -61,6 +61,11 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
   }
 
   final HomeController _homeController = Get.put(HomeController());
+  @override
+  void initState() {
+    super.initState();
+    _homeController.agreeButton.value = false;
+  }
 
   Uint8List? _photo;
   Future uploadFile() async {

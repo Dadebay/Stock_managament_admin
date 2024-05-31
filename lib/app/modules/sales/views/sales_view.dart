@@ -175,8 +175,8 @@ class _SalesViewState extends State<SalesView> {
                   return Row(
                     children: [
                       textWidgetPrice('Sold Products :   ', salesController.sumProductCount.value.toString()),
-                      textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value} \$'),
-                      textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value}  \$'),
+                      textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value.toStringAsFixed(2)} \$'),
+                      textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value.toStringAsFixed(2)}  \$'),
                     ],
                   );
                 })

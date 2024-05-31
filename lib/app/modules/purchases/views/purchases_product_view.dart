@@ -234,6 +234,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                   });
                   purchasesController.purchasesMainList.sort((a, b) => b['date'].compareTo(a['date']));
 
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pop();
                 },
               ),

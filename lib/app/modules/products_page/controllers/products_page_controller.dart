@@ -22,7 +22,6 @@ class ProductsPageController extends GetxController {
   }
 
   getData() {
-    print("geldi data alyar ----------------------------------------------------------------");
     loadingData.value = true;
     collectionReference.limit(limit.value).get().then((value) {
       productsListHomeView.value = value.docs;
@@ -43,8 +42,6 @@ class ProductsPageController extends GetxController {
   Future<void> onLoadingController() async {
     int length = productsListHomeView.length;
     loadingData.value = true;
-    print(length);
-
     if (isFiltered.value == true) {
       collectionReference
           .where(filteredName.value.toLowerCase(), isEqualTo: filteredNameToSearch.value.toLowerCase())
@@ -65,7 +62,6 @@ class ProductsPageController extends GetxController {
         }
       });
     }
-    print(productsListHomeView.length);
     loadingData.value = false;
   }
 

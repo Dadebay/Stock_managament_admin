@@ -22,7 +22,7 @@ class NavBarPageView extends StatefulWidget {
 }
 
 class _NavBarPageViewState extends State<NavBarPageView> {
-  List pages = [const HomeView(), const SalesView(), const PurchasesView(), const SearchView(), const FourInOnePageView(), const ExpencesView(), const ClientsView(), const SettingsView()];
+  List pages = [HomeView(), const SalesView(), const PurchasesView(), const SearchView(), const FourInOnePageView(), const ExpencesView(), const ClientsView(), const SettingsView()];
   List icons = [IconlyLight.chart, IconlyLight.paper, CupertinoIcons.cart_badge_plus, IconlyLight.search, IconlyLight.category, IconlyLight.wallet, IconlyLight.user3, IconlyLight.setting];
   List titles = ['home', 'Sales', 'Purchases', 'Search', 'Four in One page', 'Expences', 'Clients', 'Settings'];
   int selecedIndex = 0;

@@ -35,6 +35,7 @@ const String loadingLottie = 'assets/lottie/loading.json';
 const String noDataLottie = 'assets/lottie/noData.json';
 /////////////////////////////////////////////////
 
+// ignore: non_constant_identifier_names
 List four_in_one_names = [
   {'name': 'brands', 'pageView': "Brands"},
   {'name': 'categories', 'pageView': "Categories"},

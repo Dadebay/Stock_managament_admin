@@ -24,6 +24,7 @@ dependencies:
   excel:
   file_saver:
   path_provider: ^2.0.2
+  fl_chart: ^0.68.0
   path:
   flutter:
     sdk: flutter

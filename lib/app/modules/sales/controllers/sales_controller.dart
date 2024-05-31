@@ -130,6 +130,9 @@ class SalesController extends GetxController {
         'sum_price': sumPrice.toString(),
         'sum_cost': sumCost.toString(),
       }).then((value) async {
+        await FirebaseFirestore.instance.collection('sales').doc(value.id).get().then((saleProduct) {
+          orderCardList.add(saleProduct);
+        });
         for (var element in selectedProductsToOrder) {
           final ProductModel product = element['product'];
           await FirebaseFirestore.instance.collection('sales').doc(value.id).collection('products').add({
@@ -170,7 +173,9 @@ class SalesController extends GetxController {
           });
         }
       });
-
+      orderCardList.sort((a, b) {
+        return b['date'].compareTo(a['date']);
+      });
       showSnackBar("Done", "Your purchase submitted ", Colors.green);
     }
   }

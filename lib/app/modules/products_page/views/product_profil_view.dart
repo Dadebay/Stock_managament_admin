@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:get/get.dart';
@@ -59,6 +58,12 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     if (value!.isNotEmpty) {
       textControllers[index].text = value;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    homeController.agreeButton.value = false;
   }
 
   Future<dynamic> changeTextFieldWithData(String name, int indexTile, String changeName) {
@@ -315,7 +320,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                     child: _photo == null
                         ? Image.network(
                             product.image!,
-                            fit: BoxFit.fill,
+                            fit: BoxFit.cover,
                             loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Center(
@@ -371,6 +376,10 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                       onPressed: () async {
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
+                        final snapshot = await FirebaseFirestore.instance.collection('products').doc(widget.product.documentID).collection('purchases').get();
+                        for (var doc in snapshot.docs) {
+                          doc.reference.delete();
+                        }
 
                         await FirebaseFirestore.instance.collection('products').doc(widget.product.documentID).delete().then((value) async {
                           if (widget.product.image == '' || widget.product.image == null) {

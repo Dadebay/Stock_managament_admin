@@ -57,7 +57,7 @@ class OrderedCard extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                "${order.sumCost} \$",
+                "${double.parse(order.sumCost.toString()).toStringAsFixed(2)} \$",
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),

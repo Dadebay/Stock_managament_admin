@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:stock_managament_admin/app/data/models/client_model.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
@@ -59,7 +56,7 @@ class ClientsController extends GetxController {
         TextCellValue(client['docID'].toString()),
       ]);
     }
-    var fileBytes = excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");
+    excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");
   }
 
   addClient({required String clientName, required String clientAddress, required String clientPhoneNumber}) async {

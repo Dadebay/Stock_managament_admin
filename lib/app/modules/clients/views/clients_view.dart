@@ -159,6 +159,7 @@ class _ClientsViewState extends State<ClientsView> {
   ListView listView(List list) {
     return ListView.separated(
       itemCount: list.length,
+      // reverse: true,
       itemBuilder: (BuildContext context, int index) {
         Client clinet = Client(
             date: list[index]['date'],
@@ -172,7 +173,7 @@ class _ClientsViewState extends State<ClientsView> {
           SizedBox(
             width: 60.w,
             child: Text(
-              "${index + 1}",
+              "${list.length - index}",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 20.sp),
             ),

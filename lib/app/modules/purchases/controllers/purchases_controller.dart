@@ -26,22 +26,6 @@ class PurchasesController extends GetxController {
     });
   }
 
-  filterProductsMine(String filterName, String filterSearchName) {
-    // filteredOrderedProducts.clear();
-    // purchasesMainList = purchasesSaveProductsList;
-    // loadingDataOrders.value = true;
-    // for (var element in purchasesMainList) {
-    //   if (element[filterName].toString().toLowerCase() == filterSearchName.toLowerCase()) {
-    //     filteredOrderedProducts.add(element);
-    //   }
-    // }
-
-    // purchasesMainList = filteredOrderedProducts;
-    // Get.back();
-    // Get.back();
-    // loadingDataOrders.value = false;
-  }
-
   sumbitSale({required List<TextEditingController> textControllers}) async {
     double sumCost = 0.0;
     for (var element in salesController.selectedProductsToOrder) {
