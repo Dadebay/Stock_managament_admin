@@ -351,6 +351,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                 return ProductCard(
                   addCounterWidget: false,
                   product: product,
+                  purchaseView: false,
                   disableOnTap: true,
                 );
               },

@@ -86,7 +86,7 @@ class _CreateOrderViewState extends State<CreateOrderView> {
           selectedProductsView(),
           AgreeButton(
               onTap: () {
-                Get.to(() => const SelectOrderProducts());
+                Get.to(() => const SelectOrderProducts(purchaseView: false));
               },
               text: 'selectProducts'),
           AgreeButton(
@@ -131,6 +131,7 @@ class _CreateOrderViewState extends State<CreateOrderView> {
                     final ProductModel product = salesController.selectedProductsToOrder[index]['product'];
                     return ProductCard(
                       product: product,
+                      purchaseView: false,
                       addCounterWidget: true,
                       disableOnTap: false,
                     );

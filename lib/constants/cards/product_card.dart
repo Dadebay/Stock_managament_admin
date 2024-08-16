@@ -10,9 +10,10 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.product, required this.addCounterWidget, required this.disableOnTap});
+  const ProductCard({super.key, required this.product, required this.addCounterWidget, required this.disableOnTap, required this.purchaseView});
   final bool addCounterWidget;
   final bool disableOnTap;
+  final bool purchaseView;
 
   final ProductModel product;
 
@@ -37,7 +38,6 @@ class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
     changeData();
-
     return noCounterWidget();
   }
 
@@ -139,7 +139,7 @@ class _ProductCardState extends State<ProductCard> {
                       IconButton(
                         icon: const Icon(CupertinoIcons.add_circled, color: Colors.black),
                         onPressed: () {
-                          if (selectedCount >= widget.product.quantity!) {
+                          if (selectedCount >= widget.product.quantity! && widget.purchaseView == false) {
                             showSnackBar("Error", "Not in stock", Colors.red);
                           } else {
                             if (selectedCount == 0) {

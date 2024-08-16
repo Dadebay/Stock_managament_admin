@@ -57,8 +57,12 @@ class _HomeViewState extends State<HomeView> {
     for (int i = 0; i < 12; i++) {
       profit[i] = sales[i] - (expences[i] + purchases[i]);
     }
-    minElement1 = profit.reduce((value, element) => value < element ? value : element);
+    findMinimumelement();
+    setState(() {});
+  }
 
+  findMinimumelement() {
+    minElement1 = profit.reduce((value, element) => value < element ? value : element);
     maxElement1 = sales.reduce((value, element) => value > element ? value : element);
     maxElement2 = profit.reduce((value, element) => value > element ? value : element);
     maxElement3 = expences.reduce((value, element) => value > element ? value : element);
@@ -66,7 +70,6 @@ class _HomeViewState extends State<HomeView> {
     double a = max(maxElement1, maxElement2);
     double b = max(maxElement3, maxElement4);
     maxElement = max(a, b);
-    setState(() {});
   }
 
   getExpences(DateTime date) async {
@@ -273,6 +276,8 @@ class _HomeViewState extends State<HomeView> {
                   profit[i] -= expences[i];
                 }
               }
+              print(profit);
+              findMinimumelement();
 
               setState(() {});
             },

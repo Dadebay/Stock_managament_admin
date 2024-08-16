@@ -313,14 +313,14 @@ class _ProductProfilViewState extends State<ProductProfilView> {
               children: [
                 Container(
                   width: Get.size.width / 3,
-                  height: Get.size.height / 3,
+                  height: Get.size.height / 2,
                   decoration: const BoxDecoration(color: Colors.grey, borderRadius: borderRadius25),
                   child: ClipRRect(
                     borderRadius: borderRadius25,
                     child: _photo == null
                         ? Image.network(
                             product.image!,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                             loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Center(

@@ -5,10 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
+import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
+import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
@@ -62,11 +65,6 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
 
   final HomeController _homeController = Get.put(HomeController());
   @override
-  void initState() {
-    super.initState();
-    _homeController.agreeButton.value = false;
-  }
-
   Uint8List? _photo;
   Future uploadFile() async {
     _homeController.agreeButton.value = !_homeController.agreeButton.value;
@@ -77,15 +75,15 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     await storageRef.putString(base64Image, format: PutStringFormat.base64, metadata: SettableMetadata(contentType: 'image/png')).then((p0) async {
       var dowurl = await storageRef.getDownloadURL();
       String url = dowurl.toString();
-      addData(url);
+      addProductAndImage(url);
     });
   }
 
   final SeacrhViewController searchViewController = Get.put(SeacrhViewController());
+  final SalesController salesController = Get.put(SalesController());
 
-  addData(String imageURL) async {
+  addProductAndImage(String imageURL) async {
     String documentID = '';
-
     try {
       if (textControllers[9].text.isEmpty || textControllers[9].text == "") {
         showSnackBar("Error", "Add Product Quantity", Colors.red);
@@ -120,6 +118,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     }
     await FirebaseFirestore.instance.collection('products').doc(documentID).get().then((value22) {
       searchViewController.productsList.add(value22);
+
       Get.back();
       showSnackBar("Done", "Product added succesfully", Colors.green);
     });
@@ -136,7 +135,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     return Scaffold(
       appBar: const CustomAppBar(backArrow: true, actionIcon: false, centerTitle: true, name: "Add product"),
       body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: Get.size.width / 4),
+        padding: EdgeInsets.symmetric(horizontal: Get.size.width / 4, vertical: 20.h),
         children: [
           _photo == null
               ? GestureDetector(
@@ -224,9 +223,9 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
           CustomTextField(labelName: "Sell Price", borderRadius: true, controller: textControllers[11], focusNode: focusNodes[11], requestfocusNode: focusNodes[1], unFocus: false, readOnly: true),
           AgreeButton(
               onTap: () {
-                _photo == null ? addData("") : uploadFile();
+                _photo == null ? addProductAndImage("") : uploadFile();
               },
-              text: "add_product")
+              text: "add")
         ],
       ),
     );

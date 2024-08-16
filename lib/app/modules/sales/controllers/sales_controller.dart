@@ -74,6 +74,7 @@ class SalesController extends GetxController {
 
   addProduct({required ProductModel product, required int count}) {
     selectedProductsToOrder.add({'product': product, 'count': count});
+    selectedProductsToOrder.refresh();
   }
 
   upgradeCount(String id, int count) {

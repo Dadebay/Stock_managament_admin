@@ -28,12 +28,15 @@ class PurchasesController extends GetxController {
 
   sumbitSale({required List<TextEditingController> textControllers}) async {
     double sumCost = 0.0;
+    //purchases edilen harytlar sanyny kopletyar
     for (var element in salesController.selectedProductsToOrder) {
       final ProductModel product = element['product'];
       sumCost += double.parse(product.cost.toString()).toDouble() * int.parse(element['count'].toString());
       await FirebaseFirestore.instance.collection('products').doc(product.documentID).update({'quantity': int.parse(product.quantity.toString()) + int.parse(element['count'].toString())});
     }
-    await FirebaseFirestore.instance.collection('purchases').add({
+
+    // create purchase edyar
+    FirebaseFirestore.instance.collection('purchases').add({
       'date': textControllers[0].text,
       'title': textControllers[1].text,
       'source': textControllers[2].text,
@@ -41,12 +44,15 @@ class PurchasesController extends GetxController {
       'product_count': salesController.selectedProductsToOrder.length.toString(),
       'cost': sumCost.toString(),
     }).then((value) async {
-      await FirebaseFirestore.instance.collection('purchases').doc(value.id).get().then((valueMine) {
+      // tazeden create edilen purchase list gosyar
+      FirebaseFirestore.instance.collection('purchases').doc(value.id).get().then((valueMine) {
         purchasesMainList.add(valueMine);
       });
+      // her purchase edilen products purchase dannylaryny gosyar
       for (var element in salesController.selectedProductsToOrder) {
         final ProductModel product = element['product'];
-        await FirebaseFirestore.instance.collection('products').doc(product.documentID).collection('purchases').add({
+        //her product icindaki PURCHASE table dolduryar
+        FirebaseFirestore.instance.collection('products').doc(product.documentID).collection('purchases').add({
           'date': textControllers[0].text,
           'title': textControllers[1].text,
           'source': textControllers[2].text,
@@ -55,7 +61,8 @@ class PurchasesController extends GetxController {
           'cost': sumCost.toString(),
           'purchase_id': value.id,
         });
-        await FirebaseFirestore.instance.collection('purchases').doc(value.id).collection('products').add({
+        //her purchase icindaki productlar dolduryar
+        FirebaseFirestore.instance.collection('purchases').doc(value.id).collection('products').add({
           'brand': product.brandName,
           'category': product.category,
           'cost': product.cost,

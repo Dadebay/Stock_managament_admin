@@ -82,7 +82,7 @@ class _ExpencesViewState extends State<ExpencesView> {
                     ),
                     Expanded(
                       child: Text(
-                        " $sumPrice TMT",
+                        " $sumPrice",
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
@@ -163,7 +163,7 @@ class _ExpencesViewState extends State<ExpencesView> {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 2,
+                        flex: 5,
                         child: Text(
                           expence.name!,
                           maxLines: 1,
@@ -171,22 +171,27 @@ class _ExpencesViewState extends State<ExpencesView> {
                           style: TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 14.sp),
                         ),
                       ),
-                      const Expanded(child: SizedBox()),
+                      // const Expanded(child: SizedBox()),
                       Expanded(
+                        flex: 2,
                         child: Text(
                           "${expence.date}",
                           overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
                         ),
                       ),
                       Expanded(
+                        flex: 2,
                         child: Text(
-                          "${expence.cost} TMT",
+                          "${expence.cost}",
                           overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
                         ),
                       ),
                       Expanded(
+                        flex: 2,
                         child: Text(
                           "${expence.note}",
                           overflow: TextOverflow.ellipsis,

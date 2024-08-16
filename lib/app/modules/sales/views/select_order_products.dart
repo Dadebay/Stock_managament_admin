@@ -11,8 +11,8 @@ import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dar
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class SelectOrderProducts extends StatefulWidget {
-  const SelectOrderProducts({super.key});
-
+  const SelectOrderProducts({super.key, required this.purchaseView});
+  final bool purchaseView;
   @override
   State<SelectOrderProducts> createState() => _SelectOrderProductsState();
 }
@@ -105,6 +105,7 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                           return ProductCard(
                             addCounterWidget: true,
                             disableOnTap: false,
+                            purchaseView: widget.purchaseView,
                             product: product,
                           );
                         },
@@ -133,6 +134,7 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                               );
                               return ProductCard(
                                 addCounterWidget: true,
+                                purchaseView: widget.purchaseView,
                                 disableOnTap: false,
                                 product: product,
                               );

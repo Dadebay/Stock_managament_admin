@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
+import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
 import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_controller.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
@@ -26,7 +27,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
   final SalesController salesController = Get.put(SalesController());
   List<TextEditingController> textControllers = List.generate(4, (_) => TextEditingController());
   final PurchasesController purchasesController = Get.put(PurchasesController());
-
+  final HomeController homeController = Get.put(HomeController());
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
@@ -40,7 +41,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
       backgroundColor: Colors.white,
       appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: false, name: 'Create Purchase'.tr),
       body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        padding: EdgeInsets.symmetric(horizontal: 40.w),
         shrinkWrap: true,
         children: [
           CustomTextField(
@@ -65,30 +66,31 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
               requestfocusNode: focusNodes[1],
               unFocus: false,
               readOnly: true),
-          CustomTextField(labelName: "title", borderRadius: true, controller: textControllers[1], focusNode: focusNodes[1], requestfocusNode: focusNodes[2], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "source", borderRadius: true, controller: textControllers[2], focusNode: focusNodes[2], requestfocusNode: focusNodes[3], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "note", borderRadius: true, controller: textControllers[3], focusNode: focusNodes[3], requestfocusNode: focusNodes[0], unFocus: false, readOnly: true),
+          CustomTextField(labelName: "Title", borderRadius: true, controller: textControllers[1], focusNode: focusNodes[1], requestfocusNode: focusNodes[2], unFocus: false, readOnly: true),
+          CustomTextField(labelName: "Source", borderRadius: true, controller: textControllers[2], focusNode: focusNodes[2], requestfocusNode: focusNodes[3], unFocus: false, readOnly: true),
+          CustomTextField(labelName: "Note", borderRadius: true, controller: textControllers[3], focusNode: focusNodes[3], requestfocusNode: focusNodes[0], unFocus: false, readOnly: true),
           selectedProductsView(),
+          SizedBox(
+            height: 20.h,
+          ),
           AgreeButton(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                  return const WebAddProductPage();
-                }));
-              },
-              text: 'Create product'),
-          AgreeButton(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                  return const SelectOrderProducts();
+                  return const SelectOrderProducts(purchaseView: true);
                 }));
               },
               text: 'selectProducts'),
           AgreeButton(
               onTap: () {
-                if (salesController.selectedProductsToOrder.isEmpty) {
-                  showSnackBar('errorTitle', 'selectMoreProducts', Colors.red);
+                if (homeController.agreeButton.value == false) {
+                  homeController.agreeButton.value = !homeController.agreeButton.value;
+                  if (salesController.selectedProductsToOrder.isEmpty) {
+                    showSnackBar('errorTitle', 'selectMoreProducts', Colors.red);
+                  } else {
+                    purchasesController.sumbitSale(textControllers: textControllers);
+                  }
                 } else {
-                  purchasesController.sumbitSale(textControllers: textControllers);
+                  showSnackBar("Please wait", "Please wait while we create purchase data in our server", Colors.purple);
                 }
               },
               text: 'agree'),
@@ -122,6 +124,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                       product: product,
                       addCounterWidget: true,
                       disableOnTap: false,
+                      purchaseView: false,
                     );
                   },
                 ),

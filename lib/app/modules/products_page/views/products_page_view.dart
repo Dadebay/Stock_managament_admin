@@ -148,6 +148,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
                     documentID: documentSnapshot.id);
                 return _productsPageController.showInGrid.value
                     ? ProductCard(
+                        purchaseView: false,
                         product: product,
                         addCounterWidget: false,
                         disableOnTap: false,

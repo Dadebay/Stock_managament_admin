@@ -68,44 +68,45 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
       title:
           Text('${"Purchases".tr}   #${widget.purchasesModel.purchasesID!.length < 5 ? widget.purchasesModel.purchasesID : widget.purchasesModel.purchasesID.toString().substring(0, 5).toString()}'),
       centerTitle: true,
-      actions: [
-        IconButton(
-            onPressed: () async {
-              showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Are you sure?'),
-                  content: const Text('This action will permanently delete this PURCHASE'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                        final snapshot = await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).collection('products').get();
-                        for (var doc in snapshot.docs) {
-                          doc.reference.delete();
-                        }
+      // actions: [
+      //   IconButton(
+      //       onPressed: () async {
+      //         showDialog<bool>(
+      //           context: context,
+      //           builder: (context) => AlertDialog(
+      //             title: const Text('Are you sure?'),
+      //             content: const Text('This action will permanently delete this PURCHASE'),
+      //             actions: [
+      //               TextButton(
+      //                 onPressed: () => Navigator.pop(context, false),
+      //                 child: const Text('Cancel'),
+      //               ),
+      //               TextButton(
+      //                 onPressed: () async {
+      //                   Navigator.of(context).pop();
+      //                   Navigator.of(context).pop();
+      //                   final snapshot = await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).collection('products').get();
+      //                   for (var doc in snapshot.docs) {
+      //                     doc.reference.delete();
+      //                   }
 
-                        await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).delete().then((value) async {
-                          purchasesController.purchasesMainList.removeWhere((element) => element.id == widget.purchasesModel.purchasesID);
-                          showSnackBar("Deleted", "Succesfully deleted your PURCHASE", Colors.green);
-                        });
-                      },
-                      child: const Text('Delete'),
-                    ),
-                  ],
-                ),
-              );
-            },
-            icon: const Icon(
-              IconlyLight.delete,
-              color: Colors.black,
-            )),
-      ],
+      //                   await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).delete().then((value) async {
+      //                     purchasesController.purchasesMainList.removeWhere((element) => element.id == widget.purchasesModel.purchasesID);
+      //                     showSnackBar("Deleted", "Succesfully deleted your PURCHASE", Colors.green);
+      //                   });
+      //                 },
+      //                 child: const Text('Delete'),
+      //               ),
+      //             ],
+      //           ),
+      //         );
+      //       },
+      //       icon: const Icon(
+      //         IconlyLight.delete,
+      //         color: Colors.black,
+      //       )),
+      // ],
+
       leading: IconButton(
           onPressed: () {
             Get.back();
@@ -170,6 +171,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                 );
 
                 return ProductCard(
+                  purchaseView: false,
                   addCounterWidget: false,
                   product: product,
                   disableOnTap: true,

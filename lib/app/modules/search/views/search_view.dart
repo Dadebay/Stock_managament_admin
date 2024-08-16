@@ -291,6 +291,7 @@ class _SearchViewState extends State<SearchView> {
               ),
               Expanded(
                 child: ProductCard(
+                  purchaseView: false,
                   addCounterWidget: false,
                   disableOnTap: false,
                   product: product,
