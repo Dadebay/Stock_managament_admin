@@ -2,15 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:get/get.dart';
+import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/clients/views/clients_view.dart';
 import 'package:stock_managament_admin/app/modules/expences/views/expences_view.dart';
+import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_page_view.dart';
 import 'package:stock_managament_admin/app/modules/home/views/home_view.dart';
 import 'package:stock_managament_admin/app/modules/purchases/views/purchases_view.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/sales_view.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
-import 'package:stock_managament_admin/app/modules/settings/views/settings_view.dart';
 import 'package:stock_managament_admin/constants/buttons/drawer_button.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
@@ -22,11 +23,30 @@ class NavBarPageView extends StatefulWidget {
 }
 
 class _NavBarPageViewState extends State<NavBarPageView> {
-  List pages = [const HomeView(), const SalesView(), const PurchasesView(), const SearchView(), const FourInOnePageView(), const ExpencesView(), const ClientsView(), const SettingsView()];
+  List pages = [
+    const HomeView(),
+    const SalesView(),
+    const PurchasesView(),
+    const SearchView(),
+    const FourInOnePageView(),
+    const ExpencesView(),
+    ClientsView(),
+  ];
   List icons = [IconlyLight.chart, IconlyLight.paper, CupertinoIcons.cart_badge_plus, IconlyLight.search, IconlyLight.category, IconlyLight.wallet, IconlyLight.user3, IconlyLight.setting];
   List titles = ['home', 'Sales', 'Purchases', 'Search', 'Four in One page', 'Expences', 'Clients', 'Settings'];
   int selecedIndex = 0;
   final SeacrhViewController seacrhViewController = Get.put(SeacrhViewController());
+  final ClientsController clientsController = Get.put(ClientsController());
+  final FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
+
+  dynamic funcitons(int index) {
+    if (index == 6) {
+      clientsController.getAllClients();
+    }
+    if (index == 4) {
+      fourInOnePageController.findData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +59,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
           Expanded(
             flex: 6,
             child:
-                // Container(color: Colors.white, child: const PurchasesView()),
+                // Container(color: Colors.white, child: const FourInOnePageView()),
                 Container(
               color: Colors.white,
               child: pages[selecedIndex],
@@ -72,6 +92,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
                               onTap: () {
                                 setState(() {
                                   selecedIndex = index;
+                                  funcitons(selecedIndex);
                                 });
                               },
                               index: index,

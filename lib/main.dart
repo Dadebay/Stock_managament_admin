@@ -1,15 +1,16 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:stock_managament_admin/app/modules/login/views/login_view.dart';
 import 'package:stock_managament_admin/app/modules/nav_bar_page/views/nav_bar_page_view.dart';
 import 'package:stock_managament_admin/constants/utils.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'constants/customWidget/constants.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override

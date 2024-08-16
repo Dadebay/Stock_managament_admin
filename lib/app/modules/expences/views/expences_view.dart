@@ -3,7 +3,6 @@ import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:scroll_to_hide/scroll_to_hide.dart';

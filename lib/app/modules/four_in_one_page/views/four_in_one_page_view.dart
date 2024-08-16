@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
 import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
@@ -26,13 +24,6 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
     {'name': 'locations', 'pageView': "Locations", "countName": 'location'},
     {'name': 'materials', 'pageView': "Materials", "countName": 'material'},
   ];
-  final FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
-
-  @override
-  void initState() {
-    super.initState();
-    fourInOnePageController.findData();
-  }
 
   FloatingActionButton addDataButtonFourInONe() {
     return FloatingActionButton(
@@ -69,67 +60,73 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: addDataButtonFourInONe(),
-      body: ListView.builder(
-        itemCount: four_in_one_names.length,
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          return ExpansionTile(
-            title: Text(
-              four_in_one_names[index]['pageView'],
-              style: TextStyle(color: Colors.black, fontFamily: gilroyMedium, fontSize: 18.sp),
-            ),
-            children: [
-              FutureBuilder(
-                future: FirebaseFirestore.instance.collection(four_in_one_names[index]['name']).get(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                  if (ConnectionState.waiting == snapshot.connectionState) {
-                    return spinKit();
-                  } else if (snapshot.hasData) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (BuildContext context, int indexx) {
-                        return ListTile(
-                          title: Text(snapshot.data!.docs[indexx]['name'] + "  -  " + snapshot.data!.docs[indexx]['quantity'].toString() + " sany "),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    fourInOneEditFields(snapshot.data!.docs[indexx]['name'], snapshot.data!.docs[indexx]['note'], index == 2 ? snapshot.data!.docs[indexx]['address'] : '',
-                                        snapshot.data!.docs[indexx].id, true,
-                                        index: index);
-                                  },
-                                  icon: const Icon(
-                                    IconlyLight.editSquare,
-                                    color: Colors.green,
-                                  )),
-                              IconButton(
-                                  onPressed: () async {
-                                    await FirebaseFirestore.instance.collection(four_in_one_names[index]['name']).doc(snapshot.data!.docs[indexx].id).delete().then((value) {
-                                      showSnackBar("Done", snapshot.data!.docs[indexx]['name'] + " deleted succefully", Colors.green);
-                                      setState(() {});
-                                    });
-                                  },
-                                  icon: const Icon(
-                                    IconlyLight.delete,
-                                    color: Colors.red,
-                                  )),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  return emptyData();
-                },
-              )
-            ],
-          );
-        },
-      ),
+    return Stack(
+      children: [
+        page(),
+        Positioned(bottom: 15, right: 15, child: addDataButtonFourInONe()),
+      ],
+    );
+  }
+
+  ListView page() {
+    return ListView.builder(
+      itemCount: four_in_one_names.length,
+      physics: const BouncingScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        return ExpansionTile(
+          title: Text(
+            four_in_one_names[index]['pageView'],
+            style: TextStyle(color: Colors.black, fontFamily: gilroyMedium, fontSize: 18.sp),
+          ),
+          children: [
+            FutureBuilder(
+              future: FirebaseFirestore.instance.collection(four_in_one_names[index]['name']).get(),
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                if (ConnectionState.waiting == snapshot.connectionState) {
+                  return spinKit();
+                } else if (snapshot.hasData) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (BuildContext context, int indexx) {
+                      return ListTile(
+                        title: Text(snapshot.data!.docs[indexx]['name'] + "  -  " + snapshot.data!.docs[indexx]['quantity'].toString() + " sany "),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  fourInOneEditFields(snapshot.data!.docs[indexx]['name'], snapshot.data!.docs[indexx]['note'], index == 2 ? snapshot.data!.docs[indexx]['address'] : '',
+                                      snapshot.data!.docs[indexx].id, true,
+                                      index: index);
+                                },
+                                icon: const Icon(
+                                  IconlyLight.editSquare,
+                                  color: Colors.green,
+                                )),
+                            IconButton(
+                                onPressed: () async {
+                                  await FirebaseFirestore.instance.collection(four_in_one_names[index]['name']).doc(snapshot.data!.docs[indexx].id).delete().then((value) {
+                                    showSnackBar("Done", snapshot.data!.docs[indexx]['name'] + " deleted succefully", Colors.green);
+                                    setState(() {});
+                                  });
+                                },
+                                icon: const Icon(
+                                  IconlyLight.delete,
+                                  color: Colors.red,
+                                )),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+                return emptyData();
+              },
+            )
+          ],
+        );
+      },
     );
   }
 
