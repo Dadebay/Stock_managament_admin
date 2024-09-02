@@ -36,7 +36,7 @@ class PurchasesController extends GetxController {
     }
 
     // create purchase edyar
-    FirebaseFirestore.instance.collection('purchases').add({
+    await FirebaseFirestore.instance.collection('purchases').add({
       'date': textControllers[0].text,
       'title': textControllers[1].text,
       'source': textControllers[2].text,
@@ -45,14 +45,16 @@ class PurchasesController extends GetxController {
       'cost': sumCost.toString(),
     }).then((value) async {
       // tazeden create edilen purchase list gosyar
-      FirebaseFirestore.instance.collection('purchases').doc(value.id).get().then((valueMine) {
+      print("----------------------111111---------------------------------------");
+      await FirebaseFirestore.instance.collection('purchases').doc(value.id).get().then((valueMine) {
         purchasesMainList.add(valueMine);
+        print("----------------------2222222---------------------------------------");
       });
       // her purchase edilen products purchase dannylaryny gosyar
       for (var element in salesController.selectedProductsToOrder) {
         final ProductModel product = element['product'];
         //her product icindaki PURCHASE table dolduryar
-        FirebaseFirestore.instance.collection('products').doc(product.documentID).collection('purchases').add({
+        await FirebaseFirestore.instance.collection('products').doc(product.documentID).collection('purchases').add({
           'date': textControllers[0].text,
           'title': textControllers[1].text,
           'source': textControllers[2].text,
@@ -61,8 +63,10 @@ class PurchasesController extends GetxController {
           'cost': sumCost.toString(),
           'purchase_id': value.id,
         });
+        print("----------------------333333333---------------------------------------");
+
         //her purchase icindaki productlar dolduryar
-        FirebaseFirestore.instance.collection('purchases').doc(value.id).collection('products').add({
+        await FirebaseFirestore.instance.collection('purchases').doc(value.id).collection('products').add({
           'brand': product.brandName,
           'category': product.category,
           'cost': product.cost,
@@ -77,6 +81,7 @@ class PurchasesController extends GetxController {
           'quantity': element['count'],
           'sell_price': product.sellPrice,
         });
+        print("----------------------4444444---------------------------------------");
       }
       Get.back();
       showSnackBar("Done", "Succesfully created Purchase", Colors.green);

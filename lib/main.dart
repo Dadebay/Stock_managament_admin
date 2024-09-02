@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:stock_managament_admin/app/modules/login/views/login_view.dart';
 import 'package:stock_managament_admin/app/modules/nav_bar_page/views/nav_bar_page_view.dart';
 import 'package:stock_managament_admin/constants/utils.dart';
 
@@ -87,8 +86,8 @@ class _MyAppState extends State<MyApp> {
               locale: storage.read('langCode') != null ? Locale(storage.read('langCode')) : const Locale('tm'),
               translations: MyTranslations(),
               defaultTransition: Transition.fade,
-              home: loginValue == false ? LoginView() : const NavBarPageView());
-          // home: const NavBarPageView());
+              // home: loginValue == false ? LoginView() : const NavBarPageView());
+              home: const NavBarPageView());
           // home: const NavBarPageView());
         });
   }

@@ -106,7 +106,7 @@ class _PurchasesViewState extends State<PurchasesView> {
                         style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
                       ),
                       Text(
-                        '${purchasesController.sumCost.value}  \$',
+                        '${purchasesController.sumCost.value.toStringAsFixed(2)}  \$',
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),

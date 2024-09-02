@@ -12,6 +12,7 @@ class PurchaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String a = double.parse(purchasesModel.cost.toString()).toStringAsFixed(2);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
@@ -63,7 +64,8 @@ class PurchaseCard extends StatelessWidget {
                 ? const SizedBox.shrink()
                 : Expanded(
                     child: Text(
-                      "${purchasesModel.cost} \$",
+                      "$a  \$",
+                      maxLines: 1,
                       textAlign: TextAlign.start,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.grey, fontFamily: gilroyRegular, fontSize: 14.sp),
