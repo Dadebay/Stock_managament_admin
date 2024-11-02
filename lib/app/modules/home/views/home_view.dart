@@ -1,12 +1,10 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:excel/excel.dart' as ex;
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
 class DataItem {
@@ -28,40 +26,43 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   List<String> months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  List expences = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  List sales = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  List purchases = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  List profit = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  List sumCost = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  List zeroArray = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  DateTime? selectedDateTime = DateTime.now();
 
-  getData(DateTime date) {
-    expences = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-    sales = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-    purchases = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-    sumCost = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-    getExpences(date);
-    getSales(date);
-    getPurchases(date);
-  }
+  List<double> expences = List.filled(12, 0.0);
+  List<double> sales = List.filled(12, 0.0);
+  List<double> purchases = List.filled(12, 0.0);
+  List<double> profit = List.filled(12, 0.0);
+  List<double> sumCost = List.filled(12, 0.0);
+  List<double> zeroArray = List.filled(12, 0.0);
+
+  DateTime? selectedDateTime = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    getData(DateTime.now());
+    getData(DateTime.now(), false);
   }
 
-  findProfit() {
-    profit = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+  void findProfit(bool runExcel) {
+    profit = List.filled(12, 0.0);
     for (int i = 0; i < 12; i++) {
       profit[i] = sales[i] - (expences[i] + purchases[i]);
     }
     findMinimumelement();
+    if (runExcel == true) {
+      var excel = ex.Excel.createExcel();
+      for (int i = 0; i < 12; i++) {
+        ex.Sheet sheetObject = excel[months[i]];
+        sheetObject.appendRow(["Sales", "Purchases", "Expenses", "Sum Cost", "Net Profit"]);
+        for (int j = 0; j < 5; j++) {
+          sheetObject.appendRow([sales[i], purchases[i], expences[i], sumCost[i], profit[i]]);
+        }
+      }
+      excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_net_profit.xlsx");
+    }
     setState(() {});
   }
 
-  findMinimumelement() {
+  void findMinimumelement() {
     minElement1 = profit.reduce((value, element) => value < element ? value : element);
     maxElement1 = sales.reduce((value, element) => value > element ? value : element);
     maxElement2 = profit.reduce((value, element) => value > element ? value : element);
@@ -72,7 +73,7 @@ class _HomeViewState extends State<HomeView> {
     maxElement = max(a, b);
   }
 
-  getExpences(DateTime date) async {
+  Future<void> getExpences(DateTime date) async {
     await FirebaseFirestore.instance.collection('expences').get().then((value) {
       for (var element in value.docs) {
         DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
@@ -83,7 +84,7 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  getSales(DateTime date) async {
+  Future<void> getSales(DateTime date) async {
     await FirebaseFirestore.instance.collection('sales').orderBy("date", descending: true).get().then((value) {
       for (var element in value.docs) {
         if (element['status'].toString().toLowerCase() == 'shipped') {
@@ -97,13 +98,7 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  double maxElement1 = 0.0;
-  double maxElement3 = 0.0;
-  double maxElement4 = 0.0;
-  double minElement1 = 0.0;
-  double maxElement2 = 0.0;
-  double maxElement = 0.0;
-  getPurchases(DateTime date) async {
+  Future<void> getPurchases(DateTime date, bool runExcel) async {
     await FirebaseFirestore.instance.collection('purchases').orderBy("date", descending: true).get().then((value) {
       for (var element in value.docs) {
         DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
@@ -111,12 +106,33 @@ class _HomeViewState extends State<HomeView> {
           purchases[dateTime.month - 1] += double.parse(element['cost'].toString());
         }
       }
-      findProfit();
+      findProfit(runExcel);
     });
   }
 
-  List valuesColor = [false, false, false, false, false];
-  List valuesText = [false, false, false, false, false];
+  double maxElement1 = 0.0;
+  double maxElement3 = 0.0;
+  double maxElement4 = 0.0;
+  double minElement1 = 0.0;
+  double maxElement2 = 0.0;
+  double maxElement = 0.0;
+
+  List<bool> valuesColor = [false, false, false, false, false];
+  List<bool> valuesText = [false, false, false, false, false];
+  Future<void> getData(DateTime date, bool runExcel) async {
+    expences = List.filled(12, 0.0);
+    sales = List.filled(12, 0.0);
+    purchases = List.filled(12, 0.0);
+    sumCost = List.filled(12, 0.0);
+    getExpences(date);
+    getSales(date);
+    getPurchases(date, runExcel);
+  }
+
+  dynamic exportToExcel(BuildContext context, bool runExcel) async {
+    await getData(DateTime.now(), runExcel);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,7 +149,23 @@ class _HomeViewState extends State<HomeView> {
                 names(name: "Expences", color: Colors.blue, index: 2),
                 names(name: "Sum Cost", color: Colors.purple, index: 3),
                 names(name: "Net Profit", color: Colors.green, index: 4),
-                yearPicker(context)
+                yearPicker(context),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: ElevatedButton(
+                      onPressed: () {
+                        exportToExcel(context, true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0.0,
+                          backgroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(borderRadius: borderRadius10),
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16)),
+                      child: const Text(
+                        "Export Excel",
+                        style: TextStyle(color: Colors.white, fontFamily: gilroyBold, fontSize: 20),
+                      )),
+                )
               ],
             ),
           ),
@@ -208,7 +240,7 @@ class _HomeViewState extends State<HomeView> {
                     onChanged: (DateTime dateTime) {
                       setState(() {});
                       selectedDateTime = dateTime;
-                      getData(dateTime);
+                      getData(dateTime, false);
                       Navigator.pop(context);
                     },
                   ),
@@ -219,9 +251,7 @@ class _HomeViewState extends State<HomeView> {
         },
         child: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-          ),
+          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: borderRadius10),
           child: Row(
             children: [
               const Text(
@@ -276,16 +306,14 @@ class _HomeViewState extends State<HomeView> {
                   profit[i] -= expences[i];
                 }
               }
-              print(profit);
               findMinimumelement();
-
               setState(() {});
             },
             child: Text(
               name,
               style: TextStyle(color: Colors.black, decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none, fontFamily: gilroySemiBold, fontSize: 20),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -21,7 +21,8 @@ dependencies:
   firebase_pagination: ^3.1.0
   firebase_auth:
   scroll_to_hide: ^2.1.0
-  excel:
+  excel: ^2.0.5
+  universal_html: ^2.0.3
   file_saver:
   path_provider: ^2.0.2
   fl_chart: ^0.68.0

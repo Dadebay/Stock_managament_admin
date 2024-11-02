@@ -37,23 +37,26 @@ class ClientsController extends GetxController {
   Future<void> exportToExcel() async {
     var excel = Excel.createExcel();
     var sheet = excel['Clients']; // Customize the sheet name
+
+    // Adding header row
     sheet.appendRow([
-      const TextCellValue('Name'),
-      const TextCellValue('Number'),
-      const TextCellValue('Address'),
-      const TextCellValue('Order Count '),
-      const TextCellValue('Sum Price'),
-      const TextCellValue('Doc Id'),
+      'Name',
+      'Number',
+      'Address',
+      'Order Count',
+      'Sum Price',
+      'Doc Id',
     ]);
 
+    // Adding client data
     for (var client in clients) {
       sheet.appendRow([
-        TextCellValue(client['name'].toString()),
-        TextCellValue(client['number'].toString()),
-        TextCellValue(client['address'].toString()),
-        TextCellValue(client['order_count'].toString()),
-        TextCellValue(client['sum_price'].toString()),
-        TextCellValue(client['docID'].toString()),
+        client['name'].toString(),
+        client['number'].toString(),
+        client['address'].toString(),
+        client['order_count'].toString(),
+        client['sum_price'].toString(),
+        client['docID'].toString(),
       ]);
     }
     excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");
