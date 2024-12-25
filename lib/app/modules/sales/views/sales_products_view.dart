@@ -17,7 +17,7 @@ enum SortOptions { preparing, readyToShip, shipped, canceled, refund }
 class SalesProductsView extends StatefulWidget {
   final OrderModel order;
 
-  const SalesProductsView({super.key, required this.order});
+  const SalesProductsView({required this.order});
   @override
   State<SalesProductsView> createState() => _SalesProductsViewState();
 }

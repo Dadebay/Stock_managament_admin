@@ -10,7 +10,7 @@ class AgreeButton extends StatelessWidget {
   final Function() onTap;
   final String text;
 
-  AgreeButton({super.key, required this.onTap, required this.text});
+  AgreeButton({required this.onTap, required this.text});
   final HomeController homeController = Get.put(HomeController());
 
   @override

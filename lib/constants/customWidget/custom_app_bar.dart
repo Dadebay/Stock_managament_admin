@@ -12,7 +12,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSize {
   final bool actionIcon;
   final String name;
 
-  const CustomAppBar({required this.backArrow, required this.actionIcon, required this.name, this.icon, this.centerTitle, super.key});
+  const CustomAppBar({required this.backArrow, required this.actionIcon, required this.name, this.icon, this.centerTitle});
 
   @override
   Widget get child => Text('ad');

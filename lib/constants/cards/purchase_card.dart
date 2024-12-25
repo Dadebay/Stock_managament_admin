@@ -8,7 +8,7 @@ import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 class PurchaseCard extends StatelessWidget {
   final PurchasesModel purchasesModel;
   final bool showInProductProfil;
-  const PurchaseCard({super.key, required this.purchasesModel, required this.showInProductProfil});
+  const PurchaseCard({required this.purchasesModel, required this.showInProductProfil});
 
   @override
   Widget build(BuildContext context) {

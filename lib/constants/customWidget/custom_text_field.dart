@@ -27,7 +27,6 @@ class CustomTextField extends StatelessWidget {
     this.maxline,
     this.isNumber,
     this.borderRadius,
-    super.key,
     required this.readOnly,
     this.onTap,
   });

@@ -18,8 +18,6 @@ class DataItem {
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
-
   @override
   State<HomeView> createState() => _HomeViewState();
 }

@@ -8,7 +8,7 @@ import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 import '../customWidget/constants.dart';
 
 class ClientCard extends StatelessWidget {
-  const ClientCard({super.key, required this.client, required this.count, required this.docID});
+  const ClientCard({required this.client, required this.count, required this.docID});
   final Client client;
   final int count;
   final String docID;

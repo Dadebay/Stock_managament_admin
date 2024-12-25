@@ -24,7 +24,7 @@ class NavBarPageView extends StatefulWidget {
 
 class _NavBarPageViewState extends State<NavBarPageView> {
   List pages = [
-    const HomeView(),
+    HomeView(),
     const SalesView(),
     const PurchasesView(),
     const SearchView(),

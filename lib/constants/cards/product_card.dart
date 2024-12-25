@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/product_profil_view.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.product, required this.addCounterWidget, required this.disableOnTap, required this.purchaseView});
+  const ProductCard({required this.product, required this.addCounterWidget, required this.disableOnTap, required this.purchaseView});
   final bool addCounterWidget;
   final bool disableOnTap;
   final bool purchaseView;
@@ -167,7 +167,6 @@ class _ProductCardState extends State<ProductCard> {
 
 class SecondProductCard extends StatelessWidget {
   const SecondProductCard({
-    super.key,
     required this.product,
   });
 

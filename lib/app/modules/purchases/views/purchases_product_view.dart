@@ -17,7 +17,7 @@ import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 class PurchasesProductsView extends StatefulWidget {
   final PurchasesModel purchasesModel;
   final bool showInProductsView;
-  const PurchasesProductsView({super.key, required this.purchasesModel, required this.showInProductsView});
+  const PurchasesProductsView({required this.purchasesModel, required this.showInProductsView});
   @override
   State<PurchasesProductsView> createState() => _PurchasesProductsViewState();
 }

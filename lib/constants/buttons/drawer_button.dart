@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
 class DrawerButtonMine extends StatelessWidget {
-  const DrawerButtonMine({super.key, required this.onTap, required this.index, required this.selectedIndex, required this.showIconOnly, required this.icon, required this.title});
+  const DrawerButtonMine({required this.onTap, required this.index, required this.selectedIndex, required this.showIconOnly, required this.icon, required this.title});
   final bool showIconOnly;
   final int index;
   final int selectedIndex;

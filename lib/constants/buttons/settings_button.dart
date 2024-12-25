@@ -12,7 +12,6 @@ class SettingButton extends StatelessWidget {
     required this.name,
     required this.onTap,
     required this.icon,
-    super.key,
   });
 
   @override

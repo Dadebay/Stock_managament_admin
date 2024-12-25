@@ -7,6 +7,7 @@ import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +21,6 @@ import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
 import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProductProfilView extends StatefulWidget {
   const ProductProfilView({super.key, required this.product});

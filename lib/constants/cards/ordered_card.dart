@@ -6,7 +6,7 @@ import 'package:stock_managament_admin/constants/customWidget/constants.dart';
 
 // ignore: must_be_immutable
 class OrderedCard extends StatelessWidget {
-  OrderedCard({super.key, required this.order});
+  OrderedCard({Key? key, required this.order}) : super(key: key);
   final OrderModel order;
   Map<String, Color> colorMapping = {"shipped": Colors.green, "canceled": Colors.red, "refund": Colors.red, "preparing": kPrimaryColor2, "readyToShip": Colors.purple, "ready to ship": Colors.purple};
 

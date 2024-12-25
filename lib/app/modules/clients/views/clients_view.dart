@@ -25,8 +25,6 @@ class ClientsView extends StatelessWidget {
   final SalesController salesController = Get.put(SalesController());
   TextEditingController searchEditingController = TextEditingController();
 
-  ClientsView({super.key});
-
   FloatingActionButton addButton() {
     final TextEditingController userNameEditingController = TextEditingController();
     final TextEditingController addressEditingController = TextEditingController();

@@ -7,14 +7,47 @@
   <meta name="description" content="A new Flutter project.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="stock_managament_admin">
+  <meta name="apple-mobile-web-app-title" content="Kumus Admin Panel">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <link rel="icon" type="image/png" href="favicon.png"/>
-  <title>stock_managament_admin</title>
+  <title>Kümüş Admin Panel</title>
   <link rel="manifest" href="manifest.json">
   <script type="text/javascript"> window.flutterWebRenderer = "html"; </script>
 </head>
 <body>
+  <!-- 1. Service Worker Script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('flutter-first-frame', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+  </script>
+
+  <!-- 2. Firebase CDN Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-analytics.js"></script>
+
+  <!-- 3. Firebase Initialization -->
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBb-ONIbH2uZrBKaQQBfsgISqB2nzJCjxQ",
+      authDomain: "stock-managament-4ab89.firebaseapp.com",
+      projectId: "stock-managament-4ab89",
+      storageBucket: "stock-managament-4ab89.appspot.com",
+      messagingSenderId: "808707795977",
+      appId: "1:808707795977:web:3201cc61a72d911a9a5cd8",
+      measurementId: "G-8Y69HSE8M8"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
+
+  <!-- Flutter Bootstrap -->
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- 4. Main Dart Script (must be at the bottom) -->
+  <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

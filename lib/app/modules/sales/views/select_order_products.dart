@@ -11,7 +11,7 @@ import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dar
 import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
 
 class SelectOrderProducts extends StatefulWidget {
-  const SelectOrderProducts({super.key, required this.purchaseView});
+  const SelectOrderProducts({required this.purchaseView});
   final bool purchaseView;
   @override
   State<SelectOrderProducts> createState() => _SelectOrderProductsState();
