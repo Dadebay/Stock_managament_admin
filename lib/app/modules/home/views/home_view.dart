@@ -42,7 +42,7 @@ class _HomeViewState extends State<HomeView> {
     getData(DateTime.now(), false);
   }
 
-  void findProfit(bool runExcel) {
+  Future<void> findProfit(bool runExcel, DateTime date) async {
     profit = List.filled(12, 0.0);
     for (int i = 0; i < 12; i++) {
       profit[i] = sales[i] - (expences[i] + purchases[i]);
@@ -50,11 +50,38 @@ class _HomeViewState extends State<HomeView> {
     findMinimumelement();
     if (runExcel == true) {
       var excel = ex.Excel.createExcel();
+      ////
+      List<Map<String, String>> oldExpences = [];
+      DateTime dateeee = DateTime.now();
+      await FirebaseFirestore.instance.collection('expences').get().then((value) {
+        for (var element in value.docs) {
+          DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
+          if (dateTime.year == dateeee.year) {
+            oldExpences.add({'name': element['name'].toString(), 'date': element['date'].toString(), 'cost': element['cost'].toString()});
+          }
+        }
+      });
+      print(oldExpences);
+      /////
       for (int i = 0; i < 12; i++) {
         ex.Sheet sheetObject = excel[months[i]];
+
         sheetObject.appendRow(["Sales", "Purchases", "Expenses", "Sum Cost", "Net Profit"]);
-        for (int j = 0; j < 5; j++) {
-          sheetObject.appendRow([sales[i], purchases[i], expences[i], sumCost[i], profit[i]]);
+        sheetObject.appendRow([sales[i], purchases[i], expences[i], sumCost[i], profit[i]]);
+        sheetObject.appendRow(['']);
+        sheetObject.appendRow(['']);
+        sheetObject.appendRow(['----Expences----']);
+        for (var expence in oldExpences) {
+          String cleanDateStr = expence['date']!.replaceAll(' , ', ' ');
+          DateTime dateTime = DateTime.parse(cleanDateStr);
+          if (dateTime.year == DateTime.now().year && dateTime.month == i + 1) {
+            sheetObject.appendRow([
+              // "kerimmm"
+              expence['name'],
+              expence['date'],
+              expence['cost'],
+            ]);
+          }
         }
       }
       excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_net_profit.xlsx");
@@ -106,7 +133,7 @@ class _HomeViewState extends State<HomeView> {
           purchases[dateTime.month - 1] += double.parse(element['cost'].toString());
         }
       }
-      findProfit(runExcel);
+      findProfit(runExcel, date);
     });
   }
 
@@ -153,7 +180,7 @@ class _HomeViewState extends State<HomeView> {
                 Padding(
                   padding: const EdgeInsets.only(left: 15),
                   child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         exportToExcel(context, true);
                       },
                       style: ElevatedButton.styleFrom(
@@ -311,6 +338,7 @@ class _HomeViewState extends State<HomeView> {
             },
             child: Text(
               name,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Colors.black, decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none, fontFamily: gilroySemiBold, fontSize: 20),
             ),
           ),

@@ -201,6 +201,7 @@ class _SearchViewState extends State<SearchView> {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: Get.size.width > 1000 ? 6 : 4, mainAxisSpacing: 20),
         itemCount: controller.text.isNotEmpty ? searchViewController.searchResult.length : searchViewController.productsList.length,
+        // itemCount: 10,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
           final product = controller.text.isEmpty
