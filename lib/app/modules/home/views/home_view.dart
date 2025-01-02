@@ -18,6 +18,8 @@ class DataItem {
 }
 
 class HomeView extends StatefulWidget {
+  const HomeView({super.key});
+
   @override
   State<HomeView> createState() => _HomeViewState();
 }
@@ -82,7 +84,7 @@ class _HomeViewState extends State<HomeView> {
           }
         }
       }
-      excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_net_profit.xlsx");
+      excel.save(fileName: "${selectedDateTime.toString().substring(0, 19)}_net_profit.xlsx");
     }
     setState(() {});
   }
@@ -155,7 +157,7 @@ class _HomeViewState extends State<HomeView> {
   }
 
   dynamic exportToExcel(BuildContext context, bool runExcel) async {
-    await getData(DateTime.now(), runExcel);
+    await getData(selectedDateTime ?? DateTime.now(), runExcel);
   }
 
   @override
@@ -200,7 +202,7 @@ class _HomeViewState extends State<HomeView> {
               child: BarChart(
                 BarChartData(
                     maxY: maxElement + 50,
-                    minY: minElement1 - 50,
+                    minY: minElement1 - 20,
                     barGroups: List.generate(
                             12,
                             (index) => DataItem(

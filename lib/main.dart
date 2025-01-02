@@ -6,10 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:stock_managament_admin/app/modules/login/views/login_view.dart';
 import 'package:stock_managament_admin/app/modules/nav_bar_page/views/nav_bar_page_view.dart';
 import 'package:stock_managament_admin/constants/utils.dart';
 
-import 'app/modules/login/views/login_view.dart';
 import 'constants/customWidget/constants.dart';
 
 class MyHttpOverrides extends HttpOverrides {
@@ -34,7 +34,7 @@ Future<void> main() async {
   ));
   await GetStorage.init();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
