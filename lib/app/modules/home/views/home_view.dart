@@ -3,9 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart' as ex;
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class DataItem {
   int x;
@@ -183,14 +181,10 @@ class _HomeViewState extends State<HomeView> {
                       onPressed: () async {
                         exportToExcel(context, true);
                       },
-                      style: ElevatedButton.styleFrom(
-                          elevation: 0.0,
-                          backgroundColor: Colors.black,
-                          shape: const RoundedRectangleBorder(borderRadius: borderRadius10),
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16)),
+                      style: ElevatedButton.styleFrom(elevation: 0.0, backgroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: context.border.normalBorderRadius), padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16)),
                       child: const Text(
                         "Export Excel",
-                        style: TextStyle(color: Colors.white, fontFamily: gilroyBold, fontSize: 20),
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       )),
                 )
               ],
@@ -233,7 +227,7 @@ class _HomeViewState extends State<HomeView> {
                               if (monthIndex >= 1 && monthIndex <= 12) {
                                 return Text(
                                   months[monthIndex - 1],
-                                  style: const TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 20),
+                                  style: const TextStyle(color: Colors.black, fontSize: 20),
                                 );
                               }
                               return const Text('');
@@ -278,16 +272,16 @@ class _HomeViewState extends State<HomeView> {
         },
         child: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: borderRadius10),
+          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: context.border.normalBorderRadius),
           child: Row(
             children: [
               const Text(
                 "Select Year : ",
-                style: TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 20),
+                style: TextStyle(color: Colors.black, fontSize: 20),
               ),
               Text(
                 selectedDateTime!.year.toString(),
-                style: const TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 20),
+                style: const TextStyle(color: Colors.black, fontSize: 20),
               ),
             ],
           ),
@@ -339,7 +333,7 @@ class _HomeViewState extends State<HomeView> {
             child: Text(
               name,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black, decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none, fontFamily: gilroySemiBold, fontSize: 20),
+              style: TextStyle(color: Colors.black, decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none, fontSize: 20),
             ),
           ),
         ],

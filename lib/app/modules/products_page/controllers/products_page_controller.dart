@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class ProductsPageController extends GetxController {
   RxInt page = 0.obs;
@@ -43,22 +41,17 @@ class ProductsPageController extends GetxController {
     int length = productsListHomeView.length;
     loadingData.value = true;
     if (isFiltered.value == true) {
-      collectionReference
-          .where(filteredName.value.toLowerCase(), isEqualTo: filteredNameToSearch.value.toLowerCase())
-          .startAfterDocument(productsListHomeView.last)
-          .limit(limit.value)
-          .get()
-          .then((value) {
+      collectionReference.where(filteredName.value.toLowerCase(), isEqualTo: filteredNameToSearch.value.toLowerCase()).startAfterDocument(productsListHomeView.last).limit(limit.value).get().then((value) {
         productsListHomeView.addAll(value.docs);
         if (length == productsListHomeView.length) {
-          showSnackBar("done", "endOFProduct", Colors.green);
+          CustomWidgets.showSnackBar("done", "endOFProduct", Colors.green);
         }
       });
     } else {
       collectionReference.orderBy("date", descending: true).startAfterDocument(productsListHomeView.last).limit(limit.value).get().then((value) {
         productsListHomeView.addAll(value.docs);
         if (length == productsListHomeView.length) {
-          showSnackBar("done", "endOFProduct", Colors.green);
+          CustomWidgets.showSnackBar("done", "endOFProduct", Colors.green);
         }
       });
     }

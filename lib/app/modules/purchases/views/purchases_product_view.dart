@@ -1,18 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/data/models/purchases_model.dart';
-import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_controller.dart';
-import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/constants/cards/product_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class PurchasesProductsView extends StatefulWidget {
   final PurchasesModel purchasesModel;
@@ -44,7 +32,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
           stream: FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID!).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return spinKit();
+              return CustomWidgets.spinKit();
             } else if (snapshot.hasData) {
               return ListView(
                 shrinkWrap: true,
@@ -53,60 +41,20 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                     padding: EdgeInsets.symmetric(horizontal: 30.w),
                     child: textsWidgetsListview(context, snapshot),
                   ),
-                  topWidgetTextPart(addMorePadding: false, names: _topPartNames, ordersView: false, clientView: false, purchasesView: false),
+                  // CustomWidgets().topWidgetTextPart(addMorePadding: false, names: _topPartNames, ordersView: false, clientView: false, purchasesView: false),
                   productsListview()
                 ],
               );
             }
-            return emptyData();
+            return CustomWidgets.emptyData();
           }),
     );
   }
 
   AppBar customAppBar(BuildContext context) {
     return AppBar(
-      title:
-          Text('${"Purchases".tr}   #${widget.purchasesModel.purchasesID!.length < 5 ? widget.purchasesModel.purchasesID : widget.purchasesModel.purchasesID.toString().substring(0, 5).toString()}'),
+      title: Text('${"Purchases".tr}   #${widget.purchasesModel.purchasesID!.length < 5 ? widget.purchasesModel.purchasesID : widget.purchasesModel.purchasesID.toString().substring(0, 5).toString()}'),
       centerTitle: true,
-      // actions: [
-      //   IconButton(
-      //       onPressed: () async {
-      //         showDialog<bool>(
-      //           context: context,
-      //           builder: (context) => AlertDialog(
-      //             title: const Text('Are you sure?'),
-      //             content: const Text('This action will permanently delete this PURCHASE'),
-      //             actions: [
-      //               TextButton(
-      //                 onPressed: () => Navigator.pop(context, false),
-      //                 child: const Text('Cancel'),
-      //               ),
-      //               TextButton(
-      //                 onPressed: () async {
-      //                   Navigator.of(context).pop();
-      //                   Navigator.of(context).pop();
-      //                   final snapshot = await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).collection('products').get();
-      //                   for (var doc in snapshot.docs) {
-      //                     doc.reference.delete();
-      //                   }
-
-      //                   await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).delete().then((value) async {
-      //                     purchasesController.purchasesMainList.removeWhere((element) => element.id == widget.purchasesModel.purchasesID);
-      //                     showSnackBar("Deleted", "Succesfully deleted your PURCHASE", Colors.green);
-      //                   });
-      //                 },
-      //                 child: const Text('Delete'),
-      //               ),
-      //             ],
-      //           ),
-      //         );
-      //       },
-      //       icon: const Icon(
-      //         IconlyLight.delete,
-      //         color: Colors.black,
-      //       )),
-      // ],
-
       leading: IconButton(
           onPressed: () {
             Get.back();
@@ -125,12 +73,8 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
       {'text1': 'note', "text2": 'note'},
     ];
     return Wrap(
-        children: List.generate(
-            namesList.length,
-            (index) => textWidgetOrderedPage(
-                text1: namesList[index]['text1'],
-                text2: namesList[index]['text2'].toString() == "cost" ? "${snapshot.data![namesList[index]['text2']] ?? "Empty"} \$" : "${snapshot.data![namesList[index]['text2']] ?? "Empty"}",
-                firebaseName: namesList[index]['text2'])));
+        children: List.generate(namesList.length,
+            (index) => textWidgetOrderedPage(text1: namesList[index]['text1'], text2: namesList[index]['text2'].toString() == "cost" ? "${snapshot.data![namesList[index]['text2']] ?? "Empty"} \$" : "${snapshot.data![namesList[index]['text2']] ?? "Empty"}", firebaseName: namesList[index]['text2'])));
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> fetchData() async {
@@ -143,11 +87,11 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
         future: fetchData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return spinKit();
+            return CustomWidgets.spinKit();
           } else if (snapshot.hasError) {
-            return errorData();
+            return CustomWidgets.errorData();
           } else if (snapshot.data!.docs.isEmpty) {
-            return emptyData();
+            return CustomWidgets.emptyData();
           } else if (snapshot.hasData) {
             return ListView.builder(
               shrinkWrap: true,
@@ -195,40 +139,39 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
             title: text1.tr,
             contentPadding: EdgeInsets.only(bottom: 20.h, left: 20.w, right: 20.w),
             content: CustomTextField(
-                onTap: () {
-                  if (firebaseName == 'date') {
-                    DateTime? selectedDateTime;
-                    showDateTimePicker(BuildContext context) async {
-                      final result = await showDateTimePickerWidget(context: context);
-                      if (result != null) {
-                        setState(() {
-                          selectedDateTime = result;
-                          textEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
-                        });
-                      }
+              onTap: () {
+                if (firebaseName == 'date') {
+                  DateTime? selectedDateTime;
+                  showDateTimePicker(BuildContext context) async {
+                    final result = await CustomWidgets.showDateTimePickerWidget(context: context);
+                    if (result != null) {
+                      setState(() {
+                        selectedDateTime = result;
+                        textEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
+                      });
                     }
-
-                    showDateTimePicker(context);
                   }
-                },
-                labelName: text1.toString(),
-                controller: textEditingController,
-                focusNode: focusNode,
-                requestfocusNode: focusNode,
-                unFocus: false,
-                readOnly: true),
+
+                  showDateTimePicker(context);
+                }
+              },
+              labelName: text1.toString(),
+              controller: textEditingController,
+              focusNode: focusNode,
+              requestfocusNode: focusNode,
+            ),
             actions: [
               TextButton(
-                child: Text('no'.tr, style: TextStyle(fontFamily: gilroyMedium, fontSize: 18.sp)),
+                child: Text('no'.tr, style: TextStyle(fontSize: 18.sp)),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: Text('yes'.tr, style: TextStyle(fontFamily: gilroyBold, fontSize: 18.sp)),
+                child: Text('yes'.tr, style: TextStyle(fontSize: 18.sp)),
                 onPressed: () async {
                   await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).update({firebaseName: textEditingController.text}).then((value) {
-                    showSnackBar("copySucces", "changesUpdated", Colors.green);
+                    CustomWidgets.showSnackBar("copySucces", "changesUpdated", Colors.green);
                   });
                   purchasesController.purchasesMainList.removeWhere((element) => element.id == widget.purchasesModel.purchasesID);
                   await FirebaseFirestore.instance.collection('purchases').doc(widget.purchasesModel.purchasesID).get().then((value) {
@@ -254,12 +197,12 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                 Text(
                   text1.tr,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey, fontFamily: gilroyMedium, fontSize: 14.sp),
+                  style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 ),
                 Text(
                   text2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 14.sp),
+                  style: TextStyle(color: Colors.black, fontSize: 14.sp),
                 )
               ],
             ),

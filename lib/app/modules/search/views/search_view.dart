@@ -8,9 +8,8 @@ import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/constants/cards/product_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/cards/product_card.dart';
+import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
@@ -85,9 +84,7 @@ class _SearchViewState extends State<SearchView> {
                                   },
                                 );
                               }
-                              return Center(
-                                child: spinKit(),
-                              );
+                              return CustomWidgets.spinKit();
                             }),
                       ));
                 },
@@ -118,10 +115,10 @@ class _SearchViewState extends State<SearchView> {
                 Obx(() {
                   return Row(
                     children: [
-                      textWidgetPrice('Products :   ', searchViewController.sumCount.value.toString()),
-                      textWidgetPrice('In Stock :   ', searchViewController.sumQuantity.value.toString()),
-                      textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value.toStringAsFixed(0)} \$'),
-                      textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value.toStringAsFixed(0)} \$'),
+                      CustomWidgets.textWidgetPrice('Products :   ', searchViewController.sumCount.value.toString()),
+                      CustomWidgets.textWidgetPrice('In Stock :   ', searchViewController.sumQuantity.value.toString()),
+                      CustomWidgets.textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value.toStringAsFixed(0)} \$'),
+                      CustomWidgets.textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value.toStringAsFixed(0)} \$'),
                     ],
                   );
                 })
@@ -169,10 +166,8 @@ class _SearchViewState extends State<SearchView> {
             searchWidget(),
             Obx(() {
               return Center(
-                child: searchViewController.showInGrid.value
-                    ? const SizedBox.shrink()
-                    : topWidgetTextPart(addMorePadding: true, names: topPartNames, ordersView: false, clientView: false, purchasesView: false),
-              );
+                  // child: searchViewController.showInGrid.value ? const SizedBox.shrink() : CustomWidgets().topWidgetTextPart(addMorePadding: true, names: topPartNames, ordersView: false, clientView: false, purchasesView: false),
+                  );
             }),
             MainBody()
           ],
@@ -184,11 +179,11 @@ class _SearchViewState extends State<SearchView> {
     return Expanded(
       child: Obx(() {
         return searchViewController.loadingData.value == true
-            ? spinKit()
+            ? CustomWidgets.spinKit()
             : searchViewController.searchResult.isEmpty && controller.text.isNotEmpty
-                ? emptyData()
+                ? CustomWidgets.emptyData()
                 : searchViewController.productsList.isEmpty
-                    ? emptyData()
+                    ? CustomWidgets.emptyData()
                     : searchViewController.showInGrid.value
                         ? gridViewStyle()
                         : listViewStyle();
@@ -287,7 +282,7 @@ class _SearchViewState extends State<SearchView> {
                 child: Text(
                   "${index + 1}",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 20.sp),
+                  style: TextStyle(color: Colors.black, fontSize: 20.sp),
                 ),
               ),
               Expanded(

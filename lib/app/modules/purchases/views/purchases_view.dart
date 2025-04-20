@@ -5,10 +5,9 @@ import 'package:get/get.dart';
 import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:stock_managament_admin/app/data/models/purchases_model.dart';
 import 'package:stock_managament_admin/app/modules/purchases/views/create_purchase_view.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/cards/purchase_card.dart';
+import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
-import '../../../../constants/cards/purchase_card.dart';
 import '../controllers/purchases_controller.dart';
 
 class PurchasesView extends StatefulWidget {
@@ -38,9 +37,9 @@ class _PurchasesViewState extends State<PurchasesView> {
     return Expanded(
       child: Obx(() {
         if (purchasesController.loadingDataOrders.value == true) {
-          return spinKit();
+          return CustomWidgets.spinKit();
         } else if (purchasesController.purchasesMainList.isEmpty && purchasesController.loadingDataOrders.value == false) {
-          return emptyData();
+          return CustomWidgets.emptyData();
         } else {
           return ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: 5.w),
@@ -63,7 +62,7 @@ class _PurchasesViewState extends State<PurchasesView> {
                       child: Text(
                         "${index + 1}",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 20.sp),
+                        style: TextStyle(color: Colors.black, fontSize: 20.sp),
                       ),
                     ),
                     Expanded(
@@ -103,13 +102,13 @@ class _PurchasesViewState extends State<PurchasesView> {
                         maxLines: 1,
                         textAlign: TextAlign.end,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
+                        style: TextStyle(color: Colors.black, fontSize: 16.sp),
                       ),
                       Text(
                         '${purchasesController.sumCost.value.toStringAsFixed(2)}  \$',
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 16.sp),
+                        style: TextStyle(color: Colors.black, fontSize: 16.sp),
                       ),
                     ],
                   );
@@ -126,7 +125,10 @@ class _PurchasesViewState extends State<PurchasesView> {
           child: const Icon(IconlyLight.plus),
         ),
         body: Column(
-          children: [topWidgetPurchases(false), MainBody()],
+          children: [
+            // CustomWidgets().topWidgetPurchases(false),
+            MainBody()
+          ],
         ));
   }
 }

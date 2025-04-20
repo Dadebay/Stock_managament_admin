@@ -3,12 +3,11 @@ import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
-import 'package:stock_managament_admin/constants/cards/product_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/cards/product_card.dart';
+import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 import '../controllers/products_page_controller.dart';
 
@@ -31,7 +30,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
       decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
       child: Wrap(
         children: [
-          filterTextWidget('filter'.tr),
+          CustomWidgets.filterTextWidget('filter'.tr),
           ListView.builder(
             itemCount: filters.length,
             shrinkWrap: true,
@@ -44,7 +43,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
                     decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
                     child: Wrap(
                       children: [
-                        filterTextWidget(filters[index]['name']),
+                        CustomWidgets.filterTextWidget(filters[index]['name']),
                         StreamBuilder(
                             stream: FirebaseFirestore.instance.collection(filters[index]['name'].toLowerCase()).snapshots(),
                             builder: (context, snapshot) {
@@ -63,9 +62,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
                                   },
                                 );
                               }
-                              return Center(
-                                child: spinKit(),
-                              );
+                              return CustomWidgets.spinKit();
                             }),
                       ],
                     ),
@@ -112,7 +109,7 @@ class ProductsPageView extends GetView<ProductsPageController> {
       body: Obx(() {
         return Column(
           children: [
-            _productsPageController.showInGrid.value ? topWidgetTextPart(addMorePadding: false, names: [], ordersView: false, clientView: false, purchasesView: false) : const SizedBox.shrink(),
+            // _productsPageController.showInGrid.value ? CustomWidgets().topWidgetTextPart(addMorePadding: false, names: [], ordersView: false, clientView: false, purchasesView: false) : const SizedBox.shrink(),
             _productsPageController.showInGrid.value
                 ? const Divider(
                     color: Colors.grey,

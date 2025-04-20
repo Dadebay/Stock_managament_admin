@@ -2,14 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
 import 'package:scroll_to_hide/scroll_to_hide.dart';
 import 'package:stock_managament_admin/app/data/models/order_model.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/create_order.dart';
-import 'package:stock_managament_admin/constants/cards/ordered_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/cards/ordered_card.dart';
+import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
+import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 import '../controllers/sales_controller.dart';
 
@@ -46,15 +45,15 @@ class _SalesViewState extends State<SalesView> {
           height: Get.size.height / 2,
           padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
           child: ListView.builder(
-            itemCount: statusList.length,
+            itemCount: StringConstants.statusList.length,
             shrinkWrap: true,
             physics: const BouncingScrollPhysics(),
             itemBuilder: (BuildContext context, int index) {
               return ListTile(
                 onTap: () {
-                  salesController.filterProductsMine('status', statusList[index]['statusName']);
+                  salesController.filterProductsMine('status', StringConstants.statusList[index]['statusName']!);
                 },
-                title: Text(statusList[index]['name'].toString()),
+                title: Text(StringConstants.statusList[index]['name'].toString()),
                 trailing: const Icon(IconlyLight.arrowRightCircle),
               );
             },
@@ -67,11 +66,11 @@ class _SalesViewState extends State<SalesView> {
     return Expanded(
       child: Obx(() {
         if (salesController.loadingDataOrders.value == true) {
-          return spinKit();
+          return CustomWidgets.spinKit();
         } else if (salesController.orderedCardsSearchResult.isEmpty && controller.text.isNotEmpty) {
-          return emptyData();
+          return CustomWidgets.emptyData();
         } else if (salesController.orderCardList.isEmpty && salesController.loadingDataOrders.value == false) {
-          return emptyData();
+          return CustomWidgets.emptyData();
         } else {
           return ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: 5.w),
@@ -114,7 +113,7 @@ class _SalesViewState extends State<SalesView> {
                       child: Text(
                         "${index + 1}",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 20.sp),
+                        style: TextStyle(color: Colors.black, fontSize: 20.sp),
                       ),
                     ),
                     Expanded(child: OrderedCard(order: order))
@@ -174,9 +173,9 @@ class _SalesViewState extends State<SalesView> {
                 Obx(() {
                   return Row(
                     children: [
-                      textWidgetPrice('Sold Products :   ', salesController.sumProductCount.value.toString()),
-                      textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value.toStringAsFixed(2)} \$'),
-                      textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value.toStringAsFixed(2)}  \$'),
+                      CustomWidgets.textWidgetPrice('Sold Products :   ', salesController.sumProductCount.value.toString()),
+                      CustomWidgets.textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value.toStringAsFixed(2)} \$'),
+                      CustomWidgets.textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value.toStringAsFixed(2)}  \$'),
                     ],
                   );
                 })
@@ -205,7 +204,11 @@ class _SalesViewState extends State<SalesView> {
           ],
         ),
         body: Column(
-          children: [searchWidget(), topWidgetTextPart(addMorePadding: true, names: topPartNames, ordersView: true, clientView: false, purchasesView: false), MainBody()],
+          children: [
+            searchWidget(),
+            // CustomWidgets().topWidgetTextPart(addMorePadding: true, names: StringConstants.topPartNames, ordersView: true, clientView: false, purchasesView: false),
+            MainBody()
+          ],
         ));
   }
 }

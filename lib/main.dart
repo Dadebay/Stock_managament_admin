@@ -1,61 +1,45 @@
-import 'dart:io';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:stock_managament_admin/app/modules/login/views/login_view.dart';
+import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_service.dart';
+import 'package:stock_managament_admin/app/modules/login_view/views/login_view.dart';
 import 'package:stock_managament_admin/app/modules/nav_bar_page/views/nav_bar_page_view.dart';
-import 'package:stock_managament_admin/constants/utils.dart';
-
-import 'constants/customWidget/constants.dart';
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-  }
-}
+import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
+import 'package:stock_managament_admin/app/product/constants/theme_contants.dart';
+import 'package:stock_managament_admin/app/product/init/app_start_init.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
+import 'package:stock_managament_admin/app/product/utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = MyHttpOverrides();
-  await Firebase.initializeApp(
-      options: const FirebaseOptions(
-    apiKey: 'AIzaSyBb-ONIbH2uZrBKaQQBfsgISqB2nzJCjxQ',
-    appId: '1:808707795977:web:3201cc61a72d911a9a5cd8',
-    messagingSenderId: '808707795977',
-    projectId: 'stock-managament-4ab89',
-    authDomain: 'stock-managament-4ab89.firebaseapp.com',
-    storageBucket: 'stock-managament-4ab89.appspot.com',
-    measurementId: 'G-8Y69HSE8M8',
-  ));
-  await GetStorage.init();
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  runApp(const MyApp());
+  await AppStartInit.init();
+  runApp(_MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
+class _MyApp extends StatefulWidget {
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<_MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  final storage = GetStorage();
-  bool loginValue = false;
+class _MyAppState extends State<_MyApp> {
+  bool isLoginFuture = false;
 
   @override
   void initState() {
     super.initState();
-    changeLoginData();
+    getLoginValue();
   }
 
-  changeLoginData() async {
-    loginValue = storage.read('login') ?? false;
+  dynamic getLoginValue() async {
+    final String? accessToken = await AuthStorage().getToken();
+    print(accessToken);
+    print(accessToken);
+    print(accessToken);
+    print(accessToken);
+    print(accessToken);
+    if (accessToken != null) {
+      isLoginFuture = true;
+    } else {
+      isLoginFuture = false;
+    }
     setState(() {});
   }
 
@@ -68,28 +52,13 @@ class _MyAppState extends State<MyApp> {
         builder: (_, child) {
           return GetMaterialApp(
               debugShowCheckedModeBanner: false,
-              title: appName,
-              theme: ThemeData(
-                brightness: Brightness.light,
-                fontFamily: gilroyRegular,
-                colorSchemeSeed: kPrimaryColor,
-                useMaterial3: true,
-                appBarTheme: const AppBarTheme(
-                  backgroundColor: Colors.white,
-                  systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.white, statusBarBrightness: Brightness.light, statusBarIconBrightness: Brightness.dark),
-                  titleTextStyle: TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 20),
-                  elevation: 0,
-                ),
-                bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.transparent.withOpacity(0)),
-                visualDensity: VisualDensity.adaptivePlatformDensity,
-              ),
+              title: StringConstants.appName,
+              theme: AppThemes.lightTheme,
               fallbackLocale: const Locale('tm'),
-              locale: storage.read('langCode') != null ? Locale(storage.read('langCode')) : const Locale('tm'),
+              locale: AppStartInit().getLocale(),
               translations: MyTranslations(),
-              defaultTransition: Transition.fade,
-              home: loginValue == false ? LoginView() : const NavBarPageView());
-          // home: const NavBarPageView());
-          // home: const NavBarPageView());
+              defaultTransition: Transition.fadeIn,
+              home: isLoginFuture == true ? NavBarPageView() : LoginView());
         });
   }
 }

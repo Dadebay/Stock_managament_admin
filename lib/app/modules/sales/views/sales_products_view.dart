@@ -1,16 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/order_model.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/constants/cards/product_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 enum SortOptions { preparing, readyToShip, shipped, canceled, refund }
 
@@ -31,13 +21,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
 
   int statusRemover = 0;
 
-  Map<String, SortOptions> statusSortOption = {
-    "preparing": SortOptions.preparing,
-    "readyToShip": SortOptions.readyToShip,
-    "shipped": SortOptions.shipped,
-    "canceled": SortOptions.canceled,
-    "refund": SortOptions.refund
-  };
+  Map<String, SortOptions> statusSortOption = {"preparing": SortOptions.preparing, "readyToShip": SortOptions.readyToShip, "shipped": SortOptions.shipped, "canceled": SortOptions.canceled, "refund": SortOptions.refund};
 
   SortOptions _selectedSortOption = SortOptions.preparing;
   // Default sort option
@@ -82,10 +66,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
           await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).collection('products').get().then((value) async {
             for (var element in value.docs) {
               await FirebaseFirestore.instance.collection('products').where('name', isEqualTo: element['name']).get().then((value2) {
-                FirebaseFirestore.instance
-                    .collection('products')
-                    .doc(value2.docs[0].id)
-                    .update({'quantity': int.parse(value2.docs[0]['quantity'].toString()) + int.parse(element['quantity'].toString())}).then((value3) {
+                FirebaseFirestore.instance.collection('products').doc(value2.docs[0].id).update({'quantity': int.parse(value2.docs[0]['quantity'].toString()) + int.parse(element['quantity'].toString())}).then((value3) {
                   return value3;
                 });
               });
@@ -98,7 +79,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
           "status": statusMapping[_selectedSortOption.name.toString()].toString(),
         }).then((value) {
           Navigator.of(context).pop();
-          showSnackBar("Done", "Status changed succefully", Colors.green);
+          CustomWidgets.showSnackBar("Done", "Status changed succefully", Colors.green);
         });
         // salesController.getData();
       },
@@ -122,12 +103,12 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                 Text(
                   "status".tr,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey, fontFamily: gilroyMedium, fontSize: 14.sp),
+                  style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 ),
                 Text(
                   statusMapping[_selectedSortOption.name.toString()].toString(),
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colorMapping[_selectedSortOption.name], fontFamily: gilroyBold, fontSize: 16.sp),
+                  style: TextStyle(color: colorMapping[_selectedSortOption.name], fontSize: 16.sp),
                 )
               ],
             ),
@@ -149,7 +130,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
           title: Text(
             'Status',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.black, fontFamily: gilroyBold, fontSize: 20.sp),
+            style: TextStyle(color: Colors.black, fontSize: 20.sp),
           ),
           backgroundColor: Colors.white,
           shadowColor: Colors.red,
@@ -168,7 +149,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
             TextButton(
               child: Text(
                 'Cancel',
-                style: TextStyle(fontFamily: gilroyMedium, fontSize: 18.sp),
+                style: TextStyle(fontSize: 18.sp),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -177,13 +158,13 @@ class _SalesProductsViewState extends State<SalesProductsView> {
             TextButton(
               child: Text(
                 'OK',
-                style: TextStyle(fontFamily: gilroyBold, fontSize: 18.sp),
+                style: TextStyle(fontSize: 18.sp),
               ),
               onPressed: () {
                 FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({
                   "status": statusMapping[_selectedSortOption.name.toString()].toString(),
                 }).then((value) {
-                  showSnackBar("Done", "Status changed succefully", Colors.green);
+                  CustomWidgets.showSnackBar("Done", "Status changed succefully", Colors.green);
                 });
                 Navigator.of(context).pop();
               },
@@ -210,7 +191,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
           stream: FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID!).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return spinKit();
+              return CustomWidgets.spinKit();
             } else if (snapshot.hasData) {
               return ListView(
                 shrinkWrap: true,
@@ -223,12 +204,12 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                     padding: EdgeInsets.symmetric(horizontal: 30.w),
                     child: textsWidgetsListview(context, snapshot),
                   ),
-                  topWidgetTextPart(addMorePadding: false, names: _topPartNames, ordersView: false, clientView: false, purchasesView: false),
+                  // CustomWidgets().topWidgetTextPart(addMorePadding: false, names: _topPartNames, ordersView: false, clientView: false, purchasesView: false),
                   productsListview()
                 ],
               );
             }
-            return emptyData();
+            return CustomWidgets.emptyData();
           }),
     );
   }
@@ -262,7 +243,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                         await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).delete().then((value) async {
                           salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
 
-                          showSnackBar("Deleted", "Succesfully deleted your ORDER", Colors.green);
+                          CustomWidgets.showSnackBar("Deleted", "Succesfully deleted your ORDER", Colors.green);
                         });
                       },
                       child: const Text('Delete'),
@@ -321,11 +302,11 @@ class _SalesProductsViewState extends State<SalesProductsView> {
         future: fetchData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return spinKit();
+            return CustomWidgets.spinKit();
           } else if (snapshot.hasError) {
-            return errorData();
+            return CustomWidgets.errorData();
           } else if (snapshot.data!.docs.isEmpty) {
-            return emptyData();
+            return CustomWidgets.emptyData();
           } else if (snapshot.hasData) {
             return ListView.builder(
               shrinkWrap: true,
@@ -372,25 +353,30 @@ class _SalesProductsViewState extends State<SalesProductsView> {
         Get.defaultDialog(
             title: text1.tr,
             contentPadding: EdgeInsets.only(bottom: 20.h, left: 20.w, right: 20.w),
-            content: CustomTextField(labelName: text1.toString(), controller: textEditingController, focusNode: focusNode, requestfocusNode: focusNode, unFocus: false, readOnly: true),
+            content: CustomTextField(
+              labelName: text1.toString(),
+              controller: textEditingController,
+              focusNode: focusNode,
+              requestfocusNode: focusNode,
+            ),
             actions: [
               TextButton(
-                child: Text('no'.tr, style: TextStyle(fontFamily: gilroyMedium, fontSize: 18.sp)),
+                child: Text('no'.tr, style: TextStyle(fontSize: 18.sp)),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: Text('yes'.tr, style: TextStyle(fontFamily: gilroyBold, fontSize: 18.sp)),
+                child: Text('yes'.tr, style: TextStyle(fontSize: 18.sp)),
                 onPressed: () async {
                   if (text1 == 'discount') {
                     double sumPrice = double.parse(widget.order.sumPrice.toString());
                     double discount = textEditingController.text.isEmpty ? 0.0 : double.parse(textEditingController.text.toString());
                     if (sumPrice == discount || discount > sumPrice) {
-                      showSnackBar('errorTitle', 'notHigherThanSumPrice', Colors.red);
+                      CustomWidgets.showSnackBar('errorTitle', 'notHigherThanSumPrice', Colors.red);
                     } else {
                       await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({firebaseName: textEditingController.text, 'sum_price': sumPrice - discount}).then((value) {
-                        showSnackBar("copySucces", "changesUpdated", Colors.green);
+                        CustomWidgets.showSnackBar("copySucces", "changesUpdated", Colors.green);
                       });
                     }
                   } else {
@@ -420,7 +406,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                     }
 
                     await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({firebaseName: textEditingController.text}).then((value) {
-                      showSnackBar("copySucces", "changesUpdated", Colors.green);
+                      CustomWidgets.showSnackBar("copySucces", "changesUpdated", Colors.green);
                     });
                     salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
                     await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).get().then((value) {
@@ -447,7 +433,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                 Text(
                   text1.tr,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey, fontFamily: gilroyMedium, fontSize: 14.sp),
+                  style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 ),
                 Text(
                   text1 == "clientNumber"
@@ -458,7 +444,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                               ? text2
                               : text2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.black, fontFamily: gilroySemiBold, fontSize: 14.sp),
+                  style: TextStyle(color: Colors.black, fontSize: 14.sp),
                 )
               ],
             ),

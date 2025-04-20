@@ -1,23 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
-import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class WebAddProductPage extends StatefulWidget {
   const WebAddProductPage({super.key});
@@ -56,9 +42,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
                     },
                   );
                 }
-                return Center(
-                  child: spinKit(),
-                );
+                return CustomWidgets.spinKit();
               }),
         ));
   }
@@ -86,7 +70,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     String documentID = '';
     try {
       if (textControllers[9].text.isEmpty || textControllers[9].text == "") {
-        showSnackBar("Error", "Add Product Quantity", Colors.red);
+        CustomWidgets.showSnackBar("Error", "Add Product Quantity", Colors.red);
       } else {
         _homeController.agreeButton.value = !_homeController.agreeButton.value;
         await FirebaseFirestore.instance.collection('products').add({
@@ -110,17 +94,17 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
       }
     } on Exception catch (e) {
       _homeController.agreeButton.value = false;
-      showSnackBar("Error", e.toString(), Colors.red);
+      CustomWidgets.showSnackBar("Error", e.toString(), Colors.red);
     } catch (e) {
       _homeController.agreeButton.value = false;
 
-      showSnackBar("Error", e.toString(), Colors.red);
+      CustomWidgets.showSnackBar("Error", e.toString(), Colors.red);
     }
     await FirebaseFirestore.instance.collection('products').doc(documentID).get().then((value22) {
       searchViewController.productsList.add(value22);
 
       Get.back();
-      showSnackBar("Done", "Product added succesfully", Colors.green);
+      CustomWidgets.showSnackBar("Done", "Product added succesfully", Colors.green);
     });
     searchViewController.productsList.sort(
       (a, b) {
@@ -147,7 +131,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
                     }
                   },
                   child: Container(
-                    decoration: const BoxDecoration(color: Colors.grey, borderRadius: borderRadius25),
+                    decoration: BoxDecoration(color: Colors.grey, borderRadius: context.border.highBorderRadius),
                     width: 100,
                     height: Get.height / 3,
                     child: Icon(
@@ -157,7 +141,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
                   ),
                 )
               : ClipRRect(
-                  borderRadius: borderRadius20,
+                  borderRadius: context.border.highBorderRadius,
                   child: Image.memory(
                     _photo!,
                     width: 300,
@@ -165,62 +149,95 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
                     fit: BoxFit.fill,
                   ),
                 ),
-          CustomTextField(labelName: "Product Name", borderRadius: true, controller: textControllers[0], focusNode: focusNodes[0], requestfocusNode: focusNodes[1], unFocus: false, readOnly: true),
           CustomTextField(
-              onTap: () {
-                focusNodes[1].unfocus();
-                onTapBottomSheetToSelectBrand('brands', 1, 'brand');
-              },
-              readOnly: true,
-              labelName: 'brand',
-              borderRadius: true,
-              controller: textControllers[1],
-              focusNode: focusNodes[1],
-              requestfocusNode: focusNodes[2],
-              unFocus: true),
+            labelName: "Product Name",
+            controller: textControllers[0],
+            focusNode: focusNodes[0],
+            requestfocusNode: focusNodes[1],
+          ),
           CustomTextField(
-              onTap: () {
-                focusNodes[2].unfocus();
-                onTapBottomSheetToSelectBrand('categories', 2, 'category');
-              },
-              readOnly: true,
-              labelName: 'category',
-              borderRadius: true,
-              controller: textControllers[2],
-              focusNode: focusNodes[2],
-              requestfocusNode: focusNodes[3],
-              unFocus: true),
+            onTap: () {
+              focusNodes[1].unfocus();
+              onTapBottomSheetToSelectBrand('brands', 1, 'brand');
+            },
+            labelName: 'brand',
+            controller: textControllers[1],
+            focusNode: focusNodes[1],
+            requestfocusNode: focusNodes[2],
+          ),
           CustomTextField(
-              onTap: () {
-                focusNodes[3].unfocus();
-                onTapBottomSheetToSelectBrand('materials', 3, 'material');
-              },
-              readOnly: true,
-              labelName: 'material',
-              borderRadius: true,
-              controller: textControllers[3],
-              focusNode: focusNodes[3],
-              requestfocusNode: focusNodes[4],
-              unFocus: true),
+            onTap: () {
+              focusNodes[2].unfocus();
+              onTapBottomSheetToSelectBrand('categories', 2, 'category');
+            },
+            labelName: 'category',
+            controller: textControllers[2],
+            focusNode: focusNodes[2],
+            requestfocusNode: focusNodes[3],
+          ),
           CustomTextField(
-              onTap: () {
-                focusNodes[4].unfocus();
-                onTapBottomSheetToSelectBrand('locations', 4, 'location');
-              },
-              readOnly: true,
-              labelName: 'location',
-              borderRadius: true,
-              controller: textControllers[4],
-              focusNode: focusNodes[4],
-              requestfocusNode: focusNodes[5],
-              unFocus: true),
-          CustomTextField(labelName: "Gramm", borderRadius: true, controller: textControllers[5], focusNode: focusNodes[5], requestfocusNode: focusNodes[6], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "Date", borderRadius: true, controller: textControllers[6], focusNode: focusNodes[6], requestfocusNode: focusNodes[7], unFocus: false, readOnly: false),
-          CustomTextField(labelName: "Note", maxline: 4, borderRadius: true, controller: textControllers[7], focusNode: focusNodes[7], requestfocusNode: focusNodes[8], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "Package", borderRadius: true, controller: textControllers[8], focusNode: focusNodes[8], requestfocusNode: focusNodes[9], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "Quantity", borderRadius: true, controller: textControllers[9], focusNode: focusNodes[9], requestfocusNode: focusNodes[10], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "Cost", borderRadius: true, controller: textControllers[10], focusNode: focusNodes[10], requestfocusNode: focusNodes[11], unFocus: false, readOnly: true),
-          CustomTextField(labelName: "Sell Price", borderRadius: true, controller: textControllers[11], focusNode: focusNodes[11], requestfocusNode: focusNodes[1], unFocus: false, readOnly: true),
+            onTap: () {
+              focusNodes[3].unfocus();
+              onTapBottomSheetToSelectBrand('materials', 3, 'material');
+            },
+            labelName: 'material',
+            controller: textControllers[3],
+            focusNode: focusNodes[3],
+            requestfocusNode: focusNodes[4],
+          ),
+          CustomTextField(
+            onTap: () {
+              focusNodes[4].unfocus();
+              onTapBottomSheetToSelectBrand('locations', 4, 'location');
+            },
+            labelName: 'location',
+            controller: textControllers[4],
+            focusNode: focusNodes[4],
+            requestfocusNode: focusNodes[5],
+          ),
+          CustomTextField(
+            labelName: "Gramm",
+            controller: textControllers[5],
+            focusNode: focusNodes[5],
+            requestfocusNode: focusNodes[6],
+          ),
+          CustomTextField(
+            labelName: "Date",
+            controller: textControllers[6],
+            focusNode: focusNodes[6],
+            requestfocusNode: focusNodes[7],
+          ),
+          CustomTextField(
+            labelName: "Note",
+            maxLine: 4,
+            controller: textControllers[7],
+            focusNode: focusNodes[7],
+            requestfocusNode: focusNodes[8],
+          ),
+          CustomTextField(
+            labelName: "Package",
+            controller: textControllers[8],
+            focusNode: focusNodes[8],
+            requestfocusNode: focusNodes[9],
+          ),
+          CustomTextField(
+            labelName: "Quantity",
+            controller: textControllers[9],
+            focusNode: focusNodes[9],
+            requestfocusNode: focusNodes[10],
+          ),
+          CustomTextField(
+            labelName: "Cost",
+            controller: textControllers[10],
+            focusNode: focusNodes[10],
+            requestfocusNode: focusNodes[11],
+          ),
+          CustomTextField(
+            labelName: "Sell Price",
+            controller: textControllers[11],
+            focusNode: focusNodes[11],
+            requestfocusNode: focusNodes[1],
+          ),
           AgreeButton(
               onTap: () {
                 _photo == null ? addProductAndImage("") : uploadFile();

@@ -3,54 +3,71 @@ version: 1.0.0+1
 publish_to: none
 description: A new Flutter project.
 environment:
+  flutter: ^3.24.0
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
-  cupertino_icons: ^1.0.6
-  get: 4.6.6
-  flutter_lints:
-  firebase_core:
-  cloud_firestore:
-  flutter_iconly:
-  flutter_screenutil:
-  lottie: ^3.1.0
-  get_storage:
-  firebase_storage:
-  intl: ^0.19.0
-  image_picker_web: ^3.1.1
-  firebase_pagination: ^3.1.0
-  scroll_to_hide: ^2.1.0
-  excel: ^2.0.5
-  universal_html: ^2.0.3
-  file_saver:
-  path_provider: ^2.0.2
-  fl_chart: ^0.68.0
-  path:
+  # CORE & FIREBASE
+  cupertino_icons: ^1.0.6         # iOS-style icons for Cupertino widgets
+  flutter_lints:                  # Recommended linter rules for Flutter
+  firebase_core:                  # Required for all Firebase features
+  cloud_firestore:                # Cloud Firestore database integration
+  firebase_storage:               # Firebase file storage
+  firebase_pagination: ^3.1.0     # Firestore pagination utility
+  firebase_storage_web: ^3.9.0           # Firebase Storage for web
+
+  # STATE MANAGEMENT & UTILITIES
+  get: ^4.6.6                      # GetX for state management, routing, and DI
+  kartal: ^3.5.0                 # Handy extension methods and utilities
+  intl: ^0.19.0                   # Internationalization: date, currency, etc.
+
+  # STORAGE & FILE OPERATIONS
+  get_storage:                   # Simple key-value local storage (compatible with GetX)
+  path_provider: ^2.0.2          # Accessing commonly used locations on filesystem
+  path:                          # Path manipulation utilities
+  file_saver:                    # Save files to disk (also for web)
+  excel: ^2.0.5                  # Read/write Excel files
+
+  # WEB SUPPORT
+  image_picker_web: ^3.1.1       # Image picking functionality for Flutter Web
+  universal_html: ^2.0.3         # Web-compatible HTML API for Flutter
+
+  # UI COMPONENTS & ANIMATIONS
+  flutter_iconly:                # Lightweight icon pack (iOS/Android)
+  lottie: ^3.1.0                 # Render animations from Lottie JSON files
+  fl_chart: ^0.68.0              # Draw line, bar, pie, and other charts
+  scroll_to_hide: ^2.1.0         # Hide widgets on scroll (e.g., bottom navigation)
+  flutter_screenutil:            # Adapt UI to different screen sizes (responsive)
+  cached_network_image: ^3.0.0
+
   flutter:
     sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^4.0.0
+
+  #dart run build_runner watch
+  build_runner:
+  auto_route_generator:
+
 
 flutter:
   assets:
     - assets/fonts/
-    - assets/icons/
     - assets/lottie/
     - assets/image/
 
   fonts:
-    - family: GilroyBold
+    - family: Gilroy
       fonts:
         - asset: assets/fonts/Gilroy-Bold.ttf
-    - family: GilroySemiBold
-      fonts:
+          weight: 700
         - asset: assets/fonts/Gilroy-SemiBold.ttf
-    - family: GilroyMedium
-      fonts:
+          weight: 600
         - asset: assets/fonts/Gilroy-Medium.ttf
-    - family: GilroyRegular
-      fonts:
+          weight: 500
         - asset: assets/fonts/Gilroy-Regular.ttf
+          weight: 400
   uses-material-design: true
   generate: true

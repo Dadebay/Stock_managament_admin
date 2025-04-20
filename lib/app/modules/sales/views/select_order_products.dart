@@ -1,14 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/constants/cards/product_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
+import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 class SelectOrderProducts extends StatefulWidget {
   const SelectOrderProducts({required this.purchaseView});
@@ -111,7 +105,7 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                         },
                       )
                     : salesController.loadingDataOrders.value == true
-                        ? spinKit()
+                        ? CustomWidgets.spinKit()
                         : ListView.builder(
                             padding: EdgeInsets.symmetric(horizontal: 5.w),
                             itemCount: seacrhViewController.productsList.length,

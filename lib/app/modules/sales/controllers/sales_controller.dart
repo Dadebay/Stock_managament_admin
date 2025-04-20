@@ -1,9 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class SalesController extends GetxController {
   RxList filteredOrderedProducts = [].obs;
@@ -114,7 +110,7 @@ class SalesController extends GetxController {
     }
     double discountPrice = textControllers[7].text == "" ? 0.0 : double.parse(textControllers[7].text.toString());
     if (discountPrice >= sumPrice) {
-      showSnackBar("Error", "A discount price cannot be greater than the sum price.", Colors.red);
+      CustomWidgets.showSnackBar("Error", "A discount price cannot be greater than the sum price.", Colors.red);
     } else {
       sumPrice -= discountPrice;
       await FirebaseFirestore.instance.collection('sales').add({
@@ -177,7 +173,7 @@ class SalesController extends GetxController {
       orderCardList.sort((a, b) {
         return b['date'].compareTo(a['date']);
       });
-      showSnackBar("Done", "Your purchase submitted ", Colors.green);
+      CustomWidgets.showSnackBar("Done", "Your purchase submitted ", Colors.green);
     }
   }
 }

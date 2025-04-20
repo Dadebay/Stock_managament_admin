@@ -1,26 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_pagination/firebase_pagination.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:intl/intl.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/data/models/purchases_model.dart';
-import 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/constants/buttons/agree_button_view.dart';
-import 'package:stock_managament_admin/constants/cards/purchase_card.dart';
-import 'package:stock_managament_admin/constants/customWidget/constants.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_app_bar.dart';
-import 'package:stock_managament_admin/constants/customWidget/custom_text_field.dart';
-import 'package:stock_managament_admin/constants/customWidget/widgets.dart';
+import 'package:stock_managament_admin/app/product/cards/purchase_card.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class ProductProfilView extends StatefulWidget {
   const ProductProfilView({super.key, required this.product});
@@ -94,9 +81,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                     },
                   );
                 }
-                return Center(
-                  child: spinKit(),
-                );
+                return CustomWidgets.spinKit();
               }),
         ));
   }
@@ -107,78 +92,104 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     return Column(
       children: [
         CustomTextField(
-            readOnly: true, labelName: 'productName', maxline: 3, borderRadius: true, controller: textControllers[0], focusNode: focusNodes[0], requestfocusNode: focusNodes[1], unFocus: true),
+          labelName: 'productName',
+          maxLine: 3,
+          controller: textControllers[0],
+          focusNode: focusNodes[0],
+          requestfocusNode: focusNodes[1],
+        ),
         CustomTextField(
-            onTap: () {
-              focusNodes[1].unfocus();
-              changeTextFieldWithData('categories', 1, 'category');
-            },
-            readOnly: true,
-            labelName: 'category',
-            borderRadius: true,
-            controller: textControllers[1],
-            focusNode: focusNodes[1],
-            requestfocusNode: focusNodes[2],
-            unFocus: true),
+          onTap: () {
+            focusNodes[1].unfocus();
+            changeTextFieldWithData('categories', 1, 'category');
+          },
+          labelName: 'category',
+          controller: textControllers[1],
+          focusNode: focusNodes[1],
+          requestfocusNode: focusNodes[2],
+        ),
         CustomTextField(
-            onTap: () {
-              focusNodes[2].unfocus();
-              changeTextFieldWithData('brands', 2, 'brand');
-            },
-            readOnly: true,
-            labelName: 'brand',
-            borderRadius: true,
-            controller: textControllers[2],
-            focusNode: focusNodes[2],
-            requestfocusNode: focusNodes[3],
-            unFocus: true),
-        CustomTextField(readOnly: true, labelName: 'gramm', borderRadius: true, controller: textControllers[3], focusNode: focusNodes[3], requestfocusNode: focusNodes[4], unFocus: true),
+          onTap: () {
+            focusNodes[2].unfocus();
+            changeTextFieldWithData('brands', 2, 'brand');
+          },
+          labelName: 'brand',
+          controller: textControllers[2],
+          focusNode: focusNodes[2],
+          requestfocusNode: focusNodes[3],
+        ),
         CustomTextField(
-            onTap: () {
-              focusNodes[4].unfocus();
-              changeTextFieldWithData('materials', 4, 'material');
-            },
-            readOnly: true,
-            labelName: 'material',
-            borderRadius: true,
-            controller: textControllers[4],
-            focusNode: focusNodes[4],
-            requestfocusNode: focusNodes[5],
-            unFocus: true),
-        CustomTextField(readOnly: true, labelName: 'sell_price', borderRadius: true, controller: textControllers[5], focusNode: focusNodes[5], requestfocusNode: focusNodes[6], unFocus: true),
+          labelName: 'gramm',
+          controller: textControllers[3],
+          focusNode: focusNodes[3],
+          requestfocusNode: focusNodes[4],
+        ),
         CustomTextField(
-            onTap: () {
-              focusNodes[6].unfocus();
-              changeTextFieldWithData('locations', 6, 'location');
-            },
-            readOnly: true,
-            labelName: 'location',
-            borderRadius: true,
-            controller: textControllers[6],
-            focusNode: focusNodes[6],
-            requestfocusNode: focusNodes[7],
-            unFocus: true),
-        CustomTextField(readOnly: true, labelName: 'quantity', borderRadius: true, controller: textControllers[7], focusNode: focusNodes[7], requestfocusNode: focusNodes[8], unFocus: true),
-        CustomTextField(readOnly: true, labelName: 'note', maxline: 3, borderRadius: true, controller: textControllers[8], focusNode: focusNodes[8], requestfocusNode: focusNodes[9], unFocus: true),
-        CustomTextField(readOnly: true, labelName: 'package', borderRadius: true, controller: textControllers[9], focusNode: focusNodes[9], requestfocusNode: focusNodes[10], unFocus: true),
-        CustomTextField(readOnly: true, labelName: 'cost', borderRadius: true, controller: textControllers[10], focusNode: focusNodes[10], requestfocusNode: focusNodes[11], unFocus: true),
+          onTap: () {
+            focusNodes[4].unfocus();
+            changeTextFieldWithData('materials', 4, 'material');
+          },
+          labelName: 'material',
+          controller: textControllers[4],
+          focusNode: focusNodes[4],
+          requestfocusNode: focusNodes[5],
+        ),
         CustomTextField(
-            readOnly: true,
-            onTap: () async {
-              final result = await showDateTimePickerWidget(context: context);
-              if (result != null) {
-                setState(() {
-                  selectedDateTime = result;
-                  textControllers[11].text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
-                });
-              }
-            },
-            labelName: 'date',
-            borderRadius: true,
-            controller: textControllers[11],
-            focusNode: focusNodes[11],
-            requestfocusNode: focusNodes[1],
-            unFocus: true),
+          labelName: 'sell_price',
+          controller: textControllers[5],
+          focusNode: focusNodes[5],
+          requestfocusNode: focusNodes[6],
+        ),
+        CustomTextField(
+          onTap: () {
+            focusNodes[6].unfocus();
+            changeTextFieldWithData('locations', 6, 'location');
+          },
+          labelName: 'location',
+          controller: textControllers[6],
+          focusNode: focusNodes[6],
+          requestfocusNode: focusNodes[7],
+        ),
+        CustomTextField(
+          labelName: 'quantity',
+          controller: textControllers[7],
+          focusNode: focusNodes[7],
+          requestfocusNode: focusNodes[8],
+        ),
+        CustomTextField(
+          labelName: 'note',
+          maxLine: 3,
+          controller: textControllers[8],
+          focusNode: focusNodes[8],
+          requestfocusNode: focusNodes[9],
+        ),
+        CustomTextField(
+          labelName: 'package',
+          controller: textControllers[9],
+          focusNode: focusNodes[9],
+          requestfocusNode: focusNodes[10],
+        ),
+        CustomTextField(
+          labelName: 'cost',
+          controller: textControllers[10],
+          focusNode: focusNodes[10],
+          requestfocusNode: focusNodes[11],
+        ),
+        CustomTextField(
+          onTap: () async {
+            final result = await CustomWidgets.showDateTimePickerWidget(context: context);
+            if (result != null) {
+              setState(() {
+                selectedDateTime = result;
+                textControllers[11].text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
+              });
+            }
+          },
+          labelName: 'date',
+          controller: textControllers[11],
+          focusNode: focusNodes[11],
+          requestfocusNode: focusNodes[1],
+        ),
         AgreeButton(
             onTap: () async {
               var fileInfo = await ImagePickerWeb.getImageInfo;
@@ -212,7 +223,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         "${names[i]}": names[i] == 'quantity' ? int.parse(textControllers[i].text.toString()) : textControllers[i].text,
       });
     }
-    showSnackBar("Done", "Product data changed", Colors.green);
+    CustomWidgets.showSnackBar("Done", "Product data changed", Colors.green);
     homeController.agreeButton.value = !homeController.agreeButton.value;
   }
 
@@ -226,7 +237,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
       var dowurl = await storageRef.getDownloadURL();
       String url = dowurl.toString();
       await FirebaseFirestore.instance.collection('products').doc(widget.product.documentID).update({"image": url});
-      showSnackBar("Done", "image succesfully uploaded", Colors.green);
+      CustomWidgets.showSnackBar("Done", "image succesfully uploaded", Colors.green);
     });
   }
 
@@ -241,7 +252,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
           Expanded(
             child: Column(
               children: [
-                topWidgetPurchases(true),
+                // CustomWidgets().topWidgetPurchases(true),
                 Expanded(
                   child: FirestorePagination(
                     limit: 20, // Defaults to 10.
@@ -253,14 +264,8 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                       final data = documentSnapshot.data() as Map<String, dynamic>?;
                       if (data == null) return Container();
 
-                      final purchases = PurchasesModel(
-                          title: data['title'].toString(),
-                          date: data['date'].toString(),
-                          note: data['note'].toString(),
-                          cost: data['cost'].toString(),
-                          productsCount: data['product_count'].toString(),
-                          source: data['source'].toString(),
-                          purchasesID: data['purchase_id'].toString());
+                      final purchases =
+                          PurchasesModel(title: data['title'].toString(), date: data['date'].toString(), note: data['note'].toString(), cost: data['cost'].toString(), productsCount: data['product_count'].toString(), source: data['source'].toString(), purchasesID: data['purchase_id'].toString());
                       return PurchaseCard(
                         showInProductProfil: true,
                         purchasesModel: purchases,
@@ -287,9 +292,9 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         stream: FirebaseFirestore.instance.collection('products').doc(widget.product.documentID!).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return spinKit();
+            return CustomWidgets.spinKit();
           } else if (snapshot.hasError) {
-            return errorData();
+            return CustomWidgets.errorData();
           } else if (snapshot.hasData) {
             final product = ProductModel(
               name: snapshot.data!['name'] == null ? '' : snapshot.data!['name'].toString(),
@@ -314,9 +319,9 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                 Container(
                   width: Get.size.width / 3,
                   height: Get.size.height / 2,
-                  decoration: const BoxDecoration(color: Colors.grey, borderRadius: borderRadius25),
+                  decoration: BoxDecoration(color: Colors.grey, borderRadius: context.border.highBorderRadius),
                   child: ClipRRect(
-                    borderRadius: borderRadius25,
+                    borderRadius: context.border.highBorderRadius,
                     child: _photo == null
                         ? Image.network(
                             product.image!,
@@ -334,7 +339,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                             width: Get.size.width / 3,
                             height: Get.size.height / 3,
                             child: ClipRRect(
-                              borderRadius: borderRadius20,
+                              borderRadius: context.border.highBorderRadius,
                               child: Image.memory(
                                 _photo!,
                                 width: 300,
@@ -388,7 +393,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                             await storageRef.delete().then((value) {});
                           }
                           searchViewController.productsList.removeWhere((element) => element['name'] == widget.product.name);
-                          showSnackBar("Deleted", "Succesfully deleted your product", Colors.green);
+                          CustomWidgets.showSnackBar("Deleted", "Succesfully deleted your product", Colors.green);
                         });
                       },
                       child: const Text('Delete'),
