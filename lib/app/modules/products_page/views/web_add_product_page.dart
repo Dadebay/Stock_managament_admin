@@ -101,16 +101,16 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
       CustomWidgets.showSnackBar("Error", e.toString(), Colors.red);
     }
     await FirebaseFirestore.instance.collection('products').doc(documentID).get().then((value22) {
-      searchViewController.productsList.add(value22);
+      // searchViewController.productsList.add(value22);
 
       Get.back();
       CustomWidgets.showSnackBar("Done", "Product added succesfully", Colors.green);
     });
-    searchViewController.productsList.sort(
-      (a, b) {
-        return b['date'].compareTo(a['date']);
-      },
-    );
+    // searchViewController.productsList.sort(
+    //   (a, b) {
+    //     // return b['date'].compareTo(a['date']);
+    //   },
+    // );
   }
 
   @override

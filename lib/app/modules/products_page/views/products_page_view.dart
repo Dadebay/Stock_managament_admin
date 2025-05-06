@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
-import 'package:stock_managament_admin/app/product/cards/product_card.dart';
 import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 import '../controllers/products_page_controller.dart';
@@ -127,30 +125,30 @@ class ProductsPageView extends GetView<ProductsPageController> {
               query: FirebaseFirestore.instance.collection('products').orderBy("date", descending: true),
               itemBuilder: (context, documentSnapshot, index) {
                 final data = documentSnapshot.data() as Map<String, dynamic>?;
-                if (data == null) return Container();
-                final product = ProductModel(
-                    name: data['name'].toString(),
-                    brandName: data['brand'].toString(),
-                    category: data['category'].toString(),
-                    cost: data['cost'].toString(),
-                    gramm: data['gramm'].toString(),
-                    image: data['image'].toString(),
-                    date: data['date'].toString(),
-                    location: data['location'].toString(),
-                    material: data['material'].toString(),
-                    quantity: data['quantity'],
-                    sellPrice: data['sell_price'].toString(),
-                    note: data['note'].toString(),
-                    package: data['package'].toString(),
-                    documentID: documentSnapshot.id);
-                return _productsPageController.showInGrid.value
-                    ? ProductCard(
-                        purchaseView: false,
-                        product: product,
-                        addCounterWidget: false,
-                        disableOnTap: false,
-                      )
-                    : SecondProductCard(product: product);
+                return Container();
+                // final product = ProductModel(
+                //     name: data['name'].toString(),
+                //     brandName: data['brand'].toString(),
+                //     category: data['category'].toString(),
+                //     cost: data['cost'].toString(),
+                //     gramm: data['gramm'].toString(),
+                //     image: data['image'].toString(),
+                //     date: data['date'].toString(),
+                //     location: data['location'].toString(),
+                //     material: data['material'].toString(),
+                //     quantity: data['quantity'],
+                //     sellPrice: data['sell_price'].toString(),
+                //     note: data['note'].toString(),
+                //     package: data['package'].toString(),
+                //     documentID: documentSnapshot.id);
+                // return _productsPageController.showInGrid.value
+                //     ? ProductCard(
+                //         purchaseView: false,
+                //         product: product,
+                //         addCounterWidget: false,
+                //         disableOnTap: false,
+                //       )
+                //     : SecondProductCard(product: product);
               },
               separatorBuilder: (context, index) {
                 return const Divider(

@@ -81,7 +81,7 @@ class ExpencesCard extends StatelessWidget {
       case 'name':
         return expencesModel.name;
       case 'date':
-        return expencesModel.date!.substring(0, 16).replaceAll("T", "  ");
+        return expencesModel.date!;
       case 'cost':
         return expencesModel.cost.toString();
       case 'notes':
@@ -100,7 +100,6 @@ class ExpencesCard extends StatelessWidget {
           child: IconButton(
             onPressed: () async {
               await ExpencesService().deleteExpence(model: expencesModel);
-              CustomWidgets.showSnackBar("deleted", "${expencesModel.name} " + "Expence deleted".tr, ColorConstants.redColor);
             },
             icon: const Icon(
               IconlyLight.delete,

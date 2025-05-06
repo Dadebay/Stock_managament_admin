@@ -18,10 +18,7 @@ class PhoneNumberTextField extends StatelessWidget {
       padding: EdgeInsets.only(top: 15.h),
       child: TextFormField(
         enabled: disabled ?? true,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 18,
-        ),
+        style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w600),
         cursorColor: Colors.black,
         textInputAction: TextInputAction.next,
         keyboardType: TextInputType.number,
@@ -36,7 +33,7 @@ class PhoneNumberTextField extends StatelessWidget {
           return null;
         },
         inputFormatters: [
-          LengthLimitingTextInputFormatter(8),
+          LengthLimitingTextInputFormatter(controller.text.contains('+993') ? 12 : 8),
         ],
         onEditingComplete: () {
           unFocus ? FocusScope.of(context).unfocus() : requestFocus.requestFocus();
@@ -46,20 +43,22 @@ class PhoneNumberTextField extends StatelessWidget {
         decoration: InputDecoration(
           errorMaxLines: 2,
           errorStyle: const TextStyle(),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.only(
-              left: 15,
-            ),
-            child: Text(
-              '+ 993',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-              ),
-            ),
-          ),
+          prefixIcon: controller.text.contains('+993')
+              ? SizedBox.shrink()
+              : const Padding(
+                  padding: EdgeInsets.only(
+                    left: 15,
+                  ),
+                  child: Text(
+                    '+ 993',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
           contentPadding: const EdgeInsets.only(left: 25, top: 16, bottom: 18),
-          prefixIconConstraints: const BoxConstraints(minWidth: 70),
+          prefixIconConstraints: BoxConstraints(minWidth: controller.text.contains('+993') ? 20 : 70),
           isDense: true,
           hintText: '65 656565 ',
           alignLabelWithHint: true,

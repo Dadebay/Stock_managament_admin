@@ -45,9 +45,32 @@ class ClientsView extends StatelessWidget {
                       clientsController.searchResult.clear();
                     },
                   ),
-                  ListviewTopText(
+                  ListviewTopText<ClientModel>(
                     names: StringConstants.clientNames,
                     listToSort: displayList,
+                    setSortedList: (newList) {
+                      if (isSearching) {
+                        clientsController.searchResult.assignAll(newList);
+                      } else {
+                        clientsController.clients.assignAll(newList);
+                      }
+                    },
+                    getSortValue: (item, key) {
+                      switch (key) {
+                        case 'name':
+                          return item.name;
+                        case 'address':
+                          return item.address;
+                        case 'number':
+                          return item.phone;
+                        case 'order_count':
+                          return item.orderCount;
+                        case 'sum_price':
+                          return item.sumPrice;
+                        default:
+                          return '';
+                      }
+                    },
                   ),
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && clientsController.searchResult.isEmpty)
@@ -82,14 +105,23 @@ class ClientsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            heroTag: 'button1',
             onPressed: () {
               clientsController.exportToExcel();
             },
             child: const Icon(CupertinoIcons.doc_person),
           ),
           SizedBox(width: 30.w),
-          ClientAddButton(),
+          FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                context: Get.context!,
+                builder: (context) {
+                  return ClientAddButton();
+                },
+              );
+            },
+            child: const Icon(CupertinoIcons.add),
+          ),
         ],
       ),
     );

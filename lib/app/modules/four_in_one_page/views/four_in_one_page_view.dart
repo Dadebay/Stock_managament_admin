@@ -2,9 +2,9 @@ import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_model.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_service.dart';
-import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_add.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_card.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
+import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class FourInOnePageView extends StatefulWidget {
@@ -42,23 +42,32 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return CustomWidgets.emptyData();
                       }
+
                       final categories = snapshot.data!;
-                      fourInOnePageController.fourInOneList.addAll(categories);
-                      if (categories.isEmpty) {
-                        return CustomWidgets.emptyData();
-                      }
-                      return ListView.builder(
-                        itemCount: categories.length,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          return FourInOneCard(
-                            fourInOneModel: categories[index],
-                            count: index + 1,
-                          );
-                        },
-                      );
+                      final key = StringConstants.four_in_one_names[index]['countName'];
+
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        fourInOnePageController.addListData(key.toString(), categories);
+                      });
+
+                      return Obx(() {
+                        final list = fourInOnePageController.fourInOneDataMap[key] ?? <FourInOneModel>[].obs;
+
+                        return ListView.builder(
+                          itemCount: list.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, i) {
+                            return FourInOneCard(
+                              count: list.length - i,
+                              fourInOneModel: list[i],
+                              dataKey: key.toString(),
+                              url: StringConstants.four_in_one_names[index]['url'].toString(),
+                            );
+                          },
+                        );
+                      });
                     },
-                  ),
+                  )
                 ],
               ),
             );
@@ -70,43 +79,8 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
             );
           },
         ),
-        Positioned(bottom: 15, right: 15, child: addDataButtonFourInONe()),
+        Positioned(bottom: 15, right: 15, child: FloatingActionButton(onPressed: () => DialogsUtils.fourInOneAddData(), child: const Icon(IconlyLight.plus))),
       ],
     );
   }
-}
-
-FloatingActionButton addDataButtonFourInONe() {
-  return FloatingActionButton(
-      onPressed: () {
-        Get.defaultDialog(
-          title: "Add data",
-          titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp),
-          content: SizedBox(
-            height: Get.height / 3,
-            width: Get.size.width / 3,
-            child: ListView.builder(
-              itemCount: StringConstants.four_in_one_names.length,
-              shrinkWrap: true,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AddEditFourInOneDialog(name: StringConstants.four_in_one_names[index]['pageView'].toString()),
-                    );
-                  },
-                  title: Text(
-                    StringConstants.four_in_one_names[index]['pageView'].toString(),
-                    style: TextStyle(color: Colors.black, fontSize: 24.sp),
-                  ),
-                  trailing: const Icon(IconlyLight.plus),
-                );
-              },
-            ),
-          ),
-        );
-      },
-      child: const Icon(IconlyLight.plus));
 }

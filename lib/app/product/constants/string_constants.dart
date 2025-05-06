@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:stock_managament_admin/app/modules/clients/views/clients_view.dart';
 import 'package:stock_managament_admin/app/modules/expences/views/expences_view.dart';
+import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_page_view.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 enum ColumnSize { small, medium, large }
@@ -30,8 +31,8 @@ class StringConstants {
     {'name': 'Status', 'sortName': "status"},
   ];
   static List<Map<String, String>> clientNames = [
-    {'name': 'Client Name', 'sortName': "name", 'size': ColumnSize.medium.toString()},
-    {'name': 'Address', 'sortName': "address", 'size': ColumnSize.large.toString()},
+    {'name': 'Client Name', 'sortName': "name", 'size': ColumnSize.small.toString()},
+    {'name': 'Address', 'sortName': "address", 'size': ColumnSize.medium.toString()},
     {'name': 'Client number', 'sortName': "number", 'size': ColumnSize.small.toString()},
     {'name': 'Order count', 'sortName': "order_count", 'size': ColumnSize.small.toString()},
     {'name': 'Sum price', 'sortName': "sum_price", 'size': ColumnSize.small.toString()},
@@ -49,18 +50,35 @@ class StringConstants {
     {'name': 'Product count', 'sortName': "product_count"},
     {'name': 'Sum Cost', 'sortName': "cost"},
   ];
+  static List<Map<String, String>> searchViewFilters = [
+    {'name': 'Brands', 'searchName': 'brand'},
+    {'name': 'Categories', 'searchName': 'category'},
+    {'name': 'Locations', 'searchName': 'location'},
+    {'name': 'Materials', 'searchName': 'material'}
+  ];
+  static List<Map<String, String>> searchViewtopPartNames = [
+    {'name': 'Product Name', 'sortName': "count", 'size': ColumnSize.large.toString()},
+    {'name': 'Cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
+    {'name': 'Sell Price', 'sortName': "price", 'size': ColumnSize.small.toString()},
+    {'name': 'Brand', 'sortName': "brends", 'size': ColumnSize.small.toString()},
+    {'name': 'Category', 'sortName': "category", 'size': ColumnSize.small.toString()},
+    {'name': 'Location', 'sortName': "location", 'size': ColumnSize.small.toString()},
+  ];
+  static final List<String> fieldLabels = ['Name', 'Sell price', 'Category', 'Brand', 'Location', 'Material', 'Gram', 'Count', 'Description', 'Package (Gaplama)', 'Cost'];
+
+  static final List<String> apiFieldNames = ['name', 'price', 'category', 'brand', 'location', 'material', 'gram', 'count', 'description', 'gaplama', 'cost'];
 
   static List pages = [
     Container(),
     Container(),
     Container(),
     Container(),
-    Container(),
+    // Container(),
     // HomeView(),
     // const SalesView(),
     // const PurchasesView(),
     // const SearchView(),
-    // const FourInOnePageView(),
+    FourInOnePageView(),
     ExpencesView(),
     ClientsView(),
   ];

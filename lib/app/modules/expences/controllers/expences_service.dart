@@ -23,8 +23,8 @@ class ExpencesService {
       body: <String, dynamic>{
         'name': model.name,
         'cost': model.cost,
+        'date': model.date,
         'notes': model.note,
-        // 'date': model.date,
       },
       requiresToken: true,
       handleSuccess: (responseJson) {
@@ -49,12 +49,12 @@ class ExpencesService {
       body: <String, dynamic>{
         'name': model.name,
         'cost': model.cost,
+        'date': model.date,
         'notes': model.note,
-        // 'date': model.date,
       },
       requiresToken: true,
       handleSuccess: (responseJson) {
-        print(responseJson);
+        (responseJson);
         if (responseJson.isNotEmpty) {
           Navigator.of(context).pop();
           final model = ExpencesModel.fromJson(responseJson);
@@ -75,9 +75,9 @@ class ExpencesService {
       handleSuccess: (responseJson) async {
         expencesController.deleteExpences(model);
         if (responseJson.isNotEmpty) {
-          CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
+          CustomWidgets.showSnackBar("deleted", "${model.name} " + "Expence deleted".tr, ColorConstants.redColor);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'clientNotAdded'.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr, 'Cannot delete item please try again '.tr, Colors.red);
         }
       },
     );

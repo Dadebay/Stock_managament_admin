@@ -59,9 +59,6 @@ class SignInService {
       handleSuccess: (responseJson) async {
         if (responseJson['access'] != null) {
           await _auth.setToken(responseJson['access']);
-          _auth.getToken().then((value) {
-            print('Access Token: $value');
-          });
           await _auth.setRefreshToken(responseJson['refresh']);
         }
         return responseJson;

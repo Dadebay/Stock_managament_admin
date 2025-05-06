@@ -159,8 +159,6 @@ class _CreateOrderViewState extends State<CreateOrderView> {
                     final ProductModel product = salesController.selectedProductsToOrder[index]['product'];
                     return ProductCard(
                       product: product,
-                      purchaseView: false,
-                      addCounterWidget: true,
                       disableOnTap: false,
                     );
                   },

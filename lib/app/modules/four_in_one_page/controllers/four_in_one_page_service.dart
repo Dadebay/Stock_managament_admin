@@ -5,10 +5,9 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class FourInOnePageService {
-  final FourInOnePageController expencesController = Get.find<FourInOnePageController>();
+  final FourInOnePageController fourInOnePageController = Get.find<FourInOnePageController>();
 
   Future<List<FourInOneModel>> getData({required String url}) async {
-    print(url);
     final data = await ApiService().getRequest(url, requiresToken: true);
     if (data != null && data['results'] != null) {
       return (data['results'] as List).map((item) => FourInOneModel.fromJson(item)).toList().reversed.toList();
@@ -17,63 +16,76 @@ class FourInOnePageService {
     }
   }
 
-  Future addFourInOne({required FourInOneModel model, required BuildContext context}) async {
+  Future addFourInOne({required FourInOneModel model, String? location, required String url, required String key}) async {
     return ApiService().handleApiRequest(
-      endpoint: ApiConstants.expences,
+      endpoint: url,
       method: 'POST',
-      body: <String, dynamic>{
-        'name': model.name,
-        'notes': model.notes,
-      },
+      body: location != null
+          ? <String, dynamic>{
+              'name': model.name,
+              'notes': model.notes,
+              'address': model.address,
+            }
+          : <String, dynamic>{
+              'name': model.name,
+              'notes': model.notes,
+            },
       requiresToken: true,
       handleSuccess: (responseJson) {
         if (responseJson.isNotEmpty) {
-          Navigator.of(context).pop();
           final model = FourInOneModel.fromJson(responseJson);
-          // expencesController.addExpences(model);
-          CustomWidgets.showSnackBar('success'.tr, 'Expences added'.tr, Colors.green);
+          fourInOnePageController.addFourInOne(key, model);
+          Get.back();
+
+          CustomWidgets.showSnackBar('success'.tr, 'Added Successfully '.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot add expence please try again '.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr, 'Cannot add please try again '.tr, Colors.red);
         }
+        Get.back();
       },
     );
   }
 
-  Future editFourInOne({required FourInOneModel model, required BuildContext context}) async {
+  Future editFourInOne({required FourInOneModel model, String? location, required String key, required String url}) async {
     return ApiService().handleApiRequest(
-      endpoint: ApiConstants.expences + "${model.id}/",
+      endpoint: url + "${model.id}/",
       method: 'PUT',
-      body: <String, dynamic>{
-        'name': model.name,
-        'notes': model.notes,
-        // 'date': model.date,
-      },
+      body: location != null
+          ? <String, dynamic>{
+              'name': model.name,
+              'notes': model.notes,
+              'address': model.address,
+            }
+          : <String, dynamic>{
+              'name': model.name,
+              'notes': model.notes,
+            },
       requiresToken: true,
       handleSuccess: (responseJson) {
-        print(responseJson);
         if (responseJson.isNotEmpty) {
-          Navigator.of(context).pop();
           final model = FourInOneModel.fromJson(responseJson);
-          // expencesController.editExpences(model);
-          CustomWidgets.showSnackBar('success'.tr, 'Expences added'.tr, Colors.green);
+          fourInOnePageController.editFourInOne(key, model);
+          Get.back();
+
+          CustomWidgets.showSnackBar('success'.tr, 'Edited succesfully'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot add expence please try again '.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr, 'Cannot edit please try again'.tr, Colors.red);
         }
       },
     );
   }
 
-  Future deleteExpence({required FourInOneModel model}) async {
+  Future deleteFourInOne({required FourInOneModel model, required String url, required String key}) async {
     return ApiService().handleApiRequest(
-      endpoint: ApiConstants.expences + "${model.id}/",
+      endpoint: url + "${model.id}/",
       method: 'DELETE',
       requiresToken: true,
       handleSuccess: (responseJson) async {
-        // expencesController.deleteExpences(model);
         if (responseJson.isNotEmpty) {
-          CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
+          fourInOnePageController.deleteFourInOne(key, model.id!);
+          CustomWidgets.showSnackBar('success'.tr, 'Deleted Successfully'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'clientNotAdded'.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr, 'Cannot delete please try again'.tr, Colors.red);
         }
       },
     );

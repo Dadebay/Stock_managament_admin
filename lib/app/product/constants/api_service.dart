@@ -24,8 +24,10 @@ class ApiService {
         Uri.parse(endpoint),
         headers: headers,
       );
+      print(response.request);
+      print(response.request?.headers);
       print(response.statusCode);
-      print(response.body);
+      print(response.request?.url);
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (handleSuccess != null) {
@@ -59,7 +61,6 @@ class ApiService {
         'Content-Type': 'application/json; charset=UTF-8',
         if (requiresToken && token != null) 'Authorization': 'Bearer $token',
       };
-      print(endpoint);
       http.Response response;
       switch (method.toUpperCase()) {
         case 'GET':
@@ -88,10 +89,14 @@ class ApiService {
         default:
           throw UnsupportedError('Unsupported HTTP method: $method');
       }
-      print(response.statusCode);
+      print(endpoint);
+      print(body);
       print(method);
-      print(response.body);
       if ([200, 201, 204].contains(response.statusCode)) {
+        if (response.statusCode == 204) {
+          await handleSuccess!({"statusCode": response.statusCode});
+          return {"statusCode": response.statusCode};
+        }
         final responseJson = response.body.isNotEmpty ? json.decode(response.body) : null;
         if (handleSuccess != null && responseJson != null) {
           await handleSuccess(responseJson);

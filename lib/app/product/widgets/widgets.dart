@@ -13,6 +13,15 @@ class CustomWidgets {
     );
   }
 
+  static Center noImage() {
+    return Center(
+        child: Text(
+      'noImage'.tr,
+      textAlign: TextAlign.center,
+      style: TextStyle(color: Colors.white, fontSize: 25.sp),
+    ));
+  }
+
   int getFlexForSize(String size) {
     if (size == ColumnSize.small.toString()) return 1;
     if (size == ColumnSize.medium.toString()) return 2;
@@ -24,7 +33,7 @@ class CustomWidgets {
     return Center(
         child: Text(
       "noProduct".tr,
-      style: TextStyle(color: Colors.black, fontSize: 20.sp),
+      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 20.sp),
     ));
   }
 
@@ -67,6 +76,7 @@ class CustomWidgets {
   static Widget textWidgetPrice(String text1, String text2) {
     return Expanded(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
             child: Text(
@@ -74,15 +84,16 @@ class CustomWidgets {
               maxLines: 1,
               textAlign: TextAlign.end,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black, fontSize: 16.sp),
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18.sp),
             ),
           ),
+          SizedBox(width: 5.w),
           Expanded(
             child: Text(
               text2,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black, fontSize: 16.sp),
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
             ),
           ),
         ],

@@ -1,110 +1,115 @@
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
-class ListviewTopText extends StatefulWidget {
+class ListviewTopText<T> extends StatefulWidget {
   final List<Map<String, String>> names;
   final bool hideLastColumn;
-  final List<dynamic> listToSort;
+  final List<T> listToSort;
+  final void Function(List<T> newList) setSortedList;
+  final dynamic Function(T item, String sortKey) getSortValue;
 
   const ListviewTopText({
     super.key,
     required this.names,
     required this.listToSort,
+    required this.setSortedList,
+    required this.getSortValue,
     this.hideLastColumn = false,
   });
 
   @override
-  State<ListviewTopText> createState() => _ListviewTopTextState();
+  State<ListviewTopText> createState() => _ListviewTopTextState<T>();
 }
 
-class _ListviewTopTextState extends State<ListviewTopText> {
+class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
   late List<bool> sortStates;
-  late List<dynamic> currentList;
+  int? _currentSortIndex;
 
   @override
   void initState() {
     super.initState();
     sortStates = List.filled(widget.names.length, false);
-    currentList = [...widget.listToSort];
   }
 
-  void sortList(int index, String sortKey, bool isDouble) {
-    final bool ascending = !sortStates[index];
-    widget.listToSort.forEach((element) {
-      print(element['address']);
+  void _handleSortTap(int index, String sortKey) {
+    bool ascending = true;
+
+    if (_currentSortIndex == index) {
+      ascending = !sortStates[index];
+    } else {
+      if (_currentSortIndex != null) sortStates[_currentSortIndex!] = false;
+    }
+
+    setState(() {
+      sortStates[index] = ascending;
+      _currentSortIndex = index;
     });
-    print(sortKey);
-    currentList.sort((a, b) {
-      final aVal = a[sortKey];
-      final bVal = b[sortKey];
-      if (isDouble) {
-        final double aNum = double.tryParse((aVal ?? '0').toString().replaceAll(',', '.')) ?? 0.0;
-        final double bNum = double.tryParse((bVal ?? '0').toString().replaceAll(',', '.')) ?? 0.0;
+
+    List<T> sortedList = List<T>.from(widget.listToSort);
+    sortedList.sort((a, b) {
+      var aVal = widget.getSortValue(a, sortKey);
+      var bVal = widget.getSortValue(b, sortKey);
+
+      if (aVal is num && bVal is num) {
+        return ascending ? aVal.compareTo(bVal) : bVal.compareTo(aVal);
+      } else if (_isNumericString(aVal) && _isNumericString(bVal)) {
+        final aNum = double.tryParse(aVal.toString().replaceAll(',', '.')) ?? 0;
+        final bNum = double.tryParse(bVal.toString().replaceAll(',', '.')) ?? 0;
         return ascending ? aNum.compareTo(bNum) : bNum.compareTo(aNum);
       } else {
-        return ascending ? aVal.compareTo(bVal) : bVal.compareTo(aVal);
+        return ascending ? aVal.toString().compareTo(bVal.toString()) : bVal.toString().compareTo(aVal.toString());
       }
     });
 
-    setState(() {
-      sortStates[index] = !sortStates[index];
-    });
-    print(currentList);
+    widget.setSortedList(sortedList);
   }
 
-  Widget buildSortButton({
-    required int index,
-    required String text,
-    required String sortKey,
-    required bool isDouble,
-    required int flex,
-    required bool textAlign,
-  }) {
-    return Expanded(
-      flex: flex,
-      child: GestureDetector(
-        onTap: () => sortList(index, sortKey, isDouble),
-        child: Text(
-          text,
-          textAlign: TextAlign.start,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
+  bool _isNumericString(dynamic value) {
+    return double.tryParse(value.toString().replaceAll(',', '.')) != null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final names = widget.names;
-
     return Container(
-      padding: context.padding.normal.copyWith(left: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.black,
-            width: 2.0, // Kalınlık
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1.5)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          for (int i = 0; i < names.length; i++)
-            if (!(widget.hideLastColumn && i == names.length - 1))
-              buildSortButton(index: i, text: names[i]['name']!, sortKey: names[i]['sortName']!, isDouble: _isDoubleField(names[i]['sortName']!), flex: CustomWidgets().getFlexForSize(names[i]['size']!), textAlign: names[i]['size'] == ColumnSize.medium.toString() ? true : false),
+          for (int i = 0; i < widget.names.length; i++)
+            if (!(widget.hideLastColumn && i == widget.names.length - 1))
+              Expanded(
+                flex: CustomWidgets().getFlexForSize(widget.names[i]['size'] ?? ColumnSize.medium.toString()),
+                child: GestureDetector(
+                  onTap: () => _handleSortTap(i, widget.names[i]['sortName']!),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          widget.names[i]['name']!,
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: Colors.black),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_currentSortIndex == i)
+                        Padding(
+                          padding: EdgeInsets.only(left: 4.w),
+                          child: Icon(
+                            sortStates[i] ? Icons.arrow_upward : Icons.arrow_downward,
+                            size: 16.sp,
+                            color: Colors.black54,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
         ],
       ),
     );
-  }
-
-  bool _isDoubleField(String field) {
-    return ["price", "cost", "sum", "product_count"].contains(field);
   }
 }

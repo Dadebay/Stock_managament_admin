@@ -122,9 +122,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                     final ProductModel product = salesController.selectedProductsToOrder[index]['product'];
                     return ProductCard(
                       product: product,
-                      addCounterWidget: true,
                       disableOnTap: false,
-                      purchaseView: false,
                     );
                   },
                 ),

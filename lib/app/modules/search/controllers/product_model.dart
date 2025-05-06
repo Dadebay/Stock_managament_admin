@@ -1,0 +1,156 @@
+class ProductModel {
+  final int id;
+  final String name;
+  final String price;
+  final String gramm;
+  final int count;
+
+  final String description;
+  final String gaplama;
+  final String createdAT;
+  final String? img;
+  final String cost;
+  final CategoryModel? category;
+  final BrendModel? brend;
+  final LocationModel? location;
+  final MaterialModel? material;
+
+  ProductModel({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.gramm,
+    required this.count,
+    required this.description,
+    required this.gaplama,
+    required this.createdAT,
+    required this.img,
+    required this.cost,
+    required this.category,
+    required this.brend,
+    required this.location,
+    required this.material,
+  });
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      price: json['price'] ?? '',
+      gramm: json['gram'] ?? '',
+      count: json['count'] ?? 0,
+      description: json['description'] ?? '',
+      gaplama: json['gaplama'] ?? '',
+      createdAT: json['created_at'] ?? '',
+      img: json['img'] ?? '',
+      cost: json['cost'] ?? '',
+      category: json['category'] != null ? CategoryModel.fromJson(json['category']) : null,
+      brend: json['brends'] != null ? BrendModel.fromJson(json['brends']) : null,
+      material: json['materials'] != null ? MaterialModel.fromJson(json['materials']) : null,
+      location: json['location'] != null ? LocationModel.fromJson(json['location']) : null,
+    );
+  }
+
+  // Nesneyi JSON'a çevirme
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'gram': gramm,
+      'count': count,
+      'description': description,
+      'gaplama': gaplama,
+      'created_at': createdAT,
+      'img': img,
+      'cost': cost,
+      'category': category,
+      'brends': brend,
+      'location': location,
+      'materials': material,
+    };
+  }
+}
+
+class CategoryModel {
+  final int id;
+  final String name;
+  final String? notes;
+
+  CategoryModel({
+    required this.id,
+    required this.name,
+    this.notes,
+  });
+
+  factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    return CategoryModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      notes: json['notes'],
+    );
+  }
+}
+
+class BrendModel {
+  final int id;
+  final String name;
+  final String? notes;
+
+  BrendModel({
+    required this.id,
+    required this.name,
+    this.notes,
+  });
+
+  factory BrendModel.fromJson(Map<String, dynamic> json) {
+    return BrendModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      notes: json['notes'],
+    );
+  }
+}
+
+class MaterialModel {
+  final int id;
+  final String name;
+  final String? notes;
+
+  MaterialModel({
+    required this.id,
+    required this.name,
+    this.notes,
+  });
+
+  factory MaterialModel.fromJson(Map<String, dynamic> json) {
+    return MaterialModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      notes: json['notes'],
+    );
+  }
+}
+
+class LocationModel {
+  final int id;
+  final String name;
+  final String? notes;
+  final String? address;
+
+  LocationModel({
+    required this.id,
+    required this.name,
+    this.notes,
+    this.address,
+  });
+
+  factory LocationModel.fromJson(Map<String, dynamic> json) {
+    return LocationModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      notes: json['notes'],
+      address: json['address'],
+    );
+  }
+}

@@ -52,7 +52,31 @@ class ExpencesView extends StatelessWidget {
                       expencesController.searchResult.clear();
                     },
                   ),
-                  ListviewTopText(names: StringConstants.expencesNames, listToSort: expencesController.expencesList),
+                  ListviewTopText<ExpencesModel>(
+                    names: StringConstants.expencesNames,
+                    listToSort: displayList,
+                    setSortedList: (newList) {
+                      if (isSearching) {
+                        expencesController.searchResult.assignAll(newList);
+                      } else {
+                        expencesController.expencesList.assignAll(newList);
+                      }
+                    },
+                    getSortValue: (item, key) {
+                      switch (key) {
+                        case 'name':
+                          return item.name;
+                        case 'date':
+                          return item.date;
+                        case 'cost':
+                          return item.cost;
+                        case 'notes':
+                          return item.note;
+                        default:
+                          return '';
+                      }
+                    },
+                  ),
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && expencesController.searchResult.isEmpty)
                         ? CustomWidgets.emptyData()

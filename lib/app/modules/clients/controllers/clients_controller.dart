@@ -16,8 +16,6 @@ class ClientsController extends GetxController {
     searchResult.value = clients.where((client) {
       final name = client.name.toLowerCase();
       final phone = client.phone.toLowerCase();
-      print(name);
-      print(phone);
       return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()));
     }).toList();
   }
@@ -30,5 +28,21 @@ class ClientsController extends GetxController {
       sheet.appendRow([client.name.toString(), client.phone.toString(), client.address.toString(), client.orderCount.toString(), client.sumPrice.toString()]);
     }
     excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");
+  }
+
+  void addClient(ClientModel model) {
+    clients.insert(0, model);
+    update();
+  }
+
+  void deleteClient(int id) {
+    clients.removeWhere((item) => item.id == id);
+    update();
+  }
+
+  void editClient(ClientModel model) {
+    final index = clients.indexWhere((item) => item.id == model.id);
+    clients[index] = model;
+    clients.refresh();
   }
 }

@@ -1,14 +1,21 @@
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_model.dart';
+import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_service.dart';
+import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_add.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class FourInOneCard extends StatelessWidget {
+  final int count;
+  final String dataKey;
+  final String url;
+  final FourInOneModel fourInOneModel;
+
   FourInOneCard({
+    required this.count,
+    required this.dataKey,
     required this.fourInOneModel,
     super.key,
-    required this.count,
+    required this.url,
   });
-  final int count;
-  final FourInOneModel fourInOneModel;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +61,7 @@ class FourInOneCard extends StatelessWidget {
                     style: fadedTextStyle,
                   ),
                 ),
-                _buildDeleteButton(context),
+                _buildActionButtons(context),
               ],
             ),
           ),
@@ -63,34 +70,29 @@ class FourInOneCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: IconButton(
-            onPressed: () async {
-              // await ExpencesService().deleteExpence(model: fourInOneModel);
-              // CustomWidgets.showSnackBar("deleted", "${fourInOneModel.name} " + "Expence deleted".tr, ColorConstants.redColor);
-            },
-            icon: const Icon(
-              IconlyLight.delete,
-              color: Colors.red,
-            ),
-          ),
+        IconButton(
+          icon: const Icon(IconlyLight.delete, color: Colors.red),
+          onPressed: () async {
+            await FourInOnePageService().deleteFourInOne(model: fourInOneModel, url: url, key: dataKey);
+          },
         ),
         IconButton(
+          icon: const Icon(IconlyLight.edit, color: ColorConstants.blackColor),
           onPressed: () {
-            // showDialog(
-            //   context: context,
-            //   builder: (context) => EditAddExpencesDialog(model: fourInOneModel),
-            // );
+            showDialog(
+              context: context,
+              builder: (context) => AddEditFourInOneDialog(
+                model: fourInOneModel,
+                name: dataKey.contains('location') ? 'location' : '',
+                url: url,
+                editKey: dataKey,
+              ),
+            );
           },
-          icon: const Icon(
-            IconlyLight.edit,
-            color: ColorConstants.blackColor,
-          ),
         ),
       ],
     );

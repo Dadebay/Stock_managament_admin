@@ -18,9 +18,17 @@ class SearchWidget extends StatelessWidget {
             IconlyLight.search,
             color: Colors.black,
           ),
-          title: TextField(controller: controller, decoration: InputDecoration(hintText: 'search'.tr, border: InputBorder.none), onChanged: onChanged),
+          title: TextField(controller: controller, style: TextStyle(color: ColorConstants.blackColor, fontSize: 14.sp), decoration: InputDecoration(hintText: 'search'.tr, hintStyle: TextStyle(color: ColorConstants.greyColor, fontSize: 14.sp), border: InputBorder.none), onChanged: onChanged),
           contentPadding: EdgeInsets.only(left: 15.w),
-          trailing: IconButton(icon: const Icon(CupertinoIcons.xmark_circle), onPressed: onClear),
+          trailing: Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: IconButton(
+                icon: Icon(
+                  CupertinoIcons.xmark_circle,
+                  color: ColorConstants.greyColor,
+                ),
+                onPressed: onClear),
+          ),
         ),
       ),
     );

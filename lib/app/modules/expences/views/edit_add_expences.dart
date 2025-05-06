@@ -54,9 +54,8 @@ class _EditAddExpencesDialogState extends State<EditAddExpencesDialog> {
       name: nameController.text,
       cost: costController.text,
       note: noteController.text,
-      date: selectedDateTime?.toIso8601String(),
+      date: selectedDateTime.toString().substring(0, 10),
     );
-
     if (isEditing) {
       await ExpencesService().editExpence(model: model, context: context);
     } else {

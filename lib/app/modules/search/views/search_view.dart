@@ -1,15 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:scroll_to_hide/scroll_to_hide.dart';
-import 'package:stock_managament_admin/app/data/models/product_model.dart';
-import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
-import 'package:stock_managament_admin/app/product/cards/product_card.dart';
-import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
+import 'package:stock_managament_admin/app/modules/search/components/bottom_price_sheet.dart';
+import 'package:stock_managament_admin/app/modules/search/components/right_side_buttons.dart';
+import 'package:stock_managament_admin/app/modules/search/controllers/product_service.dart';
+import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
+import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
+import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
+
+import '../../../product/init/packages.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
@@ -19,312 +16,144 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
-  TextEditingController controller = TextEditingController();
   final SeacrhViewController searchViewController = Get.put(SeacrhViewController());
-  List filters = [
-    {'name': 'Brands', 'searchName': 'brand'},
-    {'name': 'Categories', 'searchName': 'category'},
-    {'name': 'Locations', 'searchName': 'location'},
-    {'name': 'Materials', 'searchName': 'material'}
-  ];
-  List topPartNames = [
-    {'name': 'Product Name', 'sortName': "quantity"},
-    {'name': '   Cost', 'sortName': "cost"},
-    {'name': 'Sell Price', 'sortName': "sell_price"},
-    {'name': 'Brand', 'sortName': "brand"},
-    {'name': 'Category', 'sortName': "category"},
-  ];
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    searchViewController.getClientStream();
-  }
-
-  Future<dynamic> filter() {
-    return Get.defaultDialog(
-        title: 'Filter',
-        content: Container(
-          width: Get.size.width / 3,
-          height: Get.size.height / 2,
-          padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
-          child: ListView.builder(
-            itemCount: filters.length,
-            shrinkWrap: true,
-            physics: const BouncingScrollPhysics(),
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                onTap: () {
-                  Get.defaultDialog(
-                      title: filters[index]['name'],
-                      content: Container(
-                        width: Get.size.width / 3,
-                        height: Get.size.height / 2,
-                        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
-                        child: StreamBuilder(
-                            stream: FirebaseFirestore.instance.collection(filters[index]['name'].toLowerCase()).snapshots(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return ListView.builder(
-                                  itemCount: snapshot.data!.docs.length,
-                                  shrinkWrap: true,
-                                  physics: const BouncingScrollPhysics(),
-                                  itemBuilder: (BuildContext context, int indexx) {
-                                    return ListTile(
-                                      onTap: () {
-                                        searchViewController.filterProductsMine(filters[index]['searchName'], snapshot.data!.docs[indexx]['name']);
-                                      },
-                                      title: Text(snapshot.data!.docs[indexx]['name']),
-                                    );
-                                  },
-                                );
-                              }
-                              return CustomWidgets.spinKit();
-                            }),
-                      ));
-                },
-                title: Text(filters[index]['name'].toString()),
-                trailing: const Icon(IconlyLight.arrowRightCircle),
-              );
-            },
-          ),
-        ));
-  }
-
-  final ScrollController _scrollController = ScrollController();
+  final TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        bottomNavigationBar: ScrollToHide(
-            scrollController: _scrollController,
-            height: 60, // Initial height of the bottom navigation bar.
-            hideDirection: Axis.vertical,
-            child: Column(
-              children: [
-                const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                ),
-                Obx(() {
-                  return Row(
-                    children: [
-                      CustomWidgets.textWidgetPrice('Products :   ', searchViewController.sumCount.value.toString()),
-                      CustomWidgets.textWidgetPrice('In Stock :   ', searchViewController.sumQuantity.value.toString()),
-                      CustomWidgets.textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value.toStringAsFixed(0)} \$'),
-                      CustomWidgets.textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value.toStringAsFixed(0)} \$'),
-                    ],
-                  );
-                })
-              ],
-            )),
-        floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton(
-              heroTag: "add_product",
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                  return const WebAddProductPage();
-                }));
-              },
-              child: const Icon(IconlyLight.plus),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.w),
-              child: FloatingActionButton(
-                heroTag: "filter",
-                onPressed: () {
-                  filter();
-                },
-                child: const Icon(IconlyLight.filter2),
-              ),
-            ),
-            FloatingActionButton(
-              heroTag: "viewChange",
-              backgroundColor: Colors.black,
-              onPressed: () {
-                searchViewController.showInGrid.value = !searchViewController.showInGrid.value;
-              },
-              child: Obx(() {
-                return Icon(
-                  searchViewController.showInGrid.value ? IconlyLight.paper : IconlyLight.category,
-                  color: Colors.amber,
-                );
-              }),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            searchWidget(),
-            Obx(() {
-              return Center(
-                  // child: searchViewController.showInGrid.value ? const SizedBox.shrink() : CustomWidgets().topWidgetTextPart(addMorePadding: true, names: topPartNames, ordersView: false, clientView: false, purchasesView: false),
-                  );
-            }),
-            MainBody()
-          ],
-        ));
-  }
+      backgroundColor: Colors.white,
+      body: FutureBuilder<List<ProductModel>>(
+        future: ProductsService().getProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CustomWidgets.spinKit();
+          } else if (snapshot.hasError) {
+            print(snapshot.error);
 
-  // ignore: non_constant_identifier_names
-  Expanded MainBody() {
-    return Expanded(
-      child: Obx(() {
-        return searchViewController.loadingData.value == true
-            ? CustomWidgets.spinKit()
-            : searchViewController.searchResult.isEmpty && controller.text.isNotEmpty
-                ? CustomWidgets.emptyData()
-                : searchViewController.productsList.isEmpty
-                    ? CustomWidgets.emptyData()
-                    : searchViewController.showInGrid.value
-                        ? gridViewStyle()
-                        : listViewStyle();
-      }),
+            return CustomWidgets.errorData();
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return CustomWidgets.emptyData();
+          }
+
+          print(snapshot.data!);
+          if (searchViewController.productsList.isEmpty && snapshot.hasData) {
+            searchViewController.productsList.assignAll(snapshot.data!);
+          }
+
+          return Obx(() {
+            final isSearching = searchController.text.isNotEmpty;
+            final hasResult = searchViewController.searchResult.isNotEmpty;
+
+            final displayList = (isSearching) ? (hasResult ? searchViewController.searchResult.toList() : <ProductModel>[]) : searchViewController.productsList.toList();
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    SearchWidget(
+                      controller: searchController,
+                      onChanged: (value) {
+                        searchViewController.onSearchTextChanged(value);
+                      },
+                      onClear: () {
+                        searchController.clear();
+                        searchViewController.searchResult.clear();
+                      },
+                    ),
+                    ListviewTopText<ProductModel>(
+                      names: StringConstants.searchViewtopPartNames,
+                      listToSort: displayList,
+                      setSortedList: (newList) {
+                        if (searchController.text.isNotEmpty && searchViewController.searchResult.isNotEmpty) {
+                          searchViewController.searchResult.assignAll(newList);
+                        } else {
+                          searchViewController.productsList.assignAll(newList);
+                        }
+                      },
+                      getSortValue: (model, key) {
+                        switch (key) {
+                          case 'name':
+                            return model.name;
+                          case 'price':
+                            return model.price;
+                          case 'cost':
+                            return model.cost;
+                          case 'count':
+                            return model.count;
+                          case 'brend':
+                            return model.brend;
+                          case 'category':
+                            return model.category;
+                          case 'gramm':
+                            return model.gramm;
+                          default:
+                            return '';
+                        }
+                      },
+                    ),
+                    Expanded(
+                        child: displayList.isEmpty && isSearching
+                            ? Center(child: Text("No results found for '${searchController.text}'"))
+                            : displayList.isEmpty
+                                ? CustomWidgets.emptyData()
+                                : (searchViewController.showInGrid.value ? gridViewStyle(displayList) : listViewStyle(displayList)))
+                  ],
+                ),
+                Positioned(
+                  bottom: 70.0,
+                  right: 20.0,
+                  child: RightSideButtons(),
+                ),
+                Positioned(
+                  bottom: 15.0,
+                  left: 0.0,
+                  right: 0.0,
+                  child: BottomPriceSheet(),
+                )
+              ],
+            );
+          });
+        },
+      ),
     );
   }
 
-  GridView gridViewStyle() {
+  GridView gridViewStyle(List<ProductModel> list) {
     return GridView.builder(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: Get.size.width > 1000 ? 6 : 4, mainAxisSpacing: 20),
-        itemCount: controller.text.isNotEmpty ? searchViewController.searchResult.length : searchViewController.productsList.length,
-        // itemCount: 10,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: Get.size.width > 1000 ? 6 : 4, mainAxisSpacing: 20, childAspectRatio: 0.8),
+        itemCount: list.length,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
-          final product = controller.text.isEmpty
-              ? ProductModel(
-                  name: searchViewController.productsList[index]['name'],
-                  brandName: searchViewController.productsList[index]['brand'].toString(),
-                  category: searchViewController.productsList[index]['category'].toString(),
-                  cost: searchViewController.productsList[index]['cost'].toString(),
-                  gramm: searchViewController.productsList[index]['gramm'].toString(),
-                  image: searchViewController.productsList[index]['image'].toString(),
-                  location: searchViewController.productsList[index]['location'].toString(),
-                  material: searchViewController.productsList[index]['material'].toString(),
-                  quantity: int.parse(searchViewController.productsList[index]['quantity'].toString()),
-                  sellPrice: searchViewController.productsList[index]['sell_price'].toString(),
-                  note: searchViewController.productsList[index]['note'].toString(),
-                  package: searchViewController.productsList[index]['package'].toString(),
-                  date: searchViewController.productsList[index]['date'].toString(),
-                  documentID: searchViewController.productsList[index].id,
-                )
-              : ProductModel(
-                  name: searchViewController.searchResult[index]['name'].toString(),
-                  brandName: searchViewController.searchResult[index]['brand'].toString(),
-                  category: searchViewController.searchResult[index]['category'].toString(),
-                  cost: searchViewController.searchResult[index]['cost'].toString(),
-                  gramm: searchViewController.searchResult[index]['gramm'].toString(),
-                  image: searchViewController.searchResult[index]['image'].toString(),
-                  location: searchViewController.searchResult[index]['location'].toString(),
-                  material: searchViewController.searchResult[index]['material'].toString(),
-                  quantity: int.parse(searchViewController.searchResult[index]['quantity'].toString()),
-                  sellPrice: searchViewController.searchResult[index]['sell_price'].toString(),
-                  note: searchViewController.searchResult[index]['note'].toString(),
-                  package: searchViewController.searchResult[index]['package'].toString(),
-                  documentID: searchViewController.searchResult[index].id,
-                );
-          return SecondProductCard(
-            product: product,
-          );
+          return Card(child: Center(child: Text(list[index].name)));
         });
   }
 
-  ListView listViewStyle() {
+  ListView listViewStyle(List<ProductModel> list) {
     return ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 5.w),
-        itemCount: controller.text.isNotEmpty ? searchViewController.searchResult.length : searchViewController.productsList.length,
+        itemCount: list.length,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
-          final product = controller.text.isEmpty
-              ? ProductModel(
-                  name: searchViewController.productsList[index]['name'],
-                  brandName: searchViewController.productsList[index]['brand'].toString(),
-                  category: searchViewController.productsList[index]['category'].toString(),
-                  cost: searchViewController.productsList[index]['cost'].toString(),
-                  gramm: searchViewController.productsList[index]['gramm'].toString(),
-                  image: searchViewController.productsList[index]['image'].toString(),
-                  location: searchViewController.productsList[index]['location'].toString(),
-                  material: searchViewController.productsList[index]['material'].toString(),
-                  quantity: int.parse(searchViewController.productsList[index]['quantity'].toString()),
-                  sellPrice: searchViewController.productsList[index]['sell_price'].toString(),
-                  note: searchViewController.productsList[index]['note'].toString(),
-                  package: searchViewController.productsList[index]['package'].toString(),
-                  date: searchViewController.productsList[index]['date'].toString(),
-                  documentID: searchViewController.productsList[index].id,
-                )
-              : ProductModel(
-                  name: searchViewController.searchResult[index]['name'].toString(),
-                  brandName: searchViewController.searchResult[index]['brand'].toString(),
-                  category: searchViewController.searchResult[index]['category'].toString(),
-                  cost: searchViewController.searchResult[index]['cost'].toString(),
-                  gramm: searchViewController.searchResult[index]['gramm'].toString(),
-                  image: searchViewController.searchResult[index]['image'].toString(),
-                  location: searchViewController.searchResult[index]['location'].toString(),
-                  material: searchViewController.searchResult[index]['material'].toString(),
-                  quantity: int.parse(searchViewController.searchResult[index]['quantity'].toString()),
-                  sellPrice: searchViewController.searchResult[index]['sell_price'].toString(),
-                  note: searchViewController.searchResult[index]['note'].toString(),
-                  package: searchViewController.searchResult[index]['package'].toString(),
-                  documentID: searchViewController.searchResult[index].id,
-                );
           return Row(
             children: [
-              SizedBox(
+              Container(
                 width: 40.w,
+                padding: EdgeInsets.only(right: 10.w),
+                alignment: Alignment.centerRight,
                 child: Text(
                   "${index + 1}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black, fontSize: 20.sp),
+                  style: TextStyle(color: Colors.black54, fontSize: 16.sp),
                 ),
               ),
               Expanded(
                 child: ProductCard(
-                  purchaseView: false,
-                  addCounterWidget: false,
                   disableOnTap: false,
-                  product: product,
+                  product: list[index],
                 ),
               )
             ],
           );
         });
-  }
-
-  Padding searchWidget() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        child: ListTile(
-          leading: const Icon(
-            IconlyLight.search,
-            color: Colors.black,
-          ),
-          title: TextField(
-            controller: controller,
-            decoration: InputDecoration(hintText: 'search'.tr, border: InputBorder.none),
-            onChanged: (String value) {
-              searchViewController.onSearchTextChanged(value);
-            },
-          ),
-          contentPadding: EdgeInsets.only(left: 15.w),
-          trailing: IconButton(
-            icon: const Icon(CupertinoIcons.xmark_circle),
-            onPressed: () {
-              controller.clear();
-              // searchViewController.onSearchTextChanged('');
-              searchViewController.clearFilter();
-            },
-          ),
-        ),
-      ),
-    );
   }
 }

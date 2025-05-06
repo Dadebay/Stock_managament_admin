@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart' as ex;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -59,8 +58,6 @@ class _HomeViewState extends State<HomeView> {
           }
         }
       });
-      print(oldExpences);
-      /////
       for (int i = 0; i < 12; i++) {
         ex.Sheet sheetObject = excel[months[i]];
 
@@ -181,7 +178,11 @@ class _HomeViewState extends State<HomeView> {
                       onPressed: () async {
                         exportToExcel(context, true);
                       },
-                      style: ElevatedButton.styleFrom(elevation: 0.0, backgroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: context.border.normalBorderRadius), padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16)),
+                      style: ElevatedButton.styleFrom(
+                          elevation: 0.0,
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: context.border.normalBorderRadius),
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16)),
                       child: const Text(
                         "Export Excel",
                         style: TextStyle(color: Colors.white, fontSize: 20),

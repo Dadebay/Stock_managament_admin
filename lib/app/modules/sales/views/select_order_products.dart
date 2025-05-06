@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
-import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 class SelectOrderProducts extends StatefulWidget {
   const SelectOrderProducts({required this.purchaseView});
@@ -20,7 +18,7 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
   void initState() {
     super.initState();
     if (seacrhViewController.productsList.isEmpty) {
-      seacrhViewController.getClientStream();
+      // seacrhViewController.getClientStream();
     }
   }
 
@@ -31,11 +29,11 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
     List<String> words = word.toLowerCase().trim().split(' ');
     fullData = seacrhViewController.productsList.where((p) {
       bool result = true;
-      for (final word in words) {
-        if (!p['name'].toLowerCase().contains(word)) {
-          result = false;
-        }
-      }
+      // for (final word in words) {
+      //   if (!p['name'].toLowerCase().contains(word)) {
+      //     result = false;
+      //   }
+      // }
       return result;
     }).toList();
     _searchResult = fullData.toSet().toList();
@@ -81,27 +79,29 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                         itemCount: _searchResult.length,
                         physics: const BouncingScrollPhysics(),
                         itemBuilder: (context, i) {
-                          final product = ProductModel(
-                            name: _searchResult[i]['name'],
-                            brandName: _searchResult[i]['brand'].toString(),
-                            category: _searchResult[i]['category'].toString(),
-                            cost: _searchResult[i]['cost'].toString(),
-                            gramm: _searchResult[i]['gramm'].toString(),
-                            image: _searchResult[i]['image'].toString(),
-                            location: _searchResult[i]['location'].toString(),
-                            material: _searchResult[i]['material'].toString(),
-                            quantity: int.parse(_searchResult[i]['quantity'].toString()),
-                            sellPrice: _searchResult[i]['sell_price'].toString(),
-                            note: _searchResult[i]['note'].toString(),
-                            package: _searchResult[i]['package'].toString(),
-                            documentID: _searchResult[i].id,
-                          );
-                          return ProductCard(
-                            addCounterWidget: true,
-                            disableOnTap: false,
-                            purchaseView: widget.purchaseView,
-                            product: product,
-                          );
+                          return null;
+
+                          // final product = ProductModel(
+                          //   name: _searchResult[i]['name'],
+                          //   brandName: _searchResult[i]['brand'].toString(),
+                          //   category: _searchResult[i]['category'].toString(),
+                          //   cost: _searchResult[i]['cost'].toString(),
+                          //   gramm: _searchResult[i]['gramm'].toString(),
+                          //   image: _searchResult[i]['image'].toString(),
+                          //   location: _searchResult[i]['location'].toString(),
+                          //   material: _searchResult[i]['material'].toString(),
+                          //   quantity: int.parse(_searchResult[i]['quantity'].toString()),
+                          //   sellPrice: _searchResult[i]['sell_price'].toString(),
+                          //   note: _searchResult[i]['note'].toString(),
+                          //   package: _searchResult[i]['package'].toString(),
+                          //   documentID: _searchResult[i].id,
+                          // );
+                          // return ProductCard(
+                          //   addCounterWidget: true,
+                          //   disableOnTap: false,
+                          //   purchaseView: widget.purchaseView,
+                          //   product: product,
+                          // );
                         },
                       )
                     : salesController.loadingDataOrders.value == true
@@ -111,27 +111,29 @@ class _SelectOrderProductsState extends State<SelectOrderProducts> {
                             itemCount: seacrhViewController.productsList.length,
                             physics: const BouncingScrollPhysics(),
                             itemBuilder: (BuildContext context, int index) {
-                              final product = ProductModel(
-                                name: seacrhViewController.productsList[index]['name'],
-                                brandName: seacrhViewController.productsList[index]['brand'].toString(),
-                                category: seacrhViewController.productsList[index]['category'].toString(),
-                                cost: seacrhViewController.productsList[index]['cost'].toString(),
-                                gramm: seacrhViewController.productsList[index]['gramm'].toString(),
-                                image: seacrhViewController.productsList[index]['image'].toString(),
-                                location: seacrhViewController.productsList[index]['location'].toString(),
-                                material: seacrhViewController.productsList[index]['material'].toString(),
-                                quantity: int.parse(seacrhViewController.productsList[index]['quantity'].toString()),
-                                sellPrice: seacrhViewController.productsList[index]['sell_price'].toString(),
-                                note: seacrhViewController.productsList[index]['note'].toString(),
-                                package: seacrhViewController.productsList[index]['package'].toString(),
-                                documentID: seacrhViewController.productsList[index].id,
-                              );
-                              return ProductCard(
-                                addCounterWidget: true,
-                                purchaseView: widget.purchaseView,
-                                disableOnTap: false,
-                                product: product,
-                              );
+                              return null;
+
+                              // final product = ProductModel(
+                              //   name: seacrhViewController.productsList[index]['name'],
+                              //   brandName: seacrhViewController.productsList[index]['brand'].toString(),
+                              //   category: seacrhViewController.productsList[index]['category'].toString(),
+                              //   cost: seacrhViewController.productsList[index]['cost'].toString(),
+                              //   gramm: seacrhViewController.productsList[index]['gramm'].toString(),
+                              //   image: seacrhViewController.productsList[index]['image'].toString(),
+                              //   location: seacrhViewController.productsList[index]['location'].toString(),
+                              //   material: seacrhViewController.productsList[index]['material'].toString(),
+                              //   quantity: int.parse(seacrhViewController.productsList[index]['quantity'].toString()),
+                              //   sellPrice: seacrhViewController.productsList[index]['sell_price'].toString(),
+                              //   note: seacrhViewController.productsList[index]['note'].toString(),
+                              //   package: seacrhViewController.productsList[index]['package'].toString(),
+                              //   documentID: seacrhViewController.productsList[index].id,
+                              // );
+                              // return ProductCard(
+                              //   addCounterWidget: true,
+                              //   purchaseView: widget.purchaseView,
+                              //   disableOnTap: false,
+                              //   product: product,
+                              // );
                             },
                           );
               }),

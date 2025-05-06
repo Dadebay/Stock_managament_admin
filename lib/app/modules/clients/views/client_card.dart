@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:stock_managament_admin/app/modules/clients/components/client_add_button.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/client_model.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_service.dart';
@@ -45,7 +46,7 @@ class ClientCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ..._buildDynamicTextWidgets(fadedTextStyle),
-                _buildDeleteButton(),
+                _buildActionButtons(),
               ],
             ),
           ),
@@ -63,7 +64,11 @@ class ClientCard extends StatelessWidget {
         child: Text(
           value ?? '',
           maxLines: 3,
-          textAlign: flex == 1 ? TextAlign.center : TextAlign.start,
+          textAlign: flex == 1
+              ? column['sortName'] == "name"
+                  ? TextAlign.start
+                  : TextAlign.center
+              : TextAlign.start,
           overflow: TextOverflow.ellipsis,
           style: faded,
         ),
@@ -88,18 +93,35 @@ class ClientCard extends StatelessWidget {
     }
   }
 
-  Widget _buildDeleteButton() {
+  Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: IconButton(
-        onPressed: () async {
-          await ClientsService().deleteClient(id: client.id);
-          CustomWidgets.showSnackBar("deleted", "${client.name} " + "clientDeleted".tr, ColorConstants.redColor);
-        },
-        icon: const Icon(
-          IconlyLight.delete,
-          color: Colors.red,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: () async {
+              await ClientsService().deleteClient(id: client.id!);
+              CustomWidgets.showSnackBar("deleted", "${client.name} " + "clientDeleted".tr, ColorConstants.redColor);
+            },
+            icon: const Icon(
+              IconlyLight.delete,
+              color: Colors.red,
+            ),
+          ),
+          IconButton(
+              icon: const Icon(IconlyLight.edit, color: ColorConstants.blackColor),
+              onPressed: () {
+                showDialog(
+                  context: Get.context!,
+                  builder: (context) {
+                    return ClientAddButton(
+                      model: client,
+                    );
+                  },
+                );
+              }),
+        ],
       ),
     );
   }

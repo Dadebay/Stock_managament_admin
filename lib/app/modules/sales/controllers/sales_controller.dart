@@ -76,9 +76,9 @@ class SalesController extends GetxController {
   upgradeCount(String id, int count) {
     for (var element in selectedProductsToOrder) {
       final ProductModel product = element['product'];
-      if (product.documentID.toString() == id.toString()) {
-        element['count'] = count.toString();
-      }
+      // if (product.documentID.toString() == id.toString()) {
+      //   element['count'] = count.toString();
+      // }
     }
 
     selectedProductsToOrder.refresh();
@@ -87,11 +87,11 @@ class SalesController extends GetxController {
   decreaseCount(String id, int count) {
     for (var element in selectedProductsToOrder) {
       final ProductModel product = element['product'];
-      if (product.documentID.toString() == id.toString()) {
-        element['count'] = count;
-        selectedProductsToOrder.removeWhere((element) => element['count'].toString() == '0');
-        selectedProductsToOrder.refresh();
-      }
+      // if (product.documentID.toString() == id.toString()) {
+      //   element['count'] = count;
+      //   selectedProductsToOrder.removeWhere((element) => element['count'].toString() == '0');
+      //   selectedProductsToOrder.refresh();
+      // }
     }
     selectedProductsToOrder.refresh();
   }
@@ -104,9 +104,9 @@ class SalesController extends GetxController {
     for (var element in selectedProductsToOrder) {
       final ProductModel product = element['product'];
       sumCost += double.parse(product.cost.toString()).toDouble() * int.parse(element['count'].toString());
-      sumPrice += double.parse(product.sellPrice.toString()).toDouble() * int.parse(element['count'].toString());
-      int.parse(product.quantity.toString()) - int.parse(element['count'].toString());
-      await FirebaseFirestore.instance.collection('products').doc(product.documentID).update({'quantity': int.parse(product.quantity.toString()) - int.parse(element['count'].toString())});
+      // sumPrice += double.parse(product.sellPrice.toString()).toDouble() * int.parse(element['count'].toString());
+      // int.parse(product.quantity.toString()) - int.parse(element['count'].toString());
+      // await FirebaseFirestore.instance.collection('products').doc(product.documentID).update({'quantity': int.parse(product.quantity.toString()) - int.parse(element['count'].toString())});
     }
     double discountPrice = textControllers[7].text == "" ? 0.0 : double.parse(textControllers[7].text.toString());
     if (discountPrice >= sumPrice) {
@@ -132,21 +132,21 @@ class SalesController extends GetxController {
         });
         for (var element in selectedProductsToOrder) {
           final ProductModel product = element['product'];
-          await FirebaseFirestore.instance.collection('sales').doc(value.id).collection('products').add({
-            'brand': product.brandName,
-            'category': product.category,
-            'cost': product.cost,
-            'gramm': product.gramm,
-            'image': product.image,
-            'location': product.location,
-            'date': product.date,
-            'material': product.material,
-            'name': product.name,
-            'note': product.note,
-            'package': product.package,
-            'quantity': element['count'],
-            'sell_price': product.sellPrice,
-          });
+          // await FirebaseFirestore.instance.collection('sales').doc(value.id).collection('products').add({
+          //   'brand': product.brandName,
+          //   'category': product.category,
+          //   'cost': product.cost,
+          //   'gramm': product.gramm,
+          //   'image': product.image,
+          //   'location': product.location,
+          //   'date': product.date,
+          //   'material': product.material,
+          //   'name': product.name,
+          //   'note': product.note,
+          //   'package': product.package,
+          //   'quantity': element['count'],
+          //   'sell_price': product.sellPrice,
+          // });
         }
       });
       homeController.agreeButton.value = !homeController.agreeButton.value;

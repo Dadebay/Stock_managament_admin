@@ -98,28 +98,30 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
               itemCount: snapshot.data!.docs.length,
               physics: const BouncingScrollPhysics(),
               itemBuilder: (BuildContext context, int index) {
-                final product = ProductModel(
-                  name: snapshot.data!.docs[index]['name'],
-                  brandName: snapshot.data!.docs[index]['brand'].toString(),
-                  category: snapshot.data!.docs[index]['category'].toString(),
-                  cost: snapshot.data!.docs[index]['cost'].toString(),
-                  gramm: snapshot.data!.docs[index]['gramm'].toString(),
-                  image: snapshot.data!.docs[index]['image'].toString(),
-                  location: snapshot.data!.docs[index]['location'].toString(),
-                  material: snapshot.data!.docs[index]['material'].toString(),
-                  quantity: int.parse(snapshot.data!.docs[index]['quantity'].toString()),
-                  sellPrice: snapshot.data!.docs[index]['sell_price'].toString(),
-                  note: snapshot.data!.docs[index]['note'].toString(),
-                  package: snapshot.data!.docs[index]['package'].toString(),
-                  documentID: snapshot.data!.docs[index].id,
-                );
+                return null;
 
-                return ProductCard(
-                  purchaseView: false,
-                  addCounterWidget: false,
-                  product: product,
-                  disableOnTap: true,
-                );
+                // final product = ProductModel(
+                //   name: snapshot.data!.docs[index]['name'],
+                //   brandName: snapshot.data!.docs[index]['brand'].toString(),
+                //   category: snapshot.data!.docs[index]['category'].toString(),
+                //   cost: snapshot.data!.docs[index]['cost'].toString(),
+                //   gramm: snapshot.data!.docs[index]['gramm'].toString(),
+                //   image: snapshot.data!.docs[index]['image'].toString(),
+                //   location: snapshot.data!.docs[index]['location'].toString(),
+                //   material: snapshot.data!.docs[index]['material'].toString(),
+                //   quantity: int.parse(snapshot.data!.docs[index]['quantity'].toString()),
+                //   sellPrice: snapshot.data!.docs[index]['sell_price'].toString(),
+                //   note: snapshot.data!.docs[index]['note'].toString(),
+                //   package: snapshot.data!.docs[index]['package'].toString(),
+                //   documentID: snapshot.data!.docs[index].id,
+                // );
+
+                // return ProductCard(
+                //   purchaseView: false,
+                //   addCounterWidget: false,
+                //   product: product,
+                //   disableOnTap: true,
+                // );
               },
             );
           }

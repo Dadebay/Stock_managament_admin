@@ -1,18 +1,18 @@
 class ClientModel {
-  final int id;
+  final int? id;
   final String name;
   final String address;
   final String phone;
-  final int orderCount;
-  final String sumPrice;
+  final int? orderCount;
+  final String? sumPrice;
 
   ClientModel({
-    required this.id,
+    this.id,
     required this.name,
     required this.address,
     required this.phone,
-    required this.orderCount,
-    required this.sumPrice,
+    this.orderCount,
+    this.sumPrice,
   });
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {

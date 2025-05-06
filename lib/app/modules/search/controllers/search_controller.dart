@@ -1,102 +1,54 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:image_picker_web/image_picker_web.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class SeacrhViewController extends GetxController {
-  RxList searchResult = [].obs;
-  RxList productsList = [].obs;
-  RxList collectAllProducts = [].obs;
-  RxList filteredProductsList = [].obs;
-  RxBool loadingData = false.obs;
+  RxList<ProductModel> searchResult = <ProductModel>[].obs;
+  RxList<ProductModel> productsList = <ProductModel>[].obs;
   RxBool showInGrid = false.obs;
+
   RxDouble sumSell = 0.0.obs;
   RxDouble sumCost = 0.0.obs;
   RxInt sumCount = 0.obs;
-  RxInt sumQuantity = 0.obs;
-  getClientStream() async {
-    loadingData.value = true;
-    sumCost.value = 0.0;
-    sumSell.value = 0.0;
-    sumQuantity.value = 0;
-    sumCount.value = 0;
-    productsList.clear();
-    await FirebaseFirestore.instance.collection('products').orderBy('date', descending: true).get().then((value) {
-      for (var element in value.docs) {
-        productsList.add(element);
-        collectAllProducts.add(element);
-        countAllPricesNSells(element);
-      }
-    });
-    sumCount.value = productsList.length;
 
-    loadingData.value = false;
+  Rx<Uint8List?> selectedImageBytes = Rx<Uint8List?>(null);
+
+  void onSearchTextChanged(String word) {
     searchResult.clear();
-  }
-
-  clearFilter() {
-    sumCost.value = 0.0;
-    sumSell.value = 0.0;
-    sumQuantity.value = 0;
-    sumCount.value = 0;
-    productsList.clear();
-
-    for (var element in collectAllProducts) {
-      countAllPricesNSells(element);
-      productsList.add(element);
+    if (word.isEmpty) {
+      searchResult.assignAll(productsList);
+      update();
+      return;
     }
-    sumCount.value = collectAllProducts.length;
-  }
+    List<String> words = word.trim().toLowerCase().split(' ');
+    searchResult.value = productsList.where((product) {
+      final name = product.name.toLowerCase() ?? '';
+      final price = product.price.toLowerCase() ?? '';
+      final category = product.category!.name.toLowerCase() ?? '';
+      final brand = product.brend!.name.toLowerCase() ?? '';
 
-  countAllPricesNSells(QueryDocumentSnapshot<Map<String, dynamic>> element) {
-    final String cost = element['cost'] ?? '0.0';
-    final String sell = element['sell_price'] ?? '0.0';
-    double a = double.tryParse(cost.replaceAll(',', '.')) ?? 0.0;
-    a *= int.parse(element['quantity'].toString());
-    sumCost.value += a;
-
-    double b = double.tryParse(sell.replaceAll(',', '.')) ?? 0.0;
-    b *= int.parse(element['quantity'].toString());
-    sumSell.value += b;
-    sumQuantity.value += int.parse(element['quantity'].toString());
-  }
-
-  onSearchTextChanged(String word) async {
-    loadingData.value = true;
-    searchResult.clear();
-    List fullData = [];
-    List<String> words = word.toLowerCase().trim().split(' ');
-    fullData = productsList.where((p) {
-      bool result = true;
-      for (final word in words) {
-        if (!p['name'].toLowerCase().contains(word)) {
-          result = false;
-        }
-      }
-      return result;
+      return words.every((w) => name.contains(w) || price.contains(w) || category.contains(w) || brand.contains(w));
     }).toList();
-    searchResult.value = fullData.toSet().toList();
-    loadingData.value = false;
+    update();
   }
 
-  filterProductsMine(String filterName, String filterSearchName) {
-    filteredProductsList.clear();
-    sumCost.value = 0.0;
-    sumSell.value = 0.0;
-    sumQuantity.value = 0;
-    sumCount.value = 0;
-    productsList = collectAllProducts;
-    loadingData.value = true;
+  Future<void> pickImage() async {
+    try {
+      var fileInfo = await ImagePickerWeb.getImageInfo;
+      if (fileInfo != null && fileInfo.data != null && fileInfo.fileName != null) {
+        selectedImageBytes.value = fileInfo.data;
 
-    for (var element in productsList) {
-      if (element[filterName].toString().toLowerCase() == filterSearchName.toLowerCase()) {
-        filteredProductsList.add(element);
-        countAllPricesNSells(element);
+        CustomWidgets.showSnackBar("Success", "Image selected: ", Colors.green);
       }
+    } catch (e) {
+      print("Error picking image: $e");
+      CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);
     }
+  }
 
-    productsList = filteredProductsList;
-    sumCount.value = productsList.length;
-    Get.back();
-    Get.back();
-    loadingData.value = false;
+  void deleteProduct(int id) {
+    productsList.removeWhere((product) => product.id == id);
+    searchResult.removeWhere((product) => product.id == id);
+    update();
   }
 }
