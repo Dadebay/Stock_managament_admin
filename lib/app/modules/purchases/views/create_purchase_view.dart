@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_model.dart';
+import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_service.dart';
+import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class CreatePurchasesView extends StatefulWidget {
@@ -10,15 +13,14 @@ class CreatePurchasesView extends StatefulWidget {
 }
 
 class _CreatePurchasesViewState extends State<CreatePurchasesView> {
-  List<FocusNode> focusNodes = List.generate(4, (_) => FocusNode());
-  final SalesController salesController = Get.put(SalesController());
-  List<TextEditingController> textControllers = List.generate(4, (_) => TextEditingController());
+  List<FocusNode> focusNodes = List.generate(5, (_) => FocusNode());
+  final SearchViewController _searchController = Get.find<SearchViewController>();
+  List<TextEditingController> textControllers = List.generate(5, (_) => TextEditingController());
   final PurchasesController purchasesController = Get.put(PurchasesController());
-  final HomeController homeController = Get.put(HomeController());
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
-    salesController.selectedProductsToOrder.clear();
+    print(_searchController.selectedProductsToOrder);
     super.initState();
   }
 
@@ -28,7 +30,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
       backgroundColor: Colors.white,
       appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: false, name: 'Create Purchase'.tr),
       body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
+        padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 4) : context.padding.horizontalMedium,
         shrinkWrap: true,
         children: [
           CustomTextField(
@@ -64,34 +66,34 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
             requestfocusNode: focusNodes[3],
           ),
           CustomTextField(
-            labelName: "Note",
+            labelName: "Cost",
+            maxLine: 1,
             controller: textControllers[3],
             focusNode: focusNodes[3],
+            requestfocusNode: focusNodes[4],
+          ),
+          CustomTextField(
+            labelName: "Description",
+            maxLine: 5,
+            controller: textControllers[4],
+            focusNode: focusNodes[4],
             requestfocusNode: focusNodes[0],
           ),
           selectedProductsView(),
-          SizedBox(
-            height: 20.h,
-          ),
+          AgreeButton(onTap: () => Get.to(() => SearchView(selectableProducts: true)), text: 'selectProducts'),
           AgreeButton(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                  return const SelectOrderProducts(purchaseView: true);
-                }));
-              },
-              text: 'selectProducts'),
-          AgreeButton(
-              onTap: () {
-                if (homeController.agreeButton.value == false) {
-                  homeController.agreeButton.value = !homeController.agreeButton.value;
-                  if (salesController.selectedProductsToOrder.isEmpty) {
-                    CustomWidgets.showSnackBar('errorTitle', 'selectMoreProducts', Colors.red);
-                  } else {
-                    purchasesController.sumbitSale(textControllers: textControllers);
-                  }
-                } else {
-                  CustomWidgets.showSnackBar("Please wait", "Please wait while we create purchase data in our server", Colors.purple);
-                }
+              onTap: () async {
+                final PurchasesModel model = PurchasesModel(
+                  title: textControllers[1].text,
+                  date: textControllers[0].text.substring(0, 10),
+                  source: textControllers[2].text,
+                  description: textControllers[4].text,
+                  id: 0,
+                  cost: textControllers[3].text,
+                  productCount: 0,
+                  products: [],
+                );
+                await PurchasesService().addPurchase(model: model, products: _searchController.selectedProductsToOrder);
               },
               text: 'agree'),
           SizedBox(
@@ -104,30 +106,41 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
 
   Obx selectedProductsView() {
     return Obx(() {
-      return salesController.selectedProductsToOrder.isEmpty
-          ? const SizedBox.shrink()
-          : Wrap(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 10.h, left: 10.w, bottom: 10.h),
-                  child: Text(
+      if (_searchController.selectedProductsToOrder.isEmpty) {
+        return const SizedBox.shrink();
+      } else {
+        return Wrap(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
                     "selectedProducts".tr,
-                    style: TextStyle(color: Colors.black, fontSize: 22.sp),
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22.sp),
                   ),
-                ),
-                ListView.builder(
-                  itemCount: salesController.selectedProductsToOrder.length,
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    final ProductModel product = salesController.selectedProductsToOrder[index]['product'];
-                    return ProductCard(
-                      product: product,
-                      disableOnTap: false,
-                    );
-                  },
-                ),
-              ],
-            );
+                  Text(
+                    _searchController.selectedProductsToOrder.length.toString(),
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22.sp),
+                  ),
+                ],
+              ),
+            ),
+            ListView.builder(
+              itemCount: _searchController.selectedProductsToOrder.length,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) {
+                return SearchCard(
+                  product: _searchController.selectedProductsToOrder[index]['product'],
+                  disableOnTap: false,
+                  addCounterWidget: true,
+                );
+              },
+            ),
+          ],
+        );
+      }
     });
   }
 }

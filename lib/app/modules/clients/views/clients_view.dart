@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/components/client_add_button.dart';

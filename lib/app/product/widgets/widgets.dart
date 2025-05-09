@@ -169,11 +169,11 @@ class CustomWidgets {
   }
 
   static Widget imageWidget(String? url, bool fit) {
-    final imageUrl = ApiConstants.imageURL + url!;
     return CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: url!,
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
           image: DecorationImage(
             image: imageProvider,
             fit: fit ? null : BoxFit.cover,
@@ -182,7 +182,7 @@ class CustomWidgets {
       ),
       placeholder: (context, url) => spinKit(),
       errorWidget: (context, url, error) {
-        return ClipRRect(borderRadius: BorderRadius.circular(10), child: Icon(IconlyLight.infoSquare));
+        return ClipRRect(borderRadius: BorderRadius.circular(20), child: Icon(IconlyLight.infoSquare));
       },
     );
   }

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
-import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
+import 'package:stock_managament_admin/app/modules/purchases/views/purchases_view.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/drawer_button.dart';
@@ -15,7 +15,7 @@ class NavBarPageView extends StatefulWidget {
 
 class _NavBarPageViewState extends State<NavBarPageView> {
   int selecedIndex = 0;
-  final SeacrhViewController seacrhViewController = Get.put(SeacrhViewController());
+  final SearchViewController seacrhViewController = Get.put(SearchViewController());
   final ClientsController clientsController = Get.put(ClientsController());
   final FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
   final SalesController salesController = Get.put(SalesController());
@@ -29,7 +29,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
           drawer(width),
           Expanded(
             flex: 6,
-            child: Container(color: Colors.white, child: SearchView()),
+            child: Container(color: Colors.white, child: PurchasesView()),
             // child: Container(
             //   color: Colors.white,
             //   child: StringConstants.pages[selecedIndex],

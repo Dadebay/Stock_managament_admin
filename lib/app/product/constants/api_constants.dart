@@ -9,4 +9,5 @@ class ApiConstants {
   static const String locations = '${baseUrl}location/';
   static const String categories = '${baseUrl}category/';
   static const String products = '${baseUrl}product/';
+  static const String purchases = '${baseUrl}purshaces/';
 }

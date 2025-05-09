@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/data/models/order_model.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -46,7 +48,7 @@ class _SalesProductsViewState extends State<SalesProductsView> {
     setState(() {});
   }
 
-  final SeacrhViewController seacrhViewController = Get.put(SeacrhViewController());
+  final SearchViewController seacrhViewController = Get.put(SearchViewController());
   Widget radioButton(SortOptions option, String text) {
     return RadioListTile(
       title: Text(text),
@@ -240,11 +242,11 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                           doc.reference.delete();
                         }
 
-                        await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).delete().then((value) async {
-                          salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
+                        // await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).delete().then((value) async {
+                        //   salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
 
-                          CustomWidgets.showSnackBar("Deleted", "Succesfully deleted your ORDER", Colors.green);
-                        });
+                        //   CustomWidgets.showSnackBar("Deleted", "Succesfully deleted your ORDER", Colors.green);
+                        // });
                       },
                       child: const Text('Delete'),
                     ),
@@ -410,11 +412,11 @@ class _SalesProductsViewState extends State<SalesProductsView> {
                     await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).update({firebaseName: textEditingController.text}).then((value) {
                       CustomWidgets.showSnackBar("copySucces", "changesUpdated", Colors.green);
                     });
-                    salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
+                    // salesController.orderCardList.removeWhere((element) => element.id == widget.order.orderID);
                     await FirebaseFirestore.instance.collection('sales').doc(widget.order.orderID).get().then((value) {
-                      salesController.orderCardList.add(value);
+                      // salesController.orderCardList.add(value);
                     });
-                    salesController.orderCardList.sort((a, b) => b['date'].compareTo(a['date']));
+                    // salesController.orderCardList.sort((a, b) => b['date'].compareTo(a['date']));
                   }
 
                   // ignore: use_build_context_synchronously

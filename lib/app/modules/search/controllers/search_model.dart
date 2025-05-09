@@ -1,4 +1,4 @@
-class ProductModel {
+class SearchModel {
   final int id;
   final String name;
   final String price;
@@ -15,7 +15,7 @@ class ProductModel {
   final LocationModel? location;
   final MaterialModel? material;
 
-  ProductModel({
+  SearchModel({
     required this.id,
     required this.name,
     required this.price,
@@ -32,8 +32,8 @@ class ProductModel {
     required this.material,
   });
 
-  factory ProductModel.fromJson(Map<String, dynamic> json) {
-    return ProductModel(
+  factory SearchModel.fromJson(Map<String, dynamic> json) {
+    return SearchModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       price: json['price'] ?? '',

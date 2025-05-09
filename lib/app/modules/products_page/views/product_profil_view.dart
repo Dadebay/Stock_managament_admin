@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/modules/search/controllers/product_service.dart';
+import 'package:stock_managament_admin/app/modules/search/controllers/search_service.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -9,24 +9,25 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 class ProductProfilView extends StatefulWidget {
   const ProductProfilView({super.key, required this.product});
 
-  final ProductModel product;
+  final SearchModel product;
 
   @override
   State<ProductProfilView> createState() => _ProductProfilViewState();
 }
 
 class _ProductProfilViewState extends State<ProductProfilView> {
-  final SeacrhViewController controller = Get.find<SeacrhViewController>();
+  final SearchViewController controller = Get.find<SearchViewController>();
 
   final int fieldCount = 11;
   late List<FocusNode> focusNodes;
   late List<TextEditingController> textControllers;
-
+  late List<String?> selectedIds;
   @override
   void initState() {
     super.initState();
     focusNodes = List.generate(fieldCount, (_) => FocusNode());
     textControllers = List.generate(fieldCount, (_) => TextEditingController());
+    selectedIds = List<String?>.filled(fieldCount, null);
     _populateTextFields();
   }
 
@@ -38,6 +39,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     for (var node in focusNodes) {
       node.dispose();
     }
+    controller.clearSelectedImage();
     super.dispose();
   }
 
@@ -53,15 +55,28 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     textControllers[8].text = widget.product.description;
     textControllers[9].text = widget.product.gaplama;
     textControllers[10].text = widget.product.cost;
+    selectedIds[2] = widget.product.category?.id.toString(); // category
+    selectedIds[3] = widget.product.brend?.id.toString(); // brend
+    selectedIds[4] = widget.product.location?.id.toString(); // location
+    selectedIds[5] = widget.product.material?.id.toString();
   }
 
-  void _handleUpdate() {
+  Future<void> _handleUpdate() async {
     Map<String, String> productData = {};
     for (int i = 0; i < fieldCount; i++) {
-      productData[StringConstants.apiFieldNames[i]] = textControllers[i].text;
+      final key = StringConstants.apiFieldNames[i];
+      if ([2, 3, 4, 5].contains(i)) {
+        productData[key] = selectedIds[i] ?? '';
+      } else {
+        productData[key] = textControllers[i].text;
+      }
     }
-    print(productData);
-    // controller.updateProduct(productData);
+    await SearchService().updateProductWithImage(id: widget.product.id, fields: productData, imageBytes: controller.selectedImageBytes.value, imageFileName: controller.selectedImageBytes.value != null ? "${widget.product.name}.png" : null).then((_) {
+      Navigator.pop(context);
+      CustomWidgets.showSnackBar("Success", "Product updated successfully", Colors.green);
+    }).catchError((error) {
+      CustomWidgets.showSnackBar("Error", "Failed to update product", Colors.red);
+    });
   }
 
   Future<void> _handleDeleteRequest() async {
@@ -79,8 +94,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
             onPressed: () async {
               Navigator.pop(context);
               Navigator.pop(context);
-
-              await ProductsService().deleteProduct(id: widget.product.id);
+              await SearchService().deleteProduct(id: widget.product.id);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
@@ -95,7 +109,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
       backgroundColor: Colors.white,
       appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: true, icon: IconButton(tooltip: "Delete Product", onPressed: _handleDeleteRequest, icon: Icon(IconlyLight.delete, color: Colors.red)), name: "${widget.product.name}"),
       body: ListView(
-        padding: context.padding.medium,
+        padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 4) : context.padding.horizontalMedium,
         children: [
           Obx(() => Center(
                 child: GestureDetector(
@@ -138,14 +152,15 @@ class _ProductProfilViewState extends State<ProductProfilView> {
           onTap: () {
             if (isSelectableField) {
               final fieldName = StringConstants.apiFieldNames[index];
-              print(fieldName);
-              final url = StringConstants.four_in_one_names.firstWhere((element) => element['name'] == fieldName)['url'].toString();
-              print(url);
+              final url = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldName)['url'].toString();
               DialogsUtils().showSelectableDialog(
                 context: context,
                 title: label,
                 url: url,
                 targetController: textControllers[index],
+                onIdSelected: (id) {
+                  selectedIds[index] = id;
+                },
               );
             }
           },

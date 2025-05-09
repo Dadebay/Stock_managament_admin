@@ -4,7 +4,7 @@ import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class RightSideButtons extends StatelessWidget {
-  final SeacrhViewController searchViewController = Get.find();
+  final SearchViewController searchViewController = Get.find();
 
   @override
   Widget build(BuildContext context) {

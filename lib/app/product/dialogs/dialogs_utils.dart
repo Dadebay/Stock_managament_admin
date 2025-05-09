@@ -1,4 +1,4 @@
-// ignore_for_file: inference_failure_on_function_return_type, inference_failure_on_function_invocation, duplicate_ignore
+// ignore_for_file: inference_failure_on_function_return_type, inference_failure_on_function_invocation, duplicate_ignore, unused_local_variable
 
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_model.dart';
@@ -43,6 +43,7 @@ class DialogsUtils {
     required String title,
     required String url,
     required TextEditingController targetController,
+    required void Function(String id) onIdSelected,
   }) {
     Get.defaultDialog(
       title: title,
@@ -78,6 +79,7 @@ class DialogsUtils {
                   trailing: const Icon(IconlyLight.arrowRightCircle),
                   onTap: () {
                     targetController.text = item.name;
+                    onIdSelected(item.id.toString());
                     Get.back();
                   },
                 );
@@ -90,7 +92,7 @@ class DialogsUtils {
   }
 
   static filterHelper({required int index}) {
-    final SeacrhViewController searchViewController = Get.find();
+    final SearchViewController searchViewController = Get.find();
     Get.defaultDialog(
         title: StringConstants.searchViewFilters[index]['name'].toString(),
         titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),

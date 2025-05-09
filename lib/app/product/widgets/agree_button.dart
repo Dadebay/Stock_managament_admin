@@ -6,8 +6,9 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 class AgreeButton extends StatelessWidget {
   final Function() onTap;
   final String text;
+  final bool? showBorder;
 
-  AgreeButton({required this.onTap, required this.text});
+  AgreeButton({required this.onTap, required this.text, this.showBorder});
   final HomeController homeController = Get.put(HomeController());
 
   @override
@@ -18,7 +19,8 @@ class AgreeButton extends StatelessWidget {
   Widget animatedContaner(BuildContext context) {
     return Obx(() {
       return AnimatedContainer(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: ColorConstants.kPrimaryColor2),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20), color: showBorder == true ? Colors.transparent : ColorConstants.kPrimaryColor2, border: Border.all(color: ColorConstants.kPrimaryColor2)),
         margin: context.padding.onlyTopNormal,
         padding: context.padding.normal.copyWith(top: 15, bottom: 15),
         width: homeController.agreeButton.value ? 60.w : Get.size.width,
@@ -37,7 +39,7 @@ class AgreeButton extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.general.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold, fontSize: 20.sp, color: Colors.white),
+                style: context.general.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold, fontSize: 20.sp, color: showBorder == true ? ColorConstants.kPrimaryColor2 : Colors.white),
               ),
       );
     });

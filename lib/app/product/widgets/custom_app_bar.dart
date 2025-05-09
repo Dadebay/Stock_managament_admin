@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSize {
       elevation: 0,
       scrolledUnderElevation: 0.0,
       centerTitle: centerTitle,
-      leadingWidth: centerTitle == true ? 40.0 : 0.0,
+      leadingWidth: centerTitle == true ? 80.0 : 0.0,
       leading: backArrow
           ? Padding(
               padding: const EdgeInsets.only(left: 8),

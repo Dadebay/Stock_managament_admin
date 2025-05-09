@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/expences/controllers/expences_controller.dart';
 import 'package:stock_managament_admin/app/modules/expences/controllers/expences_model.dart';

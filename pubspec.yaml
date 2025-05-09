@@ -38,6 +38,7 @@ dependencies:
   scroll_to_hide: ^2.1.0         # Hide widgets on scroll (e.g., bottom navigation)
   flutter_screenutil:            # Adapt UI to different screen sizes (responsive)
   cached_network_image: ^3.0.0
+  http_parser:
 
   flutter:
     sdk: flutter
@@ -45,7 +46,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
 
   #dart run build_runner watch
   build_runner:

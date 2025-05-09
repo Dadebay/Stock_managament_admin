@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:stock_managament_admin/app/modules/clients/views/clients_view.dart';
 import 'package:stock_managament_admin/app/modules/expences/views/expences_view.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_page_view.dart';
+import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 enum ColumnSize { small, medium, large }
@@ -10,10 +11,10 @@ enum ColumnSize { small, medium, large }
 class StringConstants {
   static const String appName = 'Kümüş Online Platforma ';
   static List<Map<String, String>> four_in_one_names = [
-    {'name': 'brands', 'pageView': "Brands", "countName": 'brand', "id": "1", 'size': ColumnSize.small.toString(), "url": ApiConstants.brends},
+    {'name': 'brands', 'pageView': "Brands", "countName": 'brends', "id": "1", 'size': ColumnSize.small.toString(), "url": ApiConstants.brends},
     {'name': 'categories', 'pageView': "Categories", "countName": 'category', "id": "2", 'size': ColumnSize.small.toString(), "url": ApiConstants.categories},
     {'name': 'locations', 'pageView': "Locations", "countName": 'location', "id": "3", 'size': ColumnSize.small.toString(), "url": ApiConstants.locations},
-    {'name': 'materials', 'pageView': "Materials", "countName": 'material', "id": "4", 'size': ColumnSize.small.toString(), "url": ApiConstants.materials},
+    {'name': 'materials', 'pageView': "Materials", "countName": 'materials', "id": "4", 'size': ColumnSize.small.toString(), "url": ApiConstants.materials},
   ];
   static List<Map<String, String>> statusList = [
     {'name': 'Shipped', 'statusName': 'shipped'},
@@ -44,11 +45,11 @@ class StringConstants {
     {'name': 'Note', 'sortName': "notes", 'size': ColumnSize.medium.toString()},
   ];
   static List<Map<String, String>> topPartNamesPurchases = [
-    {'name': 'Purchase Title', 'sortName': "client_number"},
-    {'name': 'Date', 'sortName': "date"},
-    {'name': 'Source', 'sortName': "source"},
-    {'name': 'Product count', 'sortName': "product_count"},
-    {'name': 'Sum Cost', 'sortName': "cost"},
+    {'name': 'Purchase Title', 'sortName': "title", 'size': ColumnSize.small.toString()},
+    {'name': 'Date', 'sortName': "date", 'size': ColumnSize.small.toString()},
+    {'name': 'Source', 'sortName': "source", 'size': ColumnSize.small.toString()},
+    {'name': 'Product count', 'sortName': "product_count", 'size': ColumnSize.small.toString()},
+    {'name': 'Sum Cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
   ];
   static List<Map<String, String>> searchViewFilters = [
     {'name': 'Brands', 'searchName': 'brand'},
@@ -64,12 +65,18 @@ class StringConstants {
     {'name': 'Category', 'sortName': "category", 'size': ColumnSize.small.toString()},
     {'name': 'Location', 'sortName': "location", 'size': ColumnSize.small.toString()},
   ];
+  static List<Map<String, String>> salesTopText = [
+    {'name': 'Product Name', 'sortName': "count", 'size': ColumnSize.medium.toString()},
+    {'name': 'Cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
+    {'name': 'Sell Price', 'sortName': "price", 'size': ColumnSize.small.toString()},
+    {'name': 'Brand', 'sortName': "brends", 'size': ColumnSize.small.toString()},
+    {'name': 'Category', 'sortName': "category", 'size': ColumnSize.small.toString()},
+  ];
   static final List<String> fieldLabels = ['Name', 'Sell price', 'Category', 'Brand', 'Location', 'Material', 'Gram', 'Count', 'Description', 'Package (Gaplama)', 'Cost'];
 
-  static final List<String> apiFieldNames = ['name', 'price', 'category', 'brand', 'location', 'material', 'gram', 'count', 'description', 'gaplama', 'cost'];
+  static final List<String> apiFieldNames = ['name', 'price', 'category', 'brends', 'location', 'materials', 'gram', 'count', 'description', 'gaplama', 'cost'];
 
   static List pages = [
-    Container(),
     Container(),
     Container(),
     Container(),
@@ -77,10 +84,11 @@ class StringConstants {
     // HomeView(),
     // const SalesView(),
     // const PurchasesView(),
-    // const SearchView(),
+    SearchView(selectableProducts: false),
     FourInOnePageView(),
     ExpencesView(),
     ClientsView(),
+    Container(),
   ];
   static List icons = [IconlyLight.chart, IconlyLight.paper, CupertinoIcons.cart_badge_plus, IconlyLight.search, IconlyLight.category, IconlyLight.wallet, IconlyLight.user3, IconlyLight.setting];
   static List selectedIcons = [IconlyBold.chart, IconlyBold.paper, CupertinoIcons.cart_fill_badge_plus, IconlyBold.search, IconlyBold.category, IconlyBold.wallet, IconlyBold.user3, IconlyBold.setting];

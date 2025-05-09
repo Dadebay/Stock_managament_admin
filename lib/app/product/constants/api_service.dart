@@ -92,6 +92,7 @@ class ApiService {
       print(endpoint);
       print(body);
       print(method);
+      print(response.statusCode);
       if ([200, 201, 204].contains(response.statusCode)) {
         if (response.statusCode == 204) {
           await handleSuccess!({"statusCode": response.statusCode});

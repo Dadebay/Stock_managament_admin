@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:scroll_to_hide/scroll_to_hide.dart';
-import 'package:stock_managament_admin/app/data/models/purchases_model.dart';
+import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_model.dart';
+import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_service.dart';
 import 'package:stock_managament_admin/app/modules/purchases/views/create_purchase_view.dart';
-import 'package:stock_managament_admin/app/product/cards/purchase_card.dart';
-import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
-
-import '../controllers/purchases_controller.dart';
+import 'package:stock_managament_admin/app/modules/purchases/views/purchase_card.dart';
+import 'package:stock_managament_admin/app/modules/search/components/bottom_price_sheet.dart';
+import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
+import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
+import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 
 class PurchasesView extends StatefulWidget {
   const PurchasesView({super.key});
@@ -19,116 +18,113 @@ class PurchasesView extends StatefulWidget {
 
 class _PurchasesViewState extends State<PurchasesView> {
   final PurchasesController purchasesController = Get.put(PurchasesController());
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    purchasesController.getData();
-  }
-
-  // ignore: non_constant_identifier_names
-  Widget MainBody() {
-    return Expanded(
-      child: Obx(() {
-        if (purchasesController.loadingDataOrders.value == true) {
-          return CustomWidgets.spinKit();
-        } else if (purchasesController.purchasesMainList.isEmpty && purchasesController.loadingDataOrders.value == false) {
-          return CustomWidgets.emptyData();
-        } else {
-          return ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 5.w),
-              itemCount: purchasesController.purchasesMainList.length,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) {
-                final purchases = PurchasesModel(
-                    title: purchasesController.purchasesMainList[index]['title'].toString(),
-                    date: purchasesController.purchasesMainList[index]['date'].toString(),
-                    note: purchasesController.purchasesMainList[index]['note'].toString(),
-                    cost: purchasesController.purchasesMainList[index]['cost'].toString(),
-                    productsCount: purchasesController.purchasesMainList[index]['product_count'].toString(),
-                    source: purchasesController.purchasesMainList[index]['source'].toString(),
-                    purchasesID: purchasesController.purchasesMainList[index].id);
-
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: 40.w,
-                      child: Text(
-                        "${index + 1}",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black, fontSize: 20.sp),
-                      ),
-                    ),
-                    Expanded(
-                        child: PurchaseCard(
-                      showInProductProfil: false,
-                      purchasesModel: purchases,
-                    ))
-                  ],
-                );
-              });
-        }
-      }),
-    );
-  }
-
-  final ScrollController _scrollController = ScrollController();
+  final TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        bottomNavigationBar: ScrollToHide(
-            scrollController: _scrollController,
-            height: 60, // Initial height of the bottom navigation bar.
-            hideDirection: Axis.vertical,
-            child: Wrap(
+      backgroundColor: Colors.white,
+      body: FutureBuilder<List<PurchasesModel>>(
+        future: PurchasesService().getPurchases(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CustomWidgets.spinKit();
+          } else if (snapshot.hasError) {
+            return CustomWidgets.errorData();
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return CustomWidgets.emptyData();
+          }
+          return Obx(() {
+            final isSearching = searchController.text.isNotEmpty;
+            final hasResult = purchasesController.searchResult.isNotEmpty;
+            final displayList = (isSearching) ? (hasResult ? purchasesController.searchResult.toList() : <PurchasesModel>[]) : purchasesController.purchasesMainList.toList();
+            return Stack(
               children: [
-                const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
+                Column(
+                  children: [
+                    _searchWidget(),
+                    _topText(displayList),
+                    Expanded(
+                        child: displayList.isEmpty && isSearching
+                            ? Center(child: Text("No results found for '${searchController.text}'"))
+                            : displayList.isEmpty
+                                ? CustomWidgets.emptyData()
+                                : ListView.builder(
+                                    itemCount: displayList.length,
+                                    itemBuilder: (context, index) {
+                                      return PurchaseCard(
+                                        purchasesModel: displayList[index],
+                                        showInProductProfil: false,
+                                        index: displayList.length - index,
+                                      );
+                                    },
+                                  )),
+                  ],
                 ),
-                Obx(() {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Sum Cost :",
-                        maxLines: 1,
-                        textAlign: TextAlign.end,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.black, fontSize: 16.sp),
-                      ),
-                      Text(
-                        '${purchasesController.sumCost.value.toStringAsFixed(2)}  \$',
-                        textAlign: TextAlign.start,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.black, fontSize: 16.sp),
-                      ),
-                    ],
-                  );
-                })
+                Positioned(
+                  bottom: 70.0,
+                  right: 20.0,
+                  child: FloatingActionButton(
+                    heroTag: "add_purchase",
+                    onPressed: () {
+                      Get.to(() => CreatePurchasesView());
+                    },
+                    child: const Icon(IconlyLight.plus),
+                  ),
+                ),
+                Positioned(
+                  bottom: 15.0,
+                  left: 0.0,
+                  right: 0.0,
+                  child: BottomPriceSheetPurchases(),
+                )
               ],
-            )),
-        floatingActionButton: FloatingActionButton(
-          heroTag: "add_purchase",
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-              return const CreatePurchasesView();
-            }));
-          },
-          child: const Icon(IconlyLight.plus),
-        ),
-        body: Column(
-          children: [
-            // CustomWidgets().topWidgetPurchases(false),
-            MainBody()
-          ],
-        ));
+            );
+          });
+        },
+      ),
+    );
+  }
+
+  ListviewTopText<PurchasesModel> _topText(List<PurchasesModel> displayList) {
+    return ListviewTopText<PurchasesModel>(
+      names: StringConstants.topPartNamesPurchases,
+      listToSort: displayList,
+      setSortedList: (newList) {
+        if (searchController.text.isNotEmpty && purchasesController.searchResult.isNotEmpty) {
+          purchasesController.searchResult.assignAll(newList);
+        } else {
+          purchasesController.purchasesMainList.assignAll(newList);
+        }
+      },
+      getSortValue: (model, key) {
+        switch (key) {
+          case 'title':
+            return model.title;
+          case 'date':
+            return model.date;
+          case 'source':
+            return model.source;
+          case 'count':
+            return model.productCount;
+          case 'cost':
+            return model.cost;
+          default:
+            return '';
+        }
+      },
+    );
+  }
+
+  SearchWidget _searchWidget() {
+    return SearchWidget(
+      controller: searchController,
+      onChanged: (value) {
+        purchasesController.onSearchTextChanged(value);
+      },
+      onClear: () {
+        searchController.clear();
+        purchasesController.searchResult.clear();
+      },
+    );
   }
 }

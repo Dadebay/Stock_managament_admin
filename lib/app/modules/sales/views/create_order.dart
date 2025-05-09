@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class CreateOrderView extends StatefulWidget {
@@ -19,7 +20,7 @@ class _CreateOrderViewState extends State<CreateOrderView> {
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
-    salesController.selectedProductsToOrder.clear();
+    // salesController.selectedProductsToOrder.clear();
     super.initState();
   }
 
@@ -111,21 +112,21 @@ class _CreateOrderViewState extends State<CreateOrderView> {
             focusNode: focusNodes[7],
             requestfocusNode: focusNodes[0],
           ),
-          selectedProductsView(),
+          // selectedProductsView(),
           AgreeButton(
               onTap: () {
-                Get.to(() => const SelectOrderProducts(purchaseView: false));
+                Get.to(() => const SearchView(selectableProducts: true));
               },
               text: 'selectProducts'),
           AgreeButton(
               onTap: () {
                 if (_formKey.currentState!.validate()) {
-                  if (salesController.selectedProductsToOrder.isEmpty) {
-                    CustomWidgets.showSnackBar('errorTitle', 'selectMoreProducts', Colors.red);
-                  } else {
-                    salesController.sumbitSale(textControllers: textControllers, status: selectedStatus);
-                    Navigator.of(context).pop();
-                  }
+                  // if (salesController.selectedProductsToOrder.isEmpty) {
+                  //   CustomWidgets.showSnackBar('errorTitle', 'selectMoreProducts', Colors.red);
+                  // } else {
+                  //   // salesController.sumbitSale(textControllers: textControllers, status: selectedStatus);
+                  //   Navigator.of(context).pop();
+                  // }
                 } else {
                   CustomWidgets.showSnackBar('errorTitle', 'loginErrorFillBlanks', Colors.red);
                 }
@@ -139,32 +140,33 @@ class _CreateOrderViewState extends State<CreateOrderView> {
     );
   }
 
-  Obx selectedProductsView() {
-    return Obx(() {
-      return salesController.selectedProductsToOrder.isEmpty
-          ? const SizedBox.shrink()
-          : Wrap(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 10.h, left: 10.w, bottom: 10.h),
-                  child: Text(
-                    "selectedProducts".tr,
-                    style: TextStyle(color: Colors.black, fontSize: 22.sp),
-                  ),
-                ),
-                ListView.builder(
-                  itemCount: salesController.selectedProductsToOrder.length,
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    final ProductModel product = salesController.selectedProductsToOrder[index]['product'];
-                    return ProductCard(
-                      product: product,
-                      disableOnTap: false,
-                    );
-                  },
-                ),
-              ],
-            );
-    });
-  }
+  // Obx selectedProductsView() {
+  //   return Obx(() {
+  //     return salesController.selectedProductsToOrder.isEmpty
+  //         ? const SizedBox.shrink()
+  //         : Wrap(
+  //             children: [
+  //               Padding(
+  //                 padding: EdgeInsets.only(top: 10.h, left: 10.w, bottom: 10.h),
+  //                 child: Text(
+  //                   "selectedProducts".tr,
+  //                   style: TextStyle(color: Colors.black, fontSize: 22.sp),
+  //                 ),
+  //               ),
+  //               ListView.builder(
+  //                 itemCount: salesController.selectedProductsToOrder.length,
+  //                 shrinkWrap: true,
+  //                 itemBuilder: (BuildContext context, int index) {
+  //                   final SearchModel product = salesController.selectedProductsToOrder[index];
+  //                   return SearchCard(
+  //                     product: product,
+  //                     disableOnTap: false,
+  //                     addCounterWidget: false,
+  //                   );
+  //                 },
+  //               ),
+  //             ],
+  //           );
+  //   });
+  // }
 }

@@ -4,11 +4,8 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_hide/scroll_to_hide.dart';
-import 'package:stock_managament_admin/app/data/models/order_model.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/create_order.dart';
-import 'package:stock_managament_admin/app/product/cards/ordered_card.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
-import 'package:stock_managament_admin/app/product/widgets/widgets.dart';
 
 import '../controllers/sales_controller.dart';
 
@@ -34,7 +31,7 @@ class _SalesViewState extends State<SalesView> {
   @override
   void initState() {
     super.initState();
-    salesController.getData();
+    // salesController.getData();
   }
 
   Future<dynamic> filter() {
@@ -51,7 +48,7 @@ class _SalesViewState extends State<SalesView> {
             itemBuilder: (BuildContext context, int index) {
               return ListTile(
                 onTap: () {
-                  salesController.filterProductsMine('status', StringConstants.statusList[index]['statusName']!);
+                  // salesController.filterProductsMine('status', StringConstants.statusList[index]['statusName']!);
                 },
                 title: Text(StringConstants.statusList[index]['name'].toString()),
                 trailing: const Icon(IconlyLight.arrowRightCircle),
@@ -62,68 +59,68 @@ class _SalesViewState extends State<SalesView> {
   }
 
   // ignore: non_constant_identifier_names
-  Expanded MainBody() {
-    return Expanded(
-      child: Obx(() {
-        if (salesController.loadingDataOrders.value == true) {
-          return CustomWidgets.spinKit();
-        } else if (salesController.orderedCardsSearchResult.isEmpty && controller.text.isNotEmpty) {
-          return CustomWidgets.emptyData();
-        } else if (salesController.orderCardList.isEmpty && salesController.loadingDataOrders.value == false) {
-          return CustomWidgets.emptyData();
-        } else {
-          return ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 5.w),
-              itemCount: controller.text.isNotEmpty ? salesController.orderedCardsSearchResult.length : salesController.orderCardList.length,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) {
-                final order = controller.text.isEmpty
-                    ? OrderModel(
-                        orderID: salesController.orderCardList[index].id,
-                        clientAddress: salesController.orderCardList[index]['client_address'],
-                        clientName: salesController.orderCardList[index]['client_name'],
-                        clientNumber: salesController.orderCardList[index]['client_number'],
-                        coupon: salesController.orderCardList[index]['coupon'].toString(),
-                        date: salesController.orderCardList[index]['date'],
-                        discount: salesController.orderCardList[index]['discount'].toString(),
-                        note: salesController.orderCardList[index]['note'],
-                        package: salesController.orderCardList[index]['package'],
-                        status: salesController.orderCardList[index]['status'],
-                        sumCost: salesController.orderCardList[index]['sum_cost'].toString(),
-                        sumPrice: salesController.orderCardList[index]['sum_price'].toString(),
-                        products: salesController.orderCardList[index]['product_count'])
-                    : OrderModel(
-                        orderID: salesController.orderedCardsSearchResult[index].id,
-                        clientAddress: salesController.orderedCardsSearchResult[index]['client_address'],
-                        clientName: salesController.orderedCardsSearchResult[index]['client_name'],
-                        clientNumber: salesController.orderedCardsSearchResult[index]['client_number'],
-                        coupon: salesController.orderedCardsSearchResult[index]['coupon'].toString(),
-                        date: salesController.orderedCardsSearchResult[index]['date'],
-                        discount: salesController.orderedCardsSearchResult[index]['discount'].toString(),
-                        note: salesController.orderedCardsSearchResult[index]['note'],
-                        package: salesController.orderedCardsSearchResult[index]['package'],
-                        status: salesController.orderedCardsSearchResult[index]['status'],
-                        sumCost: salesController.orderedCardsSearchResult[index]['sum_cost'].toString(),
-                        sumPrice: salesController.orderedCardsSearchResult[index]['sum_price'].toString(),
-                        products: salesController.orderedCardsSearchResult[index]['product_count']);
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: 40.w,
-                      child: Text(
-                        "${index + 1}",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black, fontSize: 20.sp),
-                      ),
-                    ),
-                    Expanded(child: OrderedCard(order: order))
-                  ],
-                );
-              });
-        }
-      }),
-    );
-  }
+  // Expanded MainBody() {
+  //   return Expanded(
+  //     child: Obx(() {
+  //       if (salesController.loadingDataOrders.value == true) {
+  //         return CustomWidgets.spinKit();
+  //       } else if (salesController.orderedCardsSearchResult.isEmpty && controller.text.isNotEmpty) {
+  //         return CustomWidgets.emptyData();
+  //       } else if (salesController.orderCardList.isEmpty && salesController.loadingDataOrders.value == false) {
+  //         return CustomWidgets.emptyData();
+  //       } else {
+  //         return ListView.builder(
+  //             padding: EdgeInsets.symmetric(horizontal: 5.w),
+  //             itemCount: controller.text.isNotEmpty ? salesController.orderedCardsSearchResult.length : salesController.orderCardList.length,
+  //             physics: const BouncingScrollPhysics(),
+  //             itemBuilder: (BuildContext context, int index) {
+  //               final order = controller.text.isEmpty
+  //                   ? OrderModel(
+  //                       orderID: salesController.orderCardList[index].id,
+  //                       clientAddress: salesController.orderCardList[index]['client_address'],
+  //                       clientName: salesController.orderCardList[index]['client_name'],
+  //                       clientNumber: salesController.orderCardList[index]['client_number'],
+  //                       coupon: salesController.orderCardList[index]['coupon'].toString(),
+  //                       date: salesController.orderCardList[index]['date'],
+  //                       discount: salesController.orderCardList[index]['discount'].toString(),
+  //                       note: salesController.orderCardList[index]['note'],
+  //                       package: salesController.orderCardList[index]['package'],
+  //                       status: salesController.orderCardList[index]['status'],
+  //                       sumCost: salesController.orderCardList[index]['sum_cost'].toString(),
+  //                       sumPrice: salesController.orderCardList[index]['sum_price'].toString(),
+  //                       products: salesController.orderCardList[index]['product_count'])
+  //                   : OrderModel(
+  //                       orderID: salesController.orderedCardsSearchResult[index].id,
+  //                       clientAddress: salesController.orderedCardsSearchResult[index]['client_address'],
+  //                       clientName: salesController.orderedCardsSearchResult[index]['client_name'],
+  //                       clientNumber: salesController.orderedCardsSearchResult[index]['client_number'],
+  //                       coupon: salesController.orderedCardsSearchResult[index]['coupon'].toString(),
+  //                       date: salesController.orderedCardsSearchResult[index]['date'],
+  //                       discount: salesController.orderedCardsSearchResult[index]['discount'].toString(),
+  //                       note: salesController.orderedCardsSearchResult[index]['note'],
+  //                       package: salesController.orderedCardsSearchResult[index]['package'],
+  //                       status: salesController.orderedCardsSearchResult[index]['status'],
+  //                       sumCost: salesController.orderedCardsSearchResult[index]['sum_cost'].toString(),
+  //                       sumPrice: salesController.orderedCardsSearchResult[index]['sum_price'].toString(),
+  //                       products: salesController.orderedCardsSearchResult[index]['product_count']);
+  //               return Row(
+  //                 children: [
+  //                   SizedBox(
+  //                     width: 40.w,
+  //                     child: Text(
+  //                       "${index + 1}",
+  //                       textAlign: TextAlign.center,
+  //                       style: TextStyle(color: Colors.black, fontSize: 20.sp),
+  //                     ),
+  //                   ),
+  //                   Expanded(child: OrderedCard(order: order))
+  //                 ],
+  //               );
+  //             });
+  //       }
+  //     }),
+  //   );
+  // }
 
   Padding searchWidget() {
     return Padding(
@@ -138,7 +135,7 @@ class _SalesViewState extends State<SalesView> {
             controller: controller,
             decoration: InputDecoration(hintText: 'search'.tr, border: InputBorder.none),
             onChanged: (String value) {
-              salesController.onSearchTextChanged(value);
+              // salesController.onSearchTextChanged(value);
             },
           ),
           contentPadding: EdgeInsets.only(left: 15.w),
@@ -146,7 +143,7 @@ class _SalesViewState extends State<SalesView> {
             icon: const Icon(CupertinoIcons.xmark_circle),
             onPressed: () {
               controller.clear();
-              salesController.onSearchTextChanged('');
+              // salesController.onSearchTextChanged('');
             },
           ),
         ),
@@ -173,9 +170,9 @@ class _SalesViewState extends State<SalesView> {
                 Obx(() {
                   return Row(
                     children: [
-                      CustomWidgets.textWidgetPrice('Sold Products :   ', salesController.sumProductCount.value.toString()),
-                      CustomWidgets.textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value.toStringAsFixed(2)} \$'),
-                      CustomWidgets.textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value.toStringAsFixed(2)}  \$'),
+                      // CustomWidgets.textWidgetPrice('Sold Products :   ', salesController.sumProductCount.value.toString()),
+                      // CustomWidgets.textWidgetPrice('Sum Price :   ', '${salesController.sumPrice.value.toStringAsFixed(2)} \$'),
+                      // CustomWidgets.textWidgetPrice('Sum Cost :    ', '${salesController.sumCost.value.toStringAsFixed(2)}  \$'),
                     ],
                   );
                 })
@@ -207,7 +204,7 @@ class _SalesViewState extends State<SalesView> {
           children: [
             searchWidget(),
             // CustomWidgets().topWidgetTextPart(addMorePadding: true, names: StringConstants.topPartNames, ordersView: true, clientView: false, purchasesView: false),
-            MainBody()
+            // MainBody()
           ],
         ));
   }
