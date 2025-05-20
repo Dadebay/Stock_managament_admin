@@ -20,9 +20,9 @@ class ClientModel {
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       address: json['address'] ?? '',
-      phone: json['phone'] ?? '',
-      sumPrice: json['order_count'] ?? '0',
-      orderCount: json['sum_price'] ?? 0,
+      phone: json['phone'].toString().contains("+993") ? json['phone'].toString().replaceFirst("+993", "") : json['phone'].toString() ?? '',
+      sumPrice: json['sumprice'] ?? 0,
+      orderCount: json['ordercount'] ?? 0,
     );
   }
 
@@ -33,8 +33,8 @@ class ClientModel {
       'name': name,
       'address': address,
       'phone': phone,
-      'order_count': orderCount,
-      'sum_price': sumPrice,
+      'ordercount': orderCount,
+      'sumprice': sumPrice,
     };
   }
 }

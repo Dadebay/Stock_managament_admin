@@ -9,8 +9,9 @@ import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 import '../../../product/init/packages.dart';
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key, required this.selectableProducts});
+  const SearchView({super.key, required this.selectableProducts, this.whichPage});
   final bool selectableProducts;
+  final String? whichPage;
   @override
   State<SearchView> createState() => _SearchViewState();
 }
@@ -37,10 +38,17 @@ class _SearchViewState extends State<SearchView> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CustomWidgets.spinKit();
           } else if (snapshot.hasError) {
+            print(snapshot.error);
             return CustomWidgets.errorData();
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return CustomWidgets.emptyData();
           }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            searchViewController.historyList.assignAll(snapshot.data!.toList());
+            searchViewController.productsList.assignAll(snapshot.data!.toList());
+            searchViewController.searchResult.assignAll(snapshot.data!.toList());
+            searchViewController.calculateTotals();
+          });
 
           return Obx(() {
             final isSearching = searchController.text.isNotEmpty;
@@ -53,11 +61,13 @@ class _SearchViewState extends State<SearchView> {
                     _searchWidget(),
                     searchViewController.showInGrid.value ? SizedBox.shrink() : _topText(displayList),
                     Expanded(
-                        child: displayList.isEmpty && isSearching
-                            ? Center(child: Text("No results found for '${searchController.text}'"))
-                            : displayList.isEmpty
-                                ? CustomWidgets.emptyData()
-                                : (searchViewController.showInGrid.value ? gridViewStyle(displayList) : listViewStyle(displayList)))
+                        child: displayList.isEmpty && snapshot.hasData
+                            ? CustomWidgets.spinKit()
+                            : displayList.isEmpty && isSearching
+                                ? Center(child: Text("No results found for '${searchController.text}'"))
+                                : displayList.isEmpty
+                                    ? CustomWidgets.emptyData()
+                                    : (searchViewController.showInGrid.value ? gridViewStyle(displayList) : listViewStyle(displayList)))
                   ],
                 ),
                 Positioned(
@@ -66,7 +76,7 @@ class _SearchViewState extends State<SearchView> {
                   child: RightSideButtons(),
                 ),
                 Positioned(
-                  bottom: 15.0,
+                  bottom: 0.0,
                   left: 0.0,
                   right: 0.0,
                   child: BottomPriceSheet(),
@@ -92,20 +102,18 @@ class _SearchViewState extends State<SearchView> {
       },
       getSortValue: (model, key) {
         switch (key) {
-          case 'name':
-            return model.name;
-          case 'price':
-            return model.price;
-          case 'cost':
-            return model.cost;
           case 'count':
-            return model.count;
-          case 'brend':
-            return model.brend;
+            return model.count ?? 0;
+          case 'price':
+            return model.price ?? 0;
+          case 'cost':
+            return model.cost ?? 0;
+          case 'brends':
+            return model.brend?.name ?? '';
           case 'category':
-            return model.category;
-          case 'gramm':
-            return model.gramm;
+            return model.category?.name ?? '';
+          case 'location':
+            return model.location?.name ?? '';
           default:
             return '';
         }
@@ -140,24 +148,18 @@ class _SearchViewState extends State<SearchView> {
   ListView listViewStyle(List<SearchModel> list) {
     return ListView.builder(
         itemCount: list.length,
+        padding: EdgeInsets.only(bottom: 50.h),
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
           return Row(
             children: [
-              Container(
-                width: 40.w,
-                padding: EdgeInsets.only(right: 10.w),
-                alignment: Alignment.centerRight,
-                child: Text(
-                  "${index + 1}",
-                  style: TextStyle(color: Colors.black54, fontSize: 16.sp),
-                ),
-              ),
+              CustomWidgets.counter(list.length - index),
               Expanded(
                 child: SearchCard(
-                  disableOnTap: false,
+                  disableOnTap: widget.selectableProducts,
                   product: list[index],
                   addCounterWidget: widget.selectableProducts,
+                  whcihPage: widget.whichPage,
                 ),
               )
             ],

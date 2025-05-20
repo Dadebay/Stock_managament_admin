@@ -8,11 +8,13 @@ class SearchCard extends StatelessWidget {
     required this.product,
     required this.disableOnTap,
     required this.addCounterWidget,
+    required this.whcihPage,
     super.key,
   });
 
   final bool disableOnTap;
   final bool addCounterWidget;
+  final String? whcihPage;
   final SearchModel product;
 
   @override
@@ -21,16 +23,19 @@ class SearchCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        print(disableOnTap);
         if (!disableOnTap) {
-          Get.to(() => ProductProfilView(product: product));
+          Get.to(() => ProductProfilView(product: product, disableUpdate: addCounterWidget));
         } else {
           CustomWidgets.showSnackBar('Error', 'Cannot show this product because it is SOLD', ColorConstants.redColor);
         }
       },
       child: Container(
         color: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 20.w),
+        padding: EdgeInsets.only(top: 15.h, bottom: 15.h, right: 15.w),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 70,
@@ -56,18 +61,19 @@ class SearchCard extends StatelessWidget {
                           product.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 15.sp),
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.sp),
                         ),
                         Text(
                           "${"quantity".tr}: ${product.count}",
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey, fontSize: 14.sp, fontWeight: FontWeight.w300),
+                          style: TextStyle(color: Colors.grey, fontSize: 15.sp, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                   ),
-                  Expanded(child: Text("${product.cost} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
-                  Expanded(child: Text("${product.price} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
+                  SizedBox(width: 50.w),
+                  Expanded(child: Text("${product.cost} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14.sp))),
+                  Expanded(child: Text("${product.price} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14.sp))),
                   Expanded(child: Text("${product.brend?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
                   Expanded(child: Text("${product.category?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
                   Expanded(child: Text("${product.location?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
@@ -101,7 +107,8 @@ class SearchCard extends StatelessWidget {
                         IconButton(
                           icon: const Icon(CupertinoIcons.add_circled, color: Colors.black),
                           onPressed: () {
-                            if (selectedCount >= product.count) {
+                            print(whcihPage);
+                            if (whcihPage == null && selectedCount >= product.count) {
                               CustomWidgets.showSnackBar("Error", "Not in stock", Colors.red);
                             } else {
                               seacrhViewController.addOrUpdateProduct(product: product, count: selectedCount + 1);
@@ -129,7 +136,7 @@ class SecondProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(() => ProductProfilView(product: product)),
+      onTap: () => Get.to(() => ProductProfilView(product: product, disableUpdate: false)),
       child: Container(
           margin: EdgeInsets.only(right: 15.w),
           decoration: BoxDecoration(

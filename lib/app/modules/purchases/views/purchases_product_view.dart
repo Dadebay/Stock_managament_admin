@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_model.dart';
+import 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_service.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
@@ -16,6 +17,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
   final PurchasesController purchasesController = Get.find();
   @override
   Widget build(BuildContext context) {
+    print(widget.purchasesModel.id);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: false, name: widget.purchasesModel.title),
@@ -27,38 +29,44 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
               child: textsWidgetsListview(context),
             ),
             _topText(),
-            listViewStyle(widget.purchasesModel.products),
-            // productsListview()
+            listViewStyle(),
           ],
         ));
   }
 
-  ListView listViewStyle(List<SearchModel> list) {
-    return ListView.builder(
-        itemCount: list.length,
-        shrinkWrap: true,
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          return Row(
-            children: [
-              Container(
-                width: 40.w,
-                padding: EdgeInsets.only(right: 10.w),
-                alignment: Alignment.centerRight,
-                child: Text(
-                  "${index + 1}",
-                  style: TextStyle(color: Colors.black54, fontSize: 16.sp),
-                ),
-              ),
-              Expanded(
-                child: SearchCard(
-                  disableOnTap: false,
-                  product: list[index],
-                  addCounterWidget: false,
-                ),
-              )
-            ],
-          );
+  Widget listViewStyle() {
+    return FutureBuilder<List<SearchModel>>(
+        future: PurchasesService().getPurchasesByID(widget.purchasesModel.id),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CustomWidgets.spinKit();
+          } else if (snapshot.hasError) {
+            print(snapshot.error);
+            return CustomWidgets.errorData();
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return CustomWidgets.emptyData();
+          }
+          {
+            return ListView.builder(
+                itemCount: snapshot.data!.length,
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                itemBuilder: (BuildContext context, int index) {
+                  return Row(
+                    children: [
+                      CustomWidgets.counter(index + 1),
+                      Expanded(
+                        child: SearchCard(
+                          disableOnTap: true,
+                          product: snapshot.data![index],
+                          addCounterWidget: false,
+                          whcihPage: '',
+                        ),
+                      )
+                    ],
+                  );
+                });
+          }
         });
   }
 
@@ -96,7 +104,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
       {'text1': 'Date', "text2": widget.purchasesModel.date},
       {'text1': 'Source', "text2": widget.purchasesModel.source},
       {'text1': 'Cost', "text2": widget.purchasesModel.cost},
-      {'text1': 'Products Count', "text2": widget.purchasesModel.productCount.toString()},
+      {'text1': 'Products Count', "text2": widget.purchasesModel.count.toString()},
       {'text1': 'Description', "text2": widget.purchasesModel.description},
     ];
     return Wrap(children: List.generate(namesList.length, (index) => textWidgetOrderedPage(labelName: namesList[index]['text1'], value: namesList[index]['text2'])));

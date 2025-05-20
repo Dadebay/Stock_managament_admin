@@ -17,40 +17,36 @@ class PurchaseCard extends StatelessWidget {
       onTap: () => Get.to(() => PurchasesProductsView(purchasesModel: purchasesModel)),
       child: Container(
         color: Colors.white,
-        padding: EdgeInsets.only(left: 10.w, right: 0.w, top: 10.h, bottom: 10.h),
+        padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
         child: Row(
           children: [
-            Container(
-              width: 30.w,
-              alignment: Alignment.center,
-              child: Text(
-                "${index} - ",
-                style: TextStyle(color: Colors.grey, fontSize: 18.sp, fontWeight: FontWeight.w600),
-              ),
-            ),
+            CustomWidgets.counter(index),
             _textWidget(big: true, text: purchasesModel.title),
+            SizedBox(width: 20.w),
             _textWidget(big: false, text: purchasesModel.date),
             _textWidget(big: false, text: purchasesModel.source),
-            _textWidget(big: false, text: purchasesModel.productCount.toString()),
-            showInProductProfil ? const SizedBox.shrink() : _textWidget(big: true, text: purchasesModel.cost + " \$"),
+            _textWidget(big: false, text: purchasesModel.count.toString(), textAlign: TextAlign.center),
+            showInProductProfil ? const SizedBox.shrink() : _textWidget(big: true, text: purchasesModel.cost + " \$", textAlign: TextAlign.center),
             IconButton(
                 onPressed: () async {
                   await PurchasesService().deletePurchases(id: purchasesModel.id);
                 },
                 icon: Icon(IconlyLight.delete, color: Colors.red, size: 20.sp)),
+            IconButton(onPressed: () => Get.to(() => PurchasesProductsView(purchasesModel: purchasesModel)), icon: Icon(IconlyLight.editSquare, color: Colors.black, size: 20.sp)),
           ],
         ),
       ),
     );
   }
 
-  Expanded _textWidget({required bool big, required String text}) {
+  Expanded _textWidget({required bool big, TextAlign? textAlign, required String text}) {
     return Expanded(
       child: Text(
         text,
         maxLines: 1,
+        textAlign: textAlign ?? TextAlign.start,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: big ? Colors.black : Colors.grey, fontSize: 16.sp, fontWeight: big ? FontWeight.w600 : FontWeight.normal),
+        style: TextStyle(color: big ? Colors.black : Colors.grey, fontSize: big ? 18.sp : 16.sp, fontWeight: big ? FontWeight.w600 : FontWeight.normal),
       ),
     );
   }

@@ -7,9 +7,10 @@ import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class ProductProfilView extends StatefulWidget {
-  const ProductProfilView({super.key, required this.product});
+  const ProductProfilView({super.key, required this.product, required this.disableUpdate});
 
   final SearchModel product;
+  final bool disableUpdate;
 
   @override
   State<ProductProfilView> createState() => _ProductProfilViewState();
@@ -65,13 +66,30 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     Map<String, String> productData = {};
     for (int i = 0; i < fieldCount; i++) {
       final key = StringConstants.apiFieldNames[i];
+
+      // Eğer dropdown (selectable) alanlardan biri ve değer boşsa ekleme
       if ([2, 3, 4, 5].contains(i)) {
-        productData[key] = selectedIds[i] ?? '';
+        final selectedId = selectedIds[i];
+        if (selectedId == null || selectedId.isEmpty) {
+          continue;
+        }
+        productData[key] = selectedId;
       } else {
+        if (textControllers[i].text == '' || textControllers[i].text.isEmpty) {
+          continue;
+        }
         productData[key] = textControllers[i].text;
       }
     }
-    await SearchService().updateProductWithImage(id: widget.product.id, fields: productData, imageBytes: controller.selectedImageBytes.value, imageFileName: controller.selectedImageBytes.value != null ? "${widget.product.name}.png" : null).then((_) {
+
+    await SearchService()
+        .updateProductWithImage(
+      id: widget.product.id,
+      fields: productData,
+      imageBytes: controller.selectedImageBytes.value,
+      imageFileName: controller.selectedImageBytes.value != null ? "${widget.product.name}.png" : null,
+    )
+        .then((_) {
       Navigator.pop(context);
       CustomWidgets.showSnackBar("Success", "Product updated successfully", Colors.green);
     }).catchError((error) {

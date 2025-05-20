@@ -17,7 +17,8 @@ class ExpencesController extends GetxController {
     searchResult.value = expencesList.where((expences) {
       final name = expences.name.toLowerCase();
       final phone = expences.cost.toLowerCase();
-      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()));
+      final note = expences.note.toLowerCase();
+      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()) || note.contains(word.toLowerCase()));
     }).toList();
   }
 

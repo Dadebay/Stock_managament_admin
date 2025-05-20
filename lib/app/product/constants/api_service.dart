@@ -29,7 +29,9 @@ class ApiService {
       print(response.statusCode);
       print(response.request?.url);
       if (response.statusCode == 200) {
-        final responseJson = json.decode(response.body);
+        final decodedBody = utf8.decode(response.bodyBytes); // UTF-8 çözümleme burada
+        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
+
         if (handleSuccess != null) {
           await handleSuccess(responseJson);
         }
@@ -92,6 +94,11 @@ class ApiService {
       print(endpoint);
       print(body);
       print(method);
+      print(response.statusCode);
+      print(response.statusCode);
+      print(response.statusCode);
+      print(response.statusCode);
+      print(response.statusCode);
       print(response.statusCode);
       if ([200, 201, 204].contains(response.statusCode)) {
         if (response.statusCode == 204) {

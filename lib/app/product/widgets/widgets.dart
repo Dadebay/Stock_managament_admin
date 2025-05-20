@@ -168,6 +168,18 @@ class CustomWidgets {
     ));
   }
 
+  static Widget counter(int index) {
+    return Container(
+      width: 50.w,
+      padding: EdgeInsets.only(right: 10.w),
+      alignment: Alignment.center,
+      child: Text(
+        index.toString(),
+        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.sp),
+      ),
+    );
+  }
+
   static Widget imageWidget(String? url, bool fit) {
     return CachedNetworkImage(
       imageUrl: url!,

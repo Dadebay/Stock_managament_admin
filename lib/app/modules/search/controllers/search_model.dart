@@ -36,6 +36,10 @@ class SearchModel {
     return SearchModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
+      category: json['category_detail'] != null ? CategoryModel.fromJson(json['category_detail']) : null,
+      brend: json['brends_detail'] != null ? BrendModel.fromJson(json['brends_detail']) : null,
+      material: json['materials_detail'] != null ? MaterialModel.fromJson(json['materials_detail']) : null,
+      location: json['location_detail'] != null ? LocationModel.fromJson(json['location_detail']) : null,
       price: json['price'] ?? '',
       gramm: json['gram'] ?? '',
       count: json['count'] ?? 0,
@@ -44,10 +48,6 @@ class SearchModel {
       createdAT: json['created_at'] ?? '',
       img: json['img'] ?? '',
       cost: json['cost'] ?? '',
-      category: json['category'] != null ? CategoryModel.fromJson(json['category']) : null,
-      brend: json['brends'] != null ? BrendModel.fromJson(json['brends']) : null,
-      material: json['materials'] != null ? MaterialModel.fromJson(json['materials']) : null,
-      location: json['location'] != null ? LocationModel.fromJson(json['location']) : null,
     );
   }
 
@@ -64,10 +64,10 @@ class SearchModel {
       'created_at': createdAT,
       'img': img,
       'cost': cost,
-      'category': category,
-      'brends': brend,
-      'location': location,
-      'materials': material,
+      'category_detail': category,
+      'brends_detail': brend,
+      'location_detail': location,
+      'materials_detail': material,
     };
   }
 }

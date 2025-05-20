@@ -20,7 +20,6 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
-    print(_searchController.selectedProductsToOrder);
     super.initState();
   }
 
@@ -30,7 +29,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
       backgroundColor: Colors.white,
       appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: false, name: 'Create Purchase'.tr),
       body: ListView(
-        padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 4) : context.padding.horizontalMedium,
+        padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 5) : context.padding.horizontalMedium,
         shrinkWrap: true,
         children: [
           CustomTextField(
@@ -80,9 +79,16 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
             requestfocusNode: focusNodes[0],
           ),
           selectedProductsView(),
-          AgreeButton(onTap: () => Get.to(() => SearchView(selectableProducts: true)), text: 'selectProducts'),
+          AgreeButton(onTap: () => Get.to(() => SearchView(selectableProducts: true, whichPage: 'purhcase')), text: 'selectProducts'),
           AgreeButton(
               onTap: () async {
+                List<Map<String, int>> products = [];
+                _searchController.selectedProductsToOrder.forEach(
+                  (element) {
+                    products.add({'id': element['product'].id, 'count': element['count']});
+                  },
+                );
+                print(products);
                 final PurchasesModel model = PurchasesModel(
                   title: textControllers[1].text,
                   date: textControllers[0].text.substring(0, 10),
@@ -90,10 +96,10 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   description: textControllers[4].text,
                   id: 0,
                   cost: textControllers[3].text,
-                  productCount: 0,
+                  count: 0,
                   products: [],
                 );
-                await PurchasesService().addPurchase(model: model, products: _searchController.selectedProductsToOrder);
+                await PurchasesService().addPurchase(model: model, products: products);
               },
               text: 'agree'),
           SizedBox(
@@ -135,6 +141,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   product: _searchController.selectedProductsToOrder[index]['product'],
                   disableOnTap: false,
                   addCounterWidget: true,
+                  whcihPage: 'purhcase',
                 );
               },
             ),

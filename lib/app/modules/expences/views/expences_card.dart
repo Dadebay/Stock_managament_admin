@@ -29,18 +29,11 @@ class ExpencesCard extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.w),
+      padding: EdgeInsets.only(top: 15.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40.w,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              count.toString(),
-              style: textStyle.copyWith(fontSize: 18.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
+          CustomWidgets.counter(count),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +108,7 @@ class ExpencesCard extends StatelessWidget {
             );
           },
           icon: const Icon(
-            IconlyLight.edit,
+            IconlyLight.editSquare,
             color: ColorConstants.blackColor,
           ),
         ),

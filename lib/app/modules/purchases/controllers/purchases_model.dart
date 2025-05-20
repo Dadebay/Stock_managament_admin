@@ -6,7 +6,7 @@ class PurchasesModel {
   final String date;
   final String source;
   final String cost;
-  final int productCount;
+  final int count;
   final String description;
   final List<SearchModel> products;
 
@@ -17,34 +17,33 @@ class PurchasesModel {
     required this.title,
     required this.date,
     required this.source,
-    required this.productCount,
+    required this.count,
     required this.products,
   });
 
   factory PurchasesModel.fromJson(Map<String, dynamic> json) {
     return PurchasesModel(
       id: json['id'] ?? 0,
-      description: json['description'] ?? '',
-      cost: json['cost'] ?? '',
       title: json['title'] ?? '',
       date: json['date'] ?? '',
       source: json['source'] ?? '',
-      productCount: json['product_count'] ?? 0,
-      products: json['products'] != null ? (json['product'] as List).map((i) => SearchModel.fromJson(i)).toList() : [],
+      cost: json['cost'] ?? '',
+      description: json['description'] ?? '',
+      count: json['count'] ?? 0,
+      products: json['product_detail'] != null ? (json['product_detail'] as List).map((i) => SearchModel.fromJson(i)).toList() : [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'count': productCount,
+      'count': count,
       'description': description,
       'cost': cost,
       'title': title,
       'date': date,
       'source': source,
-      'productCount': productCount,
-      'product': products.map((product) => product.toJson()).toList(),
+      'product_detail': products.map((product) => product.toJson()).toList(),
     };
   }
 }

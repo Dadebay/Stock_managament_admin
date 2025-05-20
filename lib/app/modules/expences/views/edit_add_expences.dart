@@ -58,6 +58,7 @@ class _EditAddExpencesDialogState extends State<EditAddExpencesDialog> {
     );
     if (isEditing) {
       await ExpencesService().editExpence(model: model, context: context);
+      expencesController.totalPrice.value += double.tryParse(model.cost.toString()) ?? 0.0;
     } else {
       await ExpencesService().addExpence(model: model, context: context);
       expencesController.totalPrice.value += double.tryParse(model.cost.toString()) ?? 0.0;

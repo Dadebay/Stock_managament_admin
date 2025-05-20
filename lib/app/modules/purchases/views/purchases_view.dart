@@ -33,6 +33,8 @@ class _PurchasesViewState extends State<PurchasesView> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return CustomWidgets.emptyData();
           }
+          purchasesController.purchasesMainList.assignAll(snapshot.data!.toList());
+          purchasesController.calculateTotals();
           return Obx(() {
             final isSearching = searchController.text.isNotEmpty;
             final hasResult = purchasesController.searchResult.isNotEmpty;
@@ -50,6 +52,7 @@ class _PurchasesViewState extends State<PurchasesView> {
                                 ? CustomWidgets.emptyData()
                                 : ListView.builder(
                                     itemCount: displayList.length,
+                                    padding: context.padding.onlyBottomHigh,
                                     itemBuilder: (context, index) {
                                       return PurchaseCard(
                                         purchasesModel: displayList[index],
@@ -64,11 +67,15 @@ class _PurchasesViewState extends State<PurchasesView> {
                   bottom: 70.0,
                   right: 20.0,
                   child: FloatingActionButton(
+                    backgroundColor: Colors.black,
                     heroTag: "add_purchase",
                     onPressed: () {
                       Get.to(() => CreatePurchasesView());
                     },
-                    child: const Icon(IconlyLight.plus),
+                    child: const Icon(
+                      IconlyLight.plus,
+                      color: Colors.amber,
+                    ),
                   ),
                 ),
                 Positioned(
@@ -85,7 +92,7 @@ class _PurchasesViewState extends State<PurchasesView> {
     );
   }
 
-  ListviewTopText<PurchasesModel> _topText(List<PurchasesModel> displayList) {
+  Widget _topText(List<PurchasesModel> displayList) {
     return ListviewTopText<PurchasesModel>(
       names: StringConstants.topPartNamesPurchases,
       listToSort: displayList,
@@ -105,7 +112,7 @@ class _PurchasesViewState extends State<PurchasesView> {
           case 'source':
             return model.source;
           case 'count':
-            return model.productCount;
+            return model.count;
           case 'cost':
             return model.cost;
           default:

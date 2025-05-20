@@ -12,13 +12,10 @@ class SearchService {
 
   Future<List<SearchModel>> getProducts() async {
     final data = await ApiService().getRequest(ApiConstants.products, requiresToken: true);
-    if (data != null && data['results'] != null) {
-      final productList = (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
-
-      searchViewController.productsList.assignAll(productList);
-      searchViewController.searchResult.assignAll(productList);
-      searchViewController.calculateTotals();
-      return productList;
+    if (data is Map && data['results'] != null) {
+      return (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
+    } else if (data is List) {
+      return (data).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
     } else {
       return [];
     }

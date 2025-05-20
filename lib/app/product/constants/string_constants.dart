@@ -23,16 +23,40 @@ class StringConstants {
     {'name': 'Preparing', 'statusName': 'preparing'},
     {'name': 'Ready to ship', 'statusName': 'ready to ship'},
   ];
-  static List<Map<String, String>> topPartNames = [
-    {'name': 'Order Name', 'sortName': "client_number"},
-    {'name': 'Date', 'sortName': "date"},
-    {'name': 'Product count', 'sortName': "product_count"},
-    {'name': '   Sum Price', 'sortName': "sum_price"},
-    {'name': ' Sum Cost', 'sortName': "sum_cost"},
-    {'name': 'Status', 'sortName': "status"},
+  static List<Map<String, String>> orderNamesList = [
+    {
+      'name': 'Order Name',
+      'sortName': "name",
+      'size': ColumnSize.large.toString(),
+    },
+    {
+      'name': 'Date',
+      'sortName': "date",
+      'size': ColumnSize.small.toString(),
+    },
+    {
+      'name': 'Product count',
+      'sortName': "count",
+      'size': ColumnSize.small.toString(),
+    },
+    {
+      'name': 'Sum Price',
+      'sortName': "totalsum",
+      'size': ColumnSize.small.toString(),
+    },
+    {
+      'name': 'Sum Cost',
+      'sortName': "totalchykdajy",
+      'size': ColumnSize.small.toString(),
+    },
+    {
+      'name': 'Status',
+      'sortName': "status",
+      'size': ColumnSize.small.toString(),
+    },
   ];
   static List<Map<String, String>> clientNames = [
-    {'name': 'Client Name', 'sortName': "name", 'size': ColumnSize.small.toString()},
+    {'name': 'Client Name', 'sortName': "name", 'size': ColumnSize.medium.toString()},
     {'name': 'Address', 'sortName': "address", 'size': ColumnSize.medium.toString()},
     {'name': 'Client number', 'sortName': "number", 'size': ColumnSize.small.toString()},
     {'name': 'Order count', 'sortName': "order_count", 'size': ColumnSize.small.toString()},
@@ -48,11 +72,11 @@ class StringConstants {
     {'name': 'Purchase Title', 'sortName': "title", 'size': ColumnSize.small.toString()},
     {'name': 'Date', 'sortName': "date", 'size': ColumnSize.small.toString()},
     {'name': 'Source', 'sortName': "source", 'size': ColumnSize.small.toString()},
-    {'name': 'Product count', 'sortName': "product_count", 'size': ColumnSize.small.toString()},
+    {'name': 'Product count', 'sortName': "count", 'size': ColumnSize.small.toString()},
     {'name': 'Sum Cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
   ];
   static List<Map<String, String>> searchViewFilters = [
-    {'name': 'Brands', 'searchName': 'brand'},
+    {'name': 'Brands', 'searchName': 'brends'},
     {'name': 'Categories', 'searchName': 'category'},
     {'name': 'Locations', 'searchName': 'location'},
     {'name': 'Materials', 'searchName': 'material'}
@@ -66,16 +90,63 @@ class StringConstants {
     {'name': 'Location', 'sortName': "location", 'size': ColumnSize.small.toString()},
   ];
   static List<Map<String, String>> salesTopText = [
-    {'name': 'Product Name', 'sortName': "count", 'size': ColumnSize.medium.toString()},
+    {'name': 'Product Name', 'sortName': "count", 'size': ColumnSize.large.toString()},
     {'name': 'Cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
     {'name': 'Sell Price', 'sortName': "price", 'size': ColumnSize.small.toString()},
     {'name': 'Brand', 'sortName': "brends", 'size': ColumnSize.small.toString()},
     {'name': 'Category', 'sortName': "category", 'size': ColumnSize.small.toString()},
+    {'name': 'Location', 'sortName': "location", 'size': ColumnSize.small.toString()},
+    {'name': 'Count', 'sortName': "count", 'size': ColumnSize.small.toString()},
   ];
-  static final List<String> fieldLabels = ['Name', 'Sell price', 'Category', 'Brand', 'Location', 'Material', 'Gram', 'Count', 'Description', 'Package (Gaplama)', 'Cost'];
+  static final List<String> fieldLabels = [
+    'Name',
+    'Sell price',
+    'Category',
+    'Brand',
+    'Location',
+    'Material',
+    'Gram',
+    'Count',
+    'Description',
+    'Package (Gaplama)',
+    'Cost',
+  ];
 
-  static final List<String> apiFieldNames = ['name', 'price', 'category', 'brends', 'location', 'materials', 'gram', 'count', 'description', 'gaplama', 'cost'];
+  static final List<String> apiFieldNames = [
+    'name',
+    'price',
+    'category',
+    'brends',
+    'location',
+    'materials',
+    'gram',
+    'count',
+    'description',
+    'gaplama',
+    'cost',
+  ];
+  static Map<String, Color> colorMapping = {
+    "1": ColorConstants.kPrimaryColor2,
+    "2": Colors.green,
+    "3": Colors.red,
+    "4": Colors.red,
+    "5": Colors.purple,
+  };
+  static Map<String, String> nameMapping = {
+    "1": "Preparing",
+    "2": "Shipped",
+    "3": 'Canceled  ',
+    "4": "Refund",
+    "5": "Ready to ship",
+  };
 
+  static List<Map<String, dynamic>> statusMapping = [
+    {'name': 'Preparing', 'sortName': "1", 'size': ColumnSize.small.toString(), 'color': ColorConstants.kPrimaryColor2},
+    {'name': 'Shipped', 'sortName': "2", 'size': ColumnSize.small.toString(), 'color': Colors.green},
+    {'name': 'Canceled', 'sortName': "3", 'size': ColumnSize.small.toString(), 'color': Colors.red},
+    {'name': 'Refund', 'sortName': "4", 'size': ColumnSize.small.toString(), 'color': Colors.red},
+    {'name': 'Ready to ship', 'sortName': "5", 'size': ColumnSize.small.toString(), 'color': Colors.purple},
+  ];
   static List pages = [
     Container(),
     Container(),

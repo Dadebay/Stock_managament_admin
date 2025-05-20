@@ -6,11 +6,66 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 class SearchViewController extends GetxController {
   RxList<SearchModel> searchResult = <SearchModel>[].obs;
   RxList<SearchModel> productsList = <SearchModel>[].obs;
+  RxList<SearchModel> historyList = <SearchModel>[].obs;
   RxBool showInGrid = false.obs;
 
   RxDouble sumSell = 0.0.obs;
   RxDouble sumCost = 0.0.obs;
   RxInt sumCount = 0.obs;
+  String _currentSearchText = '';
+  String _activeFilterType = '';
+  String _activeFilterValue = '';
+
+  void _filterAndSearchProducts() {
+    List<SearchModel> GeciciListe = productsList.toList();
+    if (_activeFilterType.isNotEmpty && _activeFilterValue.isNotEmpty) {
+      print(_activeFilterValue);
+      print(_activeFilterType);
+      GeciciListe = GeciciListe.where((product) {
+        print(product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase());
+        switch (_activeFilterType) {
+          case 'category':
+            return product.category?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+          case 'brends':
+            print('Filter value: $_activeFilterValue');
+            print('Product brand: ${product.brend?.name}');
+            return product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+          case 'location':
+            return product.location?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+          case 'material':
+            return product.material?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+          default:
+            return true;
+        }
+      }).toList();
+    }
+    print(GeciciListe.length);
+    if (_currentSearchText.isNotEmpty) {
+      List<String> words = _currentSearchText.trim().toLowerCase().split(' ');
+      GeciciListe = GeciciListe.where((product) {
+        final name = product.name.toLowerCase();
+        final price = product.price.toLowerCase();
+        return words.every((w) => name.contains(w) || price.contains(w));
+      }).toList();
+    }
+    productsList.assignAll(GeciciListe);
+  }
+
+  void applyFilter(String filterType, String filterValue) {
+    _activeFilterType = filterType;
+    _activeFilterValue = filterValue;
+    if (_currentSearchText.isEmpty) {
+      searchResult.assignAll(productsList);
+    }
+    _filterAndSearchProducts();
+  }
+
+  void clearFilter() {
+    _activeFilterType = '';
+    _activeFilterValue = '';
+    productsList.assignAll(historyList);
+    Get.back();
+  }
 
   Rx<Uint8List?> selectedImageBytes = Rx<Uint8List?>(null);
   void clearSelectedImage() {
@@ -64,8 +119,7 @@ class SearchViewController extends GetxController {
       final SearchModel? newProduct = await SearchService().createProductWithImage(fields: productData, imageFileName: imageFileName, imageBytes: selectedImageBytes.value);
 
       if (newProduct != null) {
-        final updatedList = await SearchService().getProducts();
-        productsList.assignAll(updatedList);
+        productsList.add(newProduct);
         selectedImageBytes.value = null;
         Get.back();
         CustomWidgets.showSnackBar("Başarılı", "Ürün başarıyla eklendi", Colors.green);
@@ -113,7 +167,9 @@ class SearchViewController extends GetxController {
     double totalSell = 0;
     double totalCost = 0;
     int totalCount = 0;
-
+    sumSell.value = 0;
+    sumCost.value = 0;
+    sumCount.value = 0;
     for (var product in productsList) {
       final sell = double.tryParse(product.price) ?? 0.0;
       final cost = double.tryParse(product.cost) ?? 0.0;
@@ -146,6 +202,8 @@ class SearchViewController extends GetxController {
   void deleteProduct(int id) {
     productsList.removeWhere((product) => product.id == id);
     searchResult.removeWhere((product) => product.id == id);
+    calculateTotals();
+
     update();
   }
 }

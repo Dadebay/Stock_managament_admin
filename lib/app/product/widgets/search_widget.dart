@@ -18,7 +18,11 @@ class SearchWidget extends StatelessWidget {
             IconlyLight.search,
             color: Colors.black,
           ),
-          title: TextField(controller: controller, style: TextStyle(color: ColorConstants.blackColor, fontSize: 14.sp), decoration: InputDecoration(hintText: 'search'.tr, hintStyle: TextStyle(color: ColorConstants.greyColor, fontSize: 14.sp), border: InputBorder.none), onChanged: onChanged),
+          title: TextField(
+              controller: controller,
+              style: TextStyle(color: ColorConstants.blackColor, fontSize: 16.sp, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(hintText: 'search'.tr, hintStyle: TextStyle(color: ColorConstants.greyColor, fontSize: 14.sp), border: InputBorder.none),
+              onChanged: onChanged),
           contentPadding: EdgeInsets.only(left: 15.w),
           trailing: Padding(
             padding: const EdgeInsets.only(right: 10),

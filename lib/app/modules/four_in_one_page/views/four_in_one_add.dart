@@ -60,7 +60,7 @@ class AddEditFourInOneDialog extends StatelessWidget {
                 : SizedBox(),
             AgreeButton(
               onTap: () async {
-                final newModel = FourInOneModel(id: model?.id ?? 0, name: nameController.text, notes: notesController.text, address: addressController.text);
+                final newModel = FourInOneModel(id: model?.id ?? 0, name: nameController.text, notes: notesController.text, address: addressController.text, quantity: '');
                 if (isEdit) {
                   await FourInOnePageService().editFourInOne(model: newModel, location: name == 'location' ? addressController.text : null, url: url, key: editKey);
                 } else {

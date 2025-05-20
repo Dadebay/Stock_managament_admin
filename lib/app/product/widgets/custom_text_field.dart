@@ -10,13 +10,16 @@ class CustomTextField extends StatefulWidget {
   final int? maxLine;
   final bool? enabled;
   final Function()? onTap;
-
+  final bool isNumberOnly;
+  final bool readOnly;
   const CustomTextField({
     required this.labelName,
     required this.controller,
     required this.focusNode,
     required this.requestfocusNode,
     this.maxLine,
+    this.isNumberOnly = false,
+    this.readOnly = false,
     this.prefixIcon,
     this.enabled,
     this.onTap,
@@ -42,9 +45,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
           if (value == null || value.isEmpty) return 'textfield_error'.tr;
           return null;
         },
+        readOnly: widget.readOnly,
         onEditingComplete: () => widget.requestfocusNode.requestFocus(),
-        keyboardType: TextInputType.text,
         maxLines: widget.maxLine ?? 1,
+        keyboardType: widget.isNumberOnly ? TextInputType.number : TextInputType.text,
+        inputFormatters: widget.isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
         focusNode: widget.focusNode,
         textInputAction: TextInputAction.done,
         enableSuggestions: false,

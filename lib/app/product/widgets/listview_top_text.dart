@@ -46,22 +46,48 @@ class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
     });
 
     List<T> sortedList = List<T>.from(widget.listToSort);
-    sortedList.sort((a, b) {
-      var aVal = widget.getSortValue(a, sortKey);
-      var bVal = widget.getSortValue(b, sortKey);
+    // sortedList.sort((a, b) {
+    //   var aVal = widget.getSortValue(a, sortKey);
+    //   var bVal = widget.getSortValue(b, sortKey);
 
-      if (aVal is num && bVal is num) {
-        return ascending ? aVal.compareTo(bVal) : bVal.compareTo(aVal);
-      } else if (_isNumericString(aVal) && _isNumericString(bVal)) {
-        final aNum = double.tryParse(aVal.toString().replaceAll(',', '.')) ?? 0;
-        final bNum = double.tryParse(bVal.toString().replaceAll(',', '.')) ?? 0;
+    //   if (aVal is num && bVal is num) {
+    //     return ascending ? aVal.compareTo(bVal) : bVal.compareTo(aVal);
+    //   } else if (_isNumericString(aVal) && _isNumericString(bVal)) {
+    //     final aNum = double.tryParse(aVal.toString().replaceAll(',', '.')) ?? 0;
+    //     final bNum = double.tryParse(bVal.toString().replaceAll(',', '.')) ?? 0;
+    //     return ascending ? aNum.compareTo(bNum) : bNum.compareTo(aNum);
+    //   } else {
+    //     return ascending ? aVal.toString().compareTo(bVal.toString()) : bVal.toString().compareTo(aVal.toString());
+    //   }
+    // });
+    sortedList.sort((a, b) {
+      final aVal = widget.getSortValue(a, sortKey);
+      final bVal = widget.getSortValue(b, sortKey);
+
+      final aNum = _parseToDouble(aVal);
+      final bNum = _parseToDouble(bVal);
+
+      if (aNum != null && bNum != null) {
         return ascending ? aNum.compareTo(bNum) : bNum.compareTo(aNum);
-      } else {
-        return ascending ? aVal.toString().compareTo(bVal.toString()) : bVal.toString().compareTo(aVal.toString());
       }
+
+      final aStr = aVal?.toString() ?? '';
+      final bStr = bVal?.toString() ?? '';
+
+      return ascending ? aStr.compareTo(bStr) : bStr.compareTo(aStr);
     });
 
     widget.setSortedList(sortedList);
+  }
+
+  double? _parseToDouble(dynamic val) {
+    if (val == null) return null;
+    if (val is double) return val;
+    if (val is int) return val.toDouble();
+    if (val is String) {
+      return double.tryParse(val.replaceAll(',', '.'));
+    }
+    return null;
   }
 
   bool _isNumericString(dynamic value) {

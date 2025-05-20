@@ -5,7 +5,7 @@ import 'package:stock_managament_admin/app/modules/clients/controllers/client_mo
 class ClientsController extends GetxController {
   RxList<ClientModel> clients = <ClientModel>[].obs;
   RxList<ClientModel> searchResult = <ClientModel>[].obs;
-
+  RxInt currentPage = 1.obs;
   onSearchTextChanged(String word) {
     searchResult.clear();
     if (word.isEmpty) {
@@ -16,7 +16,8 @@ class ClientsController extends GetxController {
     searchResult.value = clients.where((client) {
       final name = client.name.toLowerCase();
       final phone = client.phone.toLowerCase();
-      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()));
+      final address = client.address.toLowerCase();
+      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()) || address.contains(word.toLowerCase()));
     }).toList();
   }
 
@@ -32,17 +33,32 @@ class ClientsController extends GetxController {
 
   void addClient(ClientModel model) {
     clients.insert(0, model);
+    searchResult.insert(0, model);
+
     update();
   }
 
   void deleteClient(int id) {
     clients.removeWhere((item) => item.id == id);
+    searchResult.removeWhere((item) => item.id == id);
     update();
   }
 
   void editClient(ClientModel model) {
     final index = clients.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      print("Hata: ID ${model.id} bulunamadı.");
+      return;
+    }
+
     clients[index] = model;
+
+    final searchIndex = searchResult.indexWhere((item) => item.id == model.id);
+    if (searchIndex != -1) {
+      searchResult[searchIndex] = model;
+    }
+
     clients.refresh();
+    update();
   }
 }

@@ -31,25 +31,22 @@ class FourInOneCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40.w,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              count.toString(),
-              style: textStyle.copyWith(fontSize: 18.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
+          CustomWidgets.counter(count),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
-                    fourInOneModel.name,
+                    fourInOneModel.name + " - " + "${fourInOneModel.quantity.toString() == 'null' ? 0 : fourInOneModel.quantity.toString()} " + " count",
                     maxLines: 3,
                     textAlign: TextAlign.start,
                     overflow: TextOverflow.ellipsis,
-                    style: fadedTextStyle,
+                    style: textStyle.copyWith(
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.bold,
+                      color: ColorConstants.blackColor,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -71,30 +68,33 @@ class FourInOneCard extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(IconlyLight.delete, color: Colors.red),
-          onPressed: () async {
-            await FourInOnePageService().deleteFourInOne(model: fourInOneModel, url: url, key: dataKey);
-          },
-        ),
-        IconButton(
-          icon: const Icon(IconlyLight.edit, color: ColorConstants.blackColor),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AddEditFourInOneDialog(
-                model: fourInOneModel,
-                name: dataKey.contains('location') ? 'location' : '',
-                url: url,
-                editKey: dataKey,
-              ),
-            );
-          },
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(IconlyLight.delete, color: Colors.red),
+            onPressed: () async {
+              await FourInOnePageService().deleteFourInOne(model: fourInOneModel, url: url, key: dataKey);
+            },
+          ),
+          IconButton(
+            icon: const Icon(IconlyLight.editSquare, color: ColorConstants.blackColor),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AddEditFourInOneDialog(
+                  model: fourInOneModel,
+                  name: dataKey.contains('location') ? 'location' : '',
+                  url: url,
+                  editKey: dataKey,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

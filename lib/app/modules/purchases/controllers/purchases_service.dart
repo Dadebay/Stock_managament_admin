@@ -8,11 +8,21 @@ class PurchasesService {
 
   Future<List<PurchasesModel>> getPurchases() async {
     final data = await ApiService().getRequest(ApiConstants.purchases, requiresToken: true);
-    if (data != null && data['results'] != null) {
-      final productList = (data['results'] as List).map((item) => PurchasesModel.fromJson(item)).toList().reversed.toList();
-      purchasesController.purchasesMainList.assignAll(productList);
-      purchasesController.calculateTotals();
-      return productList;
+    if (data is Map && data['data'] != null) {
+      return (data['data'] as List).map((item) => PurchasesModel.fromJson(item)).toList().reversed.toList();
+    } else if (data is List) {
+      return (data).map((item) => PurchasesModel.fromJson(item)).toList().reversed.toList();
+    } else {
+      return [];
+    }
+  }
+
+  Future<List<SearchModel>> getPurchasesByID(int id) async {
+    final data = await ApiService().getRequest(ApiConstants.purchases + "$id/", requiresToken: true);
+    if (data is Map && data['product_detail'] != null) {
+      return (data['product_detail'] as List).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
+    } else if (data is List) {
+      return (data).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
     } else {
       return [];
     }
@@ -23,15 +33,12 @@ class PurchasesService {
       'title': model.title,
       'date': model.date,
       'source': model.source,
-      'cost': model.cost,
+      'cost': double.parse(model.cost.toString()),
       'description': model.description,
+      "count": int.parse(model.count.toString()),
+      'products': products,
     };
-    if (products.isNotEmpty) {
-      for (var product in products) {
-        final SearchModel searchModel = product['product'];
-        body.putIfAbsent('product', () => []).add(searchModel.id);
-      }
-    }
+
     return ApiService().handleApiRequest(
       endpoint: ApiConstants.purchases,
       method: 'POST',

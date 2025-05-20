@@ -58,7 +58,7 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
                           shrinkWrap: true,
                           itemBuilder: (context, i) {
                             return FourInOneCard(
-                              count: list.length - i,
+                              count: i + 1,
                               fourInOneModel: list[i],
                               dataKey: key.toString(),
                               url: StringConstants.four_in_one_names[index]['url'].toString(),
@@ -79,7 +79,16 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
             );
           },
         ),
-        Positioned(bottom: 15, right: 15, child: FloatingActionButton(onPressed: () => DialogsUtils.fourInOneAddData(), child: const Icon(IconlyLight.plus))),
+        Positioned(
+            bottom: 15,
+            right: 15,
+            child: FloatingActionButton(
+                backgroundColor: Colors.black,
+                onPressed: () => DialogsUtils.fourInOneAddData(),
+                child: const Icon(
+                  IconlyLight.plus,
+                  color: Colors.amber,
+                ))),
       ],
     );
   }

@@ -7,9 +7,12 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 class ClientsService {
   final ClientsController clientsController = Get.find();
   Future<List<ClientModel>> getClients() async {
-    final data = await ApiService().getRequest(ApiConstants.clients, requiresToken: true);
-    if (data != null && data['results'] != null) {
+    final uri = Uri.parse("${ApiConstants.clients}");
+    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+    if (data is Map && data['results'] != null) {
       return (data['results'] as List).map((item) => ClientModel.fromJson(item)).toList().reversed.toList();
+    } else if (data is List) {
+      return (data).map((item) => ClientModel.fromJson(item)).toList().reversed.toList();
     } else {
       return [];
     }
@@ -68,8 +71,6 @@ class ClientsService {
       requiresToken: true,
       handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
-          clientsController.deleteClient(id);
-
           CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'clientNotAdded'.tr, Colors.red);

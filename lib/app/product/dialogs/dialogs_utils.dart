@@ -10,6 +10,8 @@ import '../init/packages.dart';
 
 class DialogsUtils {
   static filterDialogSearchView() {
+    final SearchViewController searchViewController = Get.find();
+
     return Get.defaultDialog(
         title: 'Filter',
         titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
@@ -18,22 +20,87 @@ class DialogsUtils {
           width: Get.size.width / 3,
           height: Get.size.height / 2,
           padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
-          child: ListView.builder(
-            itemCount: StringConstants.searchViewFilters.length,
-            shrinkWrap: true,
-            physics: const BouncingScrollPhysics(),
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                onTap: () => filterHelper(index: index),
-                minVerticalPadding: 10.h,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                title: Text(
-                  StringConstants.searchViewFilters[index]['name'].toString(),
-                  style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: StringConstants.searchViewFilters.length,
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      onTap: () => filterHelper(index: index),
+                      minVerticalPadding: 10.h,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      title: Text(
+                        StringConstants.searchViewFilters[index]['name'].toString(),
+                        style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
+                      ),
+                      trailing: const Icon(IconlyLight.arrowRightCircle),
+                    );
+                  },
                 ),
-                trailing: const Icon(IconlyLight.arrowRightCircle),
-              );
-            },
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    searchViewController.clearFilter();
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: ColorConstants.kPrimaryColor2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
+                  child: Text(
+                    "Clear Filter",
+                    style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                  ))
+            ],
+          ),
+        ));
+  }
+
+  static orderFilterDialog() {
+    List nameMapping = ['Preparing', 'Shipped', 'Cancelled', 'Refund', 'Ready to ship'];
+    List numberMapping = [1, 2, 3, 4, 5];
+    final OrderController orderViewController = Get.find();
+    return Get.defaultDialog(
+        title: 'Filter by status',
+        titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
+        titlePadding: EdgeInsets.only(top: 20),
+        content: Container(
+          width: Get.size.width / 3,
+          height: Get.size.height / 2,
+          padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: nameMapping.length,
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      onTap: () {
+                        orderViewController.filterByStatus(numberMapping[index].toString());
+                        Get.back();
+                      },
+                      minVerticalPadding: 10.h,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      title: Text(
+                        nameMapping[index].toString(),
+                        style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
+                      ),
+                      trailing: const Icon(IconlyLight.arrowRightCircle),
+                    );
+                  },
+                ),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    orderViewController.clearFilter();
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: ColorConstants.kPrimaryColor2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
+                  child: Text(
+                    "Clear Filter",
+                    style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                  ))
+            ],
           ),
         ));
   }
@@ -93,13 +160,15 @@ class DialogsUtils {
 
   static filterHelper({required int index}) {
     final SearchViewController searchViewController = Get.find();
+    final String filterTypeForController = StringConstants.searchViewFilters[index]['searchName'].toString();
+    final String dialogTitle = StringConstants.searchViewFilters[index]['name'].toString();
     Get.defaultDialog(
-        title: StringConstants.searchViewFilters[index]['name'].toString(),
+        title: "${"Select".tr} ${dialogTitle.tr}",
         titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
-        titlePadding: EdgeInsets.only(top: 20),
+        titlePadding: EdgeInsets.only(top: 20.h),
         content: Container(
             width: Get.size.width / 3,
-            height: Get.size.height / 2,
+            height: Get.size.height / 1.8,
             padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
             child: FutureBuilder<List<FourInOneModel>>(
               future: FourInOnePageService().getData(url: StringConstants.four_in_one_names[index]['url'].toString()),
@@ -111,21 +180,23 @@ class DialogsUtils {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return CustomWidgets.emptyData();
                 }
-                final categories = snapshot.data!;
+                final filterValues = snapshot.data!;
 
                 return ListView.builder(
-                  itemCount: categories.length,
+                  itemCount: filterValues.length,
                   shrinkWrap: true,
                   itemBuilder: (context, i) {
                     return ListTile(
                       minVerticalPadding: 10.h,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       onTap: () {
-                        // searchViewController.filterProductsMine(StringConstants.searchViewFilters[index]['searchName'], categories[i].name);
+                        searchViewController.applyFilter(filterTypeForController, filterValues[i].name);
+                        Get.back();
+                        Get.back();
                       },
                       trailing: const Icon(IconlyLight.arrowRightCircle),
                       title: Text(
-                        categories[i].name,
+                        filterValues[i].name,
                         style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
                       ),
                     );

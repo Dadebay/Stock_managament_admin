@@ -82,13 +82,20 @@ class ExpencesView extends StatelessWidget {
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && expencesController.searchResult.isEmpty)
                         ? CustomWidgets.emptyData()
-                        : ListView.builder(
+                        : ListView.separated(
                             itemCount: displayList.length,
+                            padding: context.padding.onlyBottomHigh,
                             itemBuilder: (context, index) {
                               return ExpencesCard(
                                 expencesModel: displayList[index],
                                 count: displayList.length - index,
                                 topTextColumnSize: StringConstants.expencesNames,
+                              );
+                            },
+                            separatorBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 30.w),
+                                child: Divider(thickness: 2, color: ColorConstants.greyColorwithOpacity),
                               );
                             },
                           ),
@@ -113,56 +120,67 @@ class ExpencesView extends StatelessWidget {
         children: [
           FloatingActionButton(
             heroTag: 'button1',
+            backgroundColor: Colors.black,
             onPressed: () {
               expencesController.exportToExcel();
             },
-            child: Icon(IconlyLight.document),
+            child: Icon(
+              IconlyLight.document,
+              color: Colors.amber,
+            ),
           ),
           SizedBox(width: 20.w),
           FloatingActionButton(
+            backgroundColor: Colors.black,
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) => const EditAddExpencesDialog(),
               );
             },
-            child: const Icon(Icons.add),
+            child: const Icon(
+              Icons.add,
+              color: Colors.amber,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Column bottomSumPrice(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Divider(color: Colors.grey, thickness: 1),
-        Padding(
-          padding: context.padding.verticalLow,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  "Sum of expences :",
-                  maxLines: 1,
-                  textAlign: TextAlign.end,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.general.textTheme.displayLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
+  Widget bottomSumPrice(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(color: Colors.grey, thickness: 1),
+          Padding(
+            padding: context.padding.verticalLow,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Sum of expences :",
+                    maxLines: 1,
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.general.textTheme.displayLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Obx(() => Text(
-                      expencesController.totalPrice.value.toString(),
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.general.textTheme.displayLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
-                    )),
-              ),
-            ],
+                Expanded(
+                  child: Obx(() => Text(
+                        expencesController.totalPrice.value.toString(),
+                        textAlign: TextAlign.start,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.general.textTheme.displayLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                      )),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

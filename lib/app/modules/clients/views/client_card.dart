@@ -23,24 +23,17 @@ class ClientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = context.general.textTheme.titleMedium!;
     final fadedTextStyle = textStyle.copyWith(
-      fontSize: 17.sp,
+      fontSize: 15.sp,
       fontWeight: FontWeight.w500,
       color: ColorConstants.greyColor,
     );
 
     return Padding(
-      padding: EdgeInsets.only(top: 8.w),
+      padding: EdgeInsets.only(top: 20.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40.w,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              count.toString(),
-              style: textStyle.copyWith(fontSize: 18.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
+          CustomWidgets.counter(count),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,11 +57,7 @@ class ClientCard extends StatelessWidget {
         child: Text(
           value ?? '',
           maxLines: 3,
-          textAlign: flex == 1
-              ? column['sortName'] == "name"
-                  ? TextAlign.start
-                  : TextAlign.center
-              : TextAlign.start,
+          textAlign: flex == 1 ? TextAlign.end : TextAlign.start,
           overflow: TextOverflow.ellipsis,
           style: faded,
         ),
@@ -83,7 +72,7 @@ class ClientCard extends StatelessWidget {
       case 'address':
         return client.address;
       case 'number':
-        return client.phone;
+        return "+993 " + client.phone;
       case 'order_count':
         return client.orderCount.toString();
       case 'sum_price':
@@ -95,12 +84,14 @@ class ClientCard extends StatelessWidget {
 
   Widget _buildActionButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      padding: EdgeInsets.symmetric(horizontal: 30.w),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             onPressed: () async {
+              clientsController.deleteClient(client.id!);
+
               await ClientsService().deleteClient(id: client.id!);
               CustomWidgets.showSnackBar("deleted", "${client.name} " + "clientDeleted".tr, ColorConstants.redColor);
             },
@@ -110,7 +101,7 @@ class ClientCard extends StatelessWidget {
             ),
           ),
           IconButton(
-              icon: const Icon(IconlyLight.edit, color: ColorConstants.blackColor),
+              icon: const Icon(IconlyLight.editSquare, color: ColorConstants.blackColor),
               onPressed: () {
                 showDialog(
                   context: Get.context!,

@@ -55,7 +55,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSize {
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.black,
-          fontSize: sizeWidth > 800 ? 30 : 22,
+          fontSize: sizeWidth > 800 ? 26 : 18,
         ),
       ),
     );

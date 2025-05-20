@@ -18,7 +18,7 @@ class FourInOnePageController extends GetxController {
   }
 
   void addFourInOne(String key, FourInOneModel model) {
-    fourInOneDataMap[key]?.insert(0, model);
+    fourInOneDataMap[key]?.add(model);
   }
 
   void editFourInOne(String key, FourInOneModel model) {

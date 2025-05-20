@@ -9,8 +9,10 @@ class FourInOnePageService {
 
   Future<List<FourInOneModel>> getData({required String url}) async {
     final data = await ApiService().getRequest(url, requiresToken: true);
-    if (data != null && data['results'] != null) {
-      return (data['results'] as List).map((item) => FourInOneModel.fromJson(item)).toList().reversed.toList();
+    if (data is Map && data['results'] != null) {
+      return (data['results'] as List).map((item) => FourInOneModel.fromJson(item)).toList().toList();
+    } else if (data is List) {
+      return (data).map((item) => FourInOneModel.fromJson(item)).toList().toList();
     } else {
       return [];
     }

@@ -13,7 +13,7 @@ export 'package:lottie/lottie.dart';
 export 'package:stock_managament_admin/app/modules/clients/views/client_card.dart';
 export 'package:stock_managament_admin/app/modules/home/controllers/home_controller.dart';
 export 'package:stock_managament_admin/app/modules/purchases/controllers/purchases_controller.dart';
-export 'package:stock_managament_admin/app/modules/sales/controllers/sales_controller.dart';
+export 'package:stock_managament_admin/app/modules/sales/controllers/order_controller.dart';
 export 'package:stock_managament_admin/app/modules/search/controllers/search_controller.dart';
 export 'package:stock_managament_admin/app/modules/search/controllers/search_model.dart';
 export 'package:stock_managament_admin/app/modules/search/views/search_card.dart';

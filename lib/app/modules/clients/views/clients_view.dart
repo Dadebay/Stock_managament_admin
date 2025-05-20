@@ -30,13 +30,12 @@ class ClientsView extends StatelessWidget {
               return CustomWidgets.emptyData();
             }
             final clients = snapshot.data!;
-            if (clientsController.clients.isEmpty) {
-              clientsController.clients.addAll(clients);
-            }
+            clientsController.clients.assignAll(clients);
             return Obx(() {
               final isSearching = searchEditingController.text.isNotEmpty;
               final hasResult = clientsController.searchResult.isNotEmpty;
               final displayList = (isSearching && hasResult) ? clientsController.searchResult.toList() : clientsController.clients.toList();
+
               return Column(
                 children: [
                   SearchWidget(
@@ -77,13 +76,20 @@ class ClientsView extends StatelessWidget {
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && clientsController.searchResult.isEmpty)
                         ? CustomWidgets.emptyData()
-                        : ListView.builder(
+                        : ListView.separated(
+                            padding: context.padding.onlyBottomHigh,
                             itemCount: displayList.length,
                             itemBuilder: (context, index) {
                               return ClientCard(
                                 client: displayList[index],
-                                count: displayList.length - index,
+                                count: (clientsController.clients.length - index),
                                 topTextColumnSize: StringConstants.clientNames,
+                              );
+                            },
+                            separatorBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 30.w),
+                                child: Divider(thickness: 2, color: ColorConstants.greyColorwithOpacity),
                               );
                             },
                           ),
@@ -110,10 +116,15 @@ class ClientsView extends StatelessWidget {
             onPressed: () {
               clientsController.exportToExcel();
             },
-            child: const Icon(CupertinoIcons.doc_person),
+            backgroundColor: Colors.black,
+            child: const Icon(
+              IconlyLight.document,
+              color: Colors.amber,
+            ),
           ),
           SizedBox(width: 30.w),
           FloatingActionButton(
+            backgroundColor: Colors.black,
             onPressed: () {
               showDialog(
                 context: Get.context!,
@@ -122,7 +133,7 @@ class ClientsView extends StatelessWidget {
                 },
               );
             },
-            child: const Icon(CupertinoIcons.add),
+            child: const Icon(CupertinoIcons.add, color: Colors.amber),
           ),
         ],
       ),

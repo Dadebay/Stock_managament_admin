@@ -56,16 +56,21 @@ class ClientAddButton extends StatelessWidget {
             PhoneNumberTextField(mineFocus: focusNode2, controller: phoneNumberEditingController, requestFocus: focusNode, style: true, unFocus: false),
             AgreeButton(
               onTap: () async {
-                final newModel = ClientModel(
-                  id: model!.id,
-                  name: userNameEditingController.text,
-                  address: addressEditingController.text,
-                  phone: phoneNumberEditingController.text,
-                );
-                if (isEdit) {
-                  await ClientsService().editClients(model: newModel);
-                } else {
+                if (model == null) {
+                  final newModel = ClientModel(id: 0, name: userNameEditingController.text, address: addressEditingController.text, phone: phoneNumberEditingController.text, orderCount: 0, sumPrice: '');
+
                   await ClientsService().addClient(model: newModel);
+                } else {
+                  final newModel = ClientModel(
+                    id: model!.id ?? 0,
+                    name: userNameEditingController.text,
+                    address: addressEditingController.text,
+                    phone: phoneNumberEditingController.text,
+                    orderCount: 0,
+                    sumPrice: '',
+                  );
+
+                  await ClientsService().editClients(model: newModel);
                 }
               },
               text: isEdit ? "Edit Client" : "add_client".tr,

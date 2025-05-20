@@ -9,8 +9,10 @@ class ExpencesService {
 
   Future<List<ExpencesModel>> getExpences() async {
     final data = await ApiService().getRequest(ApiConstants.expences, requiresToken: true);
-    if (data != null && data['results'] != null) {
-      return (data['results'] as List).map((item) => ExpencesModel.fromJson(item)).toList().reversed.toList();
+    if (data is Map && data['data'] != null) {
+      return (data['data'] as List).map((item) => ExpencesModel.fromJson(item)).toList().toList();
+    } else if (data is List) {
+      return (data).map((item) => ExpencesModel.fromJson(item)).toList().toList();
     } else {
       return [];
     }
