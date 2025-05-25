@@ -17,7 +17,6 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
   final PurchasesController purchasesController = Get.find();
   @override
   Widget build(BuildContext context) {
-    print(widget.purchasesModel.id);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: false, name: widget.purchasesModel.title),
@@ -41,7 +40,6 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CustomWidgets.spinKit();
           } else if (snapshot.hasError) {
-            print(snapshot.error);
             return CustomWidgets.errorData();
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return CustomWidgets.emptyData();

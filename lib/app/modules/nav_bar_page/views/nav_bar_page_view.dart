@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
-import 'package:stock_managament_admin/app/modules/sales/views/order_view.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/drawer_button.dart';
@@ -29,11 +28,11 @@ class _NavBarPageViewState extends State<NavBarPageView> {
           drawer(width),
           Expanded(
             flex: 6,
-            child: Container(color: Colors.white, child: OrderView()),
-            // child: Container(
-            //   color: Colors.white,
-            //   child: StringConstants.pages[selecedIndex],
-            // ),
+            // child: Container(color: Colors.white, child: OrderView()),
+            child: Container(
+              color: Colors.white,
+              child: StringConstants.pages[selecedIndex],
+            ),
           ),
         ],
       ),

@@ -26,6 +26,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
+    _searchController.selectedProductsToOrder.clear();
     super.initState();
   }
 
@@ -149,7 +150,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   AgreeButton submitOrder() {
     return AgreeButton(
         onTap: () async {
-          print(selectedStatus);
           int key = 0;
           for (var status in StringConstants.statusMapping) {
             if (status['name'] == selectedStatus) {
@@ -163,6 +163,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                 products.add({'id': element['product'].id, 'count': element['count']});
               },
             );
+            print(key);
             print(products);
             final OrderModel model = OrderModel(
               id: 0,
@@ -179,7 +180,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                 name: textControllers[3].text,
                 address: textControllers[4].text,
                 phone: textControllers[2].text,
-                description: '',
+                description: textControllers[6].text,
                 ordercount: '',
                 sumprice: '',
               ),

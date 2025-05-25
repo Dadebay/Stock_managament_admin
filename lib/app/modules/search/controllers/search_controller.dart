@@ -19,16 +19,11 @@ class SearchViewController extends GetxController {
   void _filterAndSearchProducts() {
     List<SearchModel> GeciciListe = productsList.toList();
     if (_activeFilterType.isNotEmpty && _activeFilterValue.isNotEmpty) {
-      print(_activeFilterValue);
-      print(_activeFilterType);
       GeciciListe = GeciciListe.where((product) {
-        print(product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase());
         switch (_activeFilterType) {
           case 'category':
             return product.category?.name.toLowerCase() == _activeFilterValue.toLowerCase();
           case 'brends':
-            print('Filter value: $_activeFilterValue');
-            print('Product brand: ${product.brend?.name}');
             return product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase();
           case 'location':
             return product.location?.name.toLowerCase() == _activeFilterValue.toLowerCase();
@@ -39,7 +34,6 @@ class SearchViewController extends GetxController {
         }
       }).toList();
     }
-    print(GeciciListe.length);
     if (_currentSearchText.isNotEmpty) {
       List<String> words = _currentSearchText.trim().toLowerCase().split(' ');
       GeciciListe = GeciciListe.where((product) {
@@ -67,9 +61,11 @@ class SearchViewController extends GetxController {
     Get.back();
   }
 
+  Rx<String?> selectedImageFileName = Rx<String?>(null);
   Rx<Uint8List?> selectedImageBytes = Rx<Uint8List?>(null);
   void clearSelectedImage() {
     selectedImageBytes.value = null;
+    selectedImageFileName.value = null;
   }
 
   RxList<Map<String, dynamic>> selectedProductsToOrder = <Map<String, dynamic>>[].obs;
@@ -113,21 +109,23 @@ class SearchViewController extends GetxController {
 
   Future<void> addNewProduct({
     required Map<String, String> productData,
-    String? imageFileName,
   }) async {
     try {
-      final SearchModel? newProduct = await SearchService().createProductWithImage(fields: productData, imageFileName: imageFileName, imageBytes: selectedImageBytes.value);
+      final SearchModel? newProduct = await SearchService().createProductWithImage(
+        fields: productData,
+        imageBytes: selectedImageBytes.value, // Controller'daki byte'ları kullan
+        imageFileName: selectedImageFileName.value, // Controller'daki dosya adını kullan
+      );
 
       if (newProduct != null) {
         productsList.add(newProduct);
-        selectedImageBytes.value = null;
+        clearSelectedImage(); // Seçilen resmi ve dosya adını temizle
         Get.back();
         CustomWidgets.showSnackBar("Başarılı", "Ürün başarıyla eklendi", Colors.green);
       } else {
         CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
       }
     } catch (e) {
-      print("Ürün ekleme hatası: $e");
       CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi: $e", Colors.red);
     }
   }
@@ -150,17 +148,31 @@ class SearchViewController extends GetxController {
   }
 
   void updateProductLocally(SearchModel updatedProduct) {
+    print("updateProductLocally çağrıldı. Gelen ürün ID: ${updatedProduct.id}, Yeni img: ${updatedProduct.img}");
+
     final indexInProducts = productsList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInProducts != -1) {
+      print("productsList içinde bulundu, güncelleniyor. Eski img: ${productsList[indexInProducts].img}");
       productsList[indexInProducts] = updatedProduct;
+    } else {
+      print("productsList içinde ürün bulunamadı: ${updatedProduct.id}");
     }
 
     final indexInSearch = searchResult.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInSearch != -1) {
+      print("searchResult içinde bulundu, güncelleniyor. Eski img: ${searchResult[indexInSearch].img}");
       searchResult[indexInSearch] = updatedProduct;
+    } else {
+      print("searchResult içinde ürün bulunamadı: ${updatedProduct.id}");
     }
+
     calculateTotals();
+
+    productsList.refresh();
+    searchResult.refresh();
     update();
+
+    print("Güncelleme sonrası productsList[${indexInProducts}].img: ${productsList.firstWhereOrNull((p) => p.id == updatedProduct.id)?.img}");
   }
 
   void calculateTotals() {
@@ -187,14 +199,13 @@ class SearchViewController extends GetxController {
 
   Future<void> pickImage() async {
     try {
-      var fileInfo = await ImagePickerWeb.getImageInfo;
+      var fileInfo = await ImagePickerWeb.getImageInfo; // Bu MediaInfo döndürür
       if (fileInfo != null && fileInfo.data != null && fileInfo.fileName != null) {
         selectedImageBytes.value = fileInfo.data;
-
-        CustomWidgets.showSnackBar("Success", "Image selected: ", Colors.green);
+        selectedImageFileName.value = fileInfo.fileName; // Yeni: Dosya adını sakla
+        CustomWidgets.showSnackBar("Success", "Image selected: ${fileInfo.fileName}", Colors.green);
       }
     } catch (e) {
-      print("Error picking image: $e");
       CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);
     }
   }

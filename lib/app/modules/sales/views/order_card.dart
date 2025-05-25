@@ -23,7 +23,7 @@ class OrderCardView extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Text(
-                "${order.clientDetailModel?.name}  -  ${order.clientDetailModel?.phone}",
+                "${order.clientDetailModel?.name}  -  ${order.clientDetailModel?.phone!.replaceAll("+993", "")}",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -69,12 +69,15 @@ class OrderCardView extends StatelessWidget {
               flex: 2,
               child: Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: StringConstants.colorMapping[order.status]?.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                    color: StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['color']?.withOpacity(0.15),
+                    border: Border.all(color: StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['color'] ?? Colors.transparent, width: 1),
+                    borderRadius: BorderRadius.circular(10)),
                 child: Text(
-                  "${StringConstants.nameMapping[order.status]} ",
+                  "${StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['name']} ",
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: StringConstants.colorMapping[order.status], fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['color'], fontSize: 16.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

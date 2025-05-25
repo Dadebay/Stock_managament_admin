@@ -10,303 +10,414 @@ class OrderProductsView extends StatefulWidget {
   final OrderModel order;
 
   const OrderProductsView({super.key, required this.order});
+
   @override
   State<OrderProductsView> createState() => _OrderProductsViewState();
 }
 
 class _OrderProductsViewState extends State<OrderProductsView> {
-  final OrderController orderController = Get.find<OrderController>();
+  final OrderController orderController = Get.put<OrderController>(OrderController());
   late OrderModel _currentOrder;
-  late String _selectedStatus;
 
   @override
   void initState() {
     super.initState();
     _currentOrder = widget.order;
-    _selectedStatus = StringConstants.statusMapping.firstWhere((map) => map['sortName'].toString() == _currentOrder.status, orElse: () => StringConstants.statusMapping.first)['name']!;
+  }
+
+  List<Map<String, dynamic>> buildOrderDetailsFields(OrderModel order) {
+    return [
+      {'label': 'status', 'editable': true},
+      {'label': 'date', 'editable': true},
+      {'label': 'clientName', 'editable': true}, // Bu alan için sorun yaşanıyor
+      {'label': 'phone', 'editable': true},
+      {'label': 'address', 'editable': true},
+      {'label': 'gaplama', 'editable': true},
+      {'label': 'discount', 'editable': false},
+      {'label': 'coupon', 'editable': true},
+      {'label': 'description', 'editable': true},
+      {'label': 'count', 'editable': false},
+      {'label': 'totalsum', 'editable': false},
+      {'label': 'totalchykdajy', 'editable': false},
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final updatedOrderFromController = orderController.allOrders.firstWhereOrNull((o) => o.id == widget.order.id);
-      if (updatedOrderFromController != null) {
-        _currentOrder = updatedOrderFromController;
-        _selectedStatus = StringConstants.statusMapping.firstWhere((map) => map['sortName'].toString() == _currentOrder.status, orElse: () => StringConstants.statusMapping.first)['name']!;
-      }
-
-      return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: CustomAppBar(
-            backArrow: true,
-            centerTitle: true,
-            actionIcon: true,
-            icon: IconButton(
-                onPressed: () async {
-                  await OrderService().deleteOrder(model: _currentOrder);
-                  Get.back();
-                },
-                icon: Icon(IconlyLight.delete, color: Colors.red)),
-            name: _currentOrder.name,
+    final fieldDefinitions = buildOrderDetailsFields(_currentOrder);
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        backArrow: true,
+        centerTitle: true,
+        actionIcon: true,
+        icon: IconButton(
+          onPressed: () async {
+            final confirm = await Get.defaultDialog<bool>(
+              title: 'Delete Order'.tr,
+              middleText: 'Are you sure you want to delete this order?'.tr,
+              textConfirm: 'Delete'.tr,
+              textCancel: 'Cancel'.tr,
+              confirmTextColor: Colors.white,
+              onConfirm: () => Get.back(result: true),
+              onCancel: () => Get.back(result: false),
+            );
+            if (confirm == true) {
+              await OrderService().deleteOrder(model: _currentOrder);
+            }
+          },
+          icon: Icon(IconlyLight.delete, color: Colors.red),
+        ),
+        name: _currentOrder.name,
+      ),
+      body: ListView(
+        shrinkWrap: true,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 30.h),
+            child: Column(
+              children: List.generate(fieldDefinitions.length, (index) {
+                final fieldDef = fieldDefinitions[index];
+                return OrderDetailField(
+                  key: ValueKey(_currentOrder.id.toString() + fieldDef['label']!),
+                  label: fieldDef['label']!,
+                  isEditable: fieldDef['editable'] as bool,
+                  currentOrder: _currentOrder,
+                  onUpdate: (updatedOrderFromField) {
+                    setState(() {
+                      _currentOrder = updatedOrderFromField;
+                    });
+                    orderController.editOrderInList(updatedOrderFromField);
+                  },
+                );
+              }),
+            ),
           ),
-          body: ListView(
-            shrinkWrap: true,
-            children: [
-              SizedBox(height: 30.h),
-              textsWidgetsListview(context),
-              SizedBox(height: 30.h),
-              _topText(widget.order.products),
-              _productView(),
-            ],
-          ));
-    });
-  }
-
-  Widget _productView() {
-    return FutureBuilder<List<SearchModel>>(
-        future: OrderService().getOrderProduct(widget.order.id),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CustomWidgets.spinKit();
-          } else if (snapshot.hasError) {
-            return CustomWidgets.errorData();
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return SizedBox(height: 300, child: CustomWidgets.emptyData()); // Container yerine SizedBox
-          }
-          final productsToShow = snapshot.data!;
-          return ListView.builder(
-            itemCount: productsToShow.length,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 30.w),
-            itemBuilder: (BuildContext context, int index) {
-              return SearchCard(
-                product: productsToShow[index],
-                disableOnTap: true,
-                addCounterWidget: false,
-                whcihPage: '',
-              );
-            },
-          );
-        });
-  }
-
-  ListviewTopText<SearchModel> _topText(List<SearchModel> displayList) {
-    return ListviewTopText<SearchModel>(
-      names: StringConstants.searchViewtopPartNames,
-      listToSort: displayList,
-      setSortedList: (newList) {},
-      getSortValue: (model, key) {
-        switch (key) {
-          case 'count':
-            return model.count ?? 0;
-          case 'price':
-            return model.price ?? 0;
-          case 'cost':
-            return model.cost ?? 0;
-          case 'brends':
-            return model.brend?.name ?? '';
-          case 'category':
-            return model.category?.name ?? '';
-          case 'location':
-            return model.location?.name ?? '';
-          default:
-            return '';
-        }
-      },
+          if (_currentOrder.products.isNotEmpty)
+            ListviewTopText<SearchModel>(
+              names: StringConstants.searchViewtopPartNames,
+              listToSort: _currentOrder.products,
+              setSortedList: (newList) {},
+              getSortValue: (model, key) => orderController.getProductSortValue(model, key),
+            ),
+          _buildProductList(),
+        ],
+      ),
     );
   }
 
-  Wrap textsWidgetsListview(BuildContext context) {
-    List<Map<String, String>> namesList = [
-      {
-        'text1': 'status',
-        "text2": StringConstants.statusMapping.firstWhere((s) => s['sortName'].toString() == _currentOrder.status, orElse: () => {'name': 'Unknown'})['name']!
+  Widget _buildProductList() {
+    if (_currentOrder.id == 0) {
+      return SizedBox(height: 300, child: Center(child: Text("Order ID is missing".tr)));
+    }
+    return FutureBuilder<List<SearchModel>>(
+      future: OrderService().getOrderProduct(_currentOrder.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) return CustomWidgets.spinKit();
+        if (snapshot.hasError) return SizedBox(height: 300, child: Center(child: Text('Error: ${snapshot.error}'.tr)));
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (_currentOrder.products.isNotEmpty) {
+            final products = _currentOrder.products;
+            return ListView.builder(
+              itemCount: products.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 30.w),
+              itemBuilder: (context, index) => SearchCard(
+                product: products[index],
+                disableOnTap: true,
+                addCounterWidget: false,
+                whcihPage: '',
+              ),
+            );
+          }
+          return SizedBox(height: 300, child: CustomWidgets.emptyData());
+        }
+
+        final products = snapshot.data!;
+        return ListView.builder(
+          itemCount: products.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 30.w),
+          itemBuilder: (context, index) => SearchCard(
+            product: products[index],
+            disableOnTap: true,
+            addCounterWidget: false,
+            whcihPage: '',
+          ),
+        );
       },
-      {'text1': 'date', "text2": _currentOrder.date.toString().substring(0, 16).replaceAll("T", ' ')},
-      {'text1': 'clientName', "text2": _currentOrder.clientDetailModel?.name.toString() ?? 'N/A'},
-      {'text1': 'phone', "text2": _currentOrder.clientDetailModel?.phone.toString() ?? 'N/A'},
-      {'text1': 'address', "text2": _currentOrder.clientDetailModel?.address.toString() ?? 'N/A'},
-      {'text1': 'gaplama', "text2": _currentOrder.gaplama.toString()},
-      {'text1': 'discount', "text2": "${_currentOrder.discount.toString()} % "},
-      {'text1': 'coupon', "text2": _currentOrder.coupon.toString()},
-      {'text1': 'description', "text2": _currentOrder.description.toString()},
-      {'text1': 'count', "text2": _currentOrder.count.toString()}, // Bu genellikle düzenlenemez
-      {'text1': 'totalsum', "text2": "${_currentOrder.totalsum.toString()} \$"}, // Bu genellikle düzenlenemez
-      {'text1': 'totalchykdajy', "text2": "${_currentOrder.totalchykdajy.toString()} \$"}, // Bu genellikle düzenlenemez
-    ];
-    return Wrap(
-        children: List.generate(namesList.length, (index) {
-      bool isEditable = ![
-        'count',
-        'totalsum',
-        'totalchykdajy',
-      ].contains(namesList[index]['text1']);
-      return textWidgetOrderedPage(labelName: namesList[index]['text1']!, value: namesList[index]['text2']!, isEditable: isEditable);
-    }));
+    );
+  }
+}
+
+class OrderDetailField extends StatefulWidget {
+  final String label;
+  final bool isEditable;
+  final OrderModel currentOrder;
+  final Function(OrderModel) onUpdate;
+
+  const OrderDetailField({
+    super.key,
+    required this.label,
+    required this.isEditable,
+    required this.currentOrder,
+    required this.onUpdate,
+  });
+
+  @override
+  State<OrderDetailField> createState() => _OrderDetailFieldState();
+}
+
+class _OrderDetailFieldState extends State<OrderDetailField> {
+  late String _displayedValue;
+  @override
+  void initState() {
+    super.initState();
+    _displayedValue = _getValue(widget.label, widget.currentOrder);
   }
 
-  Widget textWidgetOrderedPage({required String labelName, required String value, bool isEditable = true}) {
-    FocusNode focusNode = FocusNode();
-    final TextEditingController textEditingController = TextEditingController();
-    textEditingController.text = value;
-    if (labelName == 'discount') {
-      textEditingController.text = value.replaceAll(" % ", "").trim();
+  @override
+  void didUpdateWidget(covariant OrderDetailField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentOrder != oldWidget.currentOrder) {
+      final newValue = _getValue(widget.label, widget.currentOrder);
+      if (_displayedValue != newValue) {
+        setState(() {
+          _displayedValue = newValue;
+        });
+      }
     }
+  }
 
+  String _getValue(String label, OrderModel order) {
+    switch (label) {
+      case 'status':
+        return StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status, orElse: () => {'name': 'Unknown'})['name']!;
+      case 'date':
+        return order.date.toString().substring(0, 16).replaceAll("T", ' ');
+      case 'clientName':
+        return order.clientDetailModel?.name ?? 'N/A';
+      case 'phone':
+        final phoneNum = order.clientDetailModel?.phone ?? 'N/A';
+        return phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum; // Display without +993
+      case 'address':
+        return order.clientDetailModel?.address ?? 'N/A';
+      case 'gaplama':
+        return order.gaplama.toString();
+      case 'discount':
+        return "${order.discount} % ";
+      case 'coupon':
+        return order.coupon.toString();
+      case 'description':
+        return order.description.toString();
+      case 'count':
+        return order.count.toString();
+      case 'totalsum':
+        return "${order.totalchykdajy} \$";
+      case 'totalchykdajy':
+        return "${order.totalsum} \$";
+      default:
+        return 'Bilinmeyen Alan'.tr;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _displayedValue = _getValue(widget.label, widget.currentOrder);
     return GestureDetector(
-      onTap: !isEditable
+      onTap: !widget.isEditable
           ? null
-          : () {
-              String? tempSelectedStatusValue = _currentOrder.status;
-  
-              Get.defaultDialog(
-                title: "${labelName.tr}",
-                content: Container(
-                  width: Get.size.width / 3,
-                  child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setStateDialog) {
-                      Widget contentWidget;
-                      if (labelName == 'date') {
-                        contentWidget = CustomTextField(
-                          readOnly: true,
-                          onTap: () async {
-                            final result = await CustomWidgets.showDateTimePickerWidget(context: context);
-                            if (result != null) {
-                              setStateDialog(() {
-                                textEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(result);
-                              });
-                            }
-                          },
-                          labelName: labelName.tr,
-                          controller: textEditingController,
-                          focusNode: focusNode,
-                          requestfocusNode: focusNode,
-                        );
-                      } else if (labelName == 'status') {
-                        contentWidget = Column(
-                          children: List.generate(
-                              StringConstants.statusMapping.length,
-                              (index) => Container(
-                                    padding: context.padding.low,
-                                    margin: context.padding.low,
-                                    width: Get.size.width / 4,
-                                    decoration: BoxDecoration(border: Border.all(color: StringConstants.statusMapping[index]['color']!, width: 2), borderRadius: BorderRadius.circular(10), color: StringConstants.statusMapping[index]['color']!.withOpacity(0.5)),
-                                    child: Text(StringConstants.statusMapping[index]['name'], style: TextStyle(color: StringConstants.statusMapping[index]['color'], fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                                  )),
-                        );
-                      } else {
-                        contentWidget = CustomTextField(
-                          labelName: labelName.tr,
-                          controller: textEditingController,
-                          focusNode: focusNode,
-                          isNumberOnly: labelName == 'discount',
-                          requestfocusNode: focusNode,
-                        );
-                      }
-
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          contentWidget,
-                          SizedBox(height: 20.h),
-                          AgreeButton(
-                              onTap: () async {
-                                OrderModel updatedOrderData = _currentOrder;
-                                switch (labelName) {
-                                  case 'date':
-                                    updatedOrderData = _currentOrder.copyWith(date: textEditingController.text);
-                                    break;
-                                  case 'status':
-                                    updatedOrderData = _currentOrder.copyWith(status: tempSelectedStatusValue);
-                                    break;
-                                  case 'clientName':
-                                    final newClientDetail = _currentOrder.clientDetailModel?.copyWith(name: textEditingController.text);
-                                    updatedOrderData = _currentOrder.copyWith(
-                                      clientDetailModel: newClientDetail,
-                                      name: "${textEditingController.text} - ${_currentOrder.clientDetailModel?.phone ?? ''}",
-                                    );
-                                    break;
-                                  case 'phone':
-                                    final newClientDetail = _currentOrder.clientDetailModel?.copyWith(phone: textEditingController.text);
-                                    updatedOrderData = _currentOrder.copyWith(
-                                      clientDetailModel: newClientDetail,
-                                      name: "${_currentOrder.clientDetailModel?.name ?? ''} - ${textEditingController.text}",
-                                    );
-                                    break;
-                                  case 'address':
-                                    final newClientDetail = _currentOrder.clientDetailModel?.copyWith(address: textEditingController.text);
-                                    updatedOrderData = _currentOrder.copyWith(clientDetailModel: newClientDetail);
-                                    break;
-                                  case 'gaplama':
-                                    updatedOrderData = _currentOrder.copyWith(gaplama: textEditingController.text);
-                                    break;
-                                  case 'discount':
-                                    updatedOrderData = _currentOrder.copyWith(discount: textEditingController.text.isEmpty ? "0" : textEditingController.text);
-                                    break;
-                                  case 'coupon':
-                                    updatedOrderData = _currentOrder.copyWith(coupon: textEditingController.text);
-                                    break;
-                                  case 'description':
-                                    updatedOrderData = _currentOrder.copyWith(description: textEditingController.text);
-                                    break;
-                                  default:
-                                    break;
-                                }
-
-                                Get.back(); // Dialog'u kapat
-                                await OrderService().editOrder(model: updatedOrderData);
-                              },
-                              text: "Change Data".tr),
-                          SizedBox(height: 10.h),
-                          AgreeButton(
-                              onTap: () {
-                                Get.back();
-                              },
-                              showBorder: true,
-                              text: "Cancel".tr)
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              );
-            },
+          : () => showEditDialog(
+                context: context,
+                label: widget.label,
+                initialValue: _displayedValue, // Dialog için başlangıç değeri
+                currentOrder: widget.currentOrder,
+                onSave: (locallyUpdatedOrder) async {
+                  await OrderService().editOrderManually(model: locallyUpdatedOrder);
+                  widget.onUpdate(locallyUpdatedOrder);
+                },
+              ),
       child: Container(
-        color: Colors.white, // Tıklanabilirliği artırmak için
+        color: Colors.white,
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 10.h), // Biraz dikey padding ekledim
+              padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 10.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    labelName == "date" ? labelName.tr : "${labelName.tr} :",
+                    widget.label == "date" ? widget.label.tr : "${widget.label.tr} :",
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Colors.grey, fontSize: 16.sp, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 10.w), // Arada boşluk
-                  Expanded(
-                    // Değerin taşmasını engellemek için Expanded
-                    child: Text(
-                      value,
-                      textAlign: TextAlign.end, // Sağa yasla
-                      // overflow: TextOverflow.ellipsis, // Taşarsa ...
-                      style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
-                    ),
-                  )
+                  SizedBox(width: 10.w),
+                  widget.label == 'status'
+                      ? Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color']?.withOpacity(0.15),
+                              border: Border.all(color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color']!, width: 1),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Text(
+                            "${StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['name']} ",
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color'], fontSize: 16.sp, fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      : Expanded(
+                          child: Text(
+                            _displayedValue, // Her zaman güncel olan _displayedValue'yu kullan
+                            textAlign: TextAlign.end,
+                            style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                          ),
+                        )
                 ],
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.h), // Divider padding'ini azalttım
-              child: Divider(color: Colors.grey.shade200, height: 1), // Yüksekliği 1 yaptım
+              padding: EdgeInsets.symmetric(vertical: 5.h),
+              child: Divider(color: Colors.grey.shade200, height: 1),
             )
           ],
         ),
       ),
     );
+  }
+
+  void showEditDialog({
+    required BuildContext context,
+    required String label,
+    required String initialValue,
+    required OrderModel currentOrder,
+    required Function(OrderModel) onSave,
+  }) {
+    final TextEditingController controller = TextEditingController();
+
+    if (label == 'status') {
+      Get.defaultDialog(
+        title: label.tr,
+        titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: Get.size.width / 3,
+          padding: context.padding.normal,
+          child: SingleChildScrollView(
+            child: Column(
+              children: StringConstants.statusMapping2.map((statusItem) {
+                return GestureDetector(
+                  onTap: () async {
+                    final updatedOrder = currentOrder.copyWith(status: statusItem['sortName']!);
+                    Get.back();
+                    await onSave(updatedOrder);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(vertical: 4.h),
+                    padding: EdgeInsets.all(10.w),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: (statusItem['color'] as Color).withOpacity(0.5)),
+                      borderRadius: BorderRadius.circular(10),
+                      color: (statusItem['color'] as Color).withOpacity(0.2),
+                    ),
+                    child: Text(
+                      statusItem['name']!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: statusItem['color'] as Color, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (label == 'discount') {
+      controller.text = currentOrder.discount.replaceAll(" % ", "").trim();
+    } else if (label == 'phone') {
+      final phoneNum = currentOrder.clientDetailModel?.phone ?? '';
+      controller.text = phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum;
+    } else {
+      controller.text = initialValue == 'N/A' ? '' : initialValue;
+    }
+
+    Get.defaultDialog(
+      title: label.tr,
+      content: StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return Container(
+            width: Get.size.width / 3,
+            padding: context.padding.normal,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomTextField(
+                  labelName: label.tr,
+                  controller: controller,
+
+                  isNumberOnly: ['discount'].contains(label) || (label == 'phone'), // Telefon için de sayısal olabilir
+                  readOnly: label == 'date',
+                  onTap: label == 'date'
+                      ? () async {
+                          final resultTime = await CustomWidgets.showDateTimePickerWidget(context: context);
+                          if (resultTime != null) {
+                            controller.text = DateFormat('yyyy-MM-dd HH:mm').format(resultTime);
+                            setStateDialog(() {});
+                          }
+                        }
+                      : null,
+                  focusNode: FocusNode(),
+                  requestfocusNode: FocusNode(),
+                ),
+                SizedBox(height: 10.h),
+                AgreeButton(
+                  text: 'Change Data'.tr,
+                  onTap: () async {
+                    final newValueFromInput = controller.text;
+                    OrderModel updatedOrderWithNewValue = _copyUpdatedOrder(label, newValueFromInput, currentOrder);
+                    Get.back();
+                    await onSave(updatedOrderWithNewValue); // onSave çağrısı
+                  },
+                ),
+                SizedBox(height: 5.h),
+                AgreeButton(onTap: () => Get.back(), text: 'Cancel'.tr, showBorder: true),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  OrderModel _copyUpdatedOrder(String label, String value, OrderModel current) {
+    ClientDetailModel clientDetails = current.clientDetailModel ?? ClientDetailModel(id: current.clientID, name: '');
+    switch (label) {
+      case 'date':
+        return current.copyWith(date: value.replaceAll(" ", "T"));
+      case 'clientName':
+        return current.copyWith(clientDetailModel: clientDetails.copyWith(name: value));
+      case 'phone':
+        final String phoneNumber = value.startsWith('+993') || value.isEmpty ? value : '+993$value';
+        return current.copyWith(clientDetailModel: clientDetails.copyWith(phone: phoneNumber));
+      case 'address':
+        return current.copyWith(clientDetailModel: clientDetails.copyWith(address: value));
+      case 'gaplama':
+        return current.copyWith(gaplama: value);
+      case 'discount':
+        return current.copyWith(discount: value); // Modeldeki discount string ise
+      case 'coupon':
+        return current.copyWith(coupon: value);
+      case 'description':
+        return current.copyWith(description: value);
+      default:
+        return current;
+    }
   }
 }

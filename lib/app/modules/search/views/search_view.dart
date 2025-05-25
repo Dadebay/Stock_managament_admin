@@ -38,7 +38,6 @@ class _SearchViewState extends State<SearchView> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CustomWidgets.spinKit();
           } else if (snapshot.hasError) {
-            print(snapshot.error);
             return CustomWidgets.errorData();
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return CustomWidgets.emptyData();

@@ -88,7 +88,6 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                     products.add({'id': element['product'].id, 'count': element['count']});
                   },
                 );
-                print(products);
                 final PurchasesModel model = PurchasesModel(
                   title: textControllers[1].text,
                   date: textControllers[0].text.substring(0, 10),

@@ -47,7 +47,6 @@ class ClientsController extends GetxController {
   void editClient(ClientModel model) {
     final index = clients.indexWhere((item) => item.id == model.id);
     if (index == -1) {
-      print("Hata: ID ${model.id} bulunamadı.");
       return;
     }
 

@@ -67,18 +67,27 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     for (int i = 0; i < fieldCount; i++) {
       final key = StringConstants.apiFieldNames[i];
 
-      // Eğer dropdown (selectable) alanlardan biri ve değer boşsa ekleme
       if ([2, 3, 4, 5].contains(i)) {
         final selectedId = selectedIds[i];
         if (selectedId == null || selectedId.isEmpty) {
+          productData[key] = '';
           continue;
         }
         productData[key] = selectedId;
       } else {
         if (textControllers[i].text == '' || textControllers[i].text.isEmpty) {
+          productData[key] = '';
           continue;
         }
         productData[key] = textControllers[i].text;
+      }
+    }
+
+    String? finalImageFileName;
+    if (controller.selectedImageBytes.value != null) {
+      finalImageFileName = controller.selectedImageFileName.value; // Resim seçildiyse dosya adını al
+      if (finalImageFileName == null || finalImageFileName.isEmpty) {
+        finalImageFileName = "${widget.product.name}_updated.png";
       }
     }
 
@@ -86,14 +95,15 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         .updateProductWithImage(
       id: widget.product.id,
       fields: productData,
-      imageBytes: controller.selectedImageBytes.value,
-      imageFileName: controller.selectedImageBytes.value != null ? "${widget.product.name}.png" : null,
+      imageBytes: controller.selectedImageBytes.value, // Controller'dan byte'ları al
+      imageFileName: finalImageFileName, // Controller'dan veya oluşturulan dosya adını al
     )
         .then((_) {
       Navigator.pop(context);
       CustomWidgets.showSnackBar("Success", "Product updated successfully", Colors.green);
     }).catchError((error) {
-      CustomWidgets.showSnackBar("Error", "Failed to update product", Colors.red);
+      print(error.toString());
+      CustomWidgets.showSnackBar("Error", "Failed to update product: $error", Colors.red);
     });
   }
 
@@ -129,26 +139,32 @@ class _ProductProfilViewState extends State<ProductProfilView> {
       body: ListView(
         padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 4) : context.padding.horizontalMedium,
         children: [
-          Obx(() => Center(
-                child: GestureDetector(
-                  onTap: () {
-                    controller.pickImage();
-                  },
-                  child: Container(
-                    width: 300,
-                    height: 300,
-                    margin: context.padding.verticalMedium,
-                    decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: context.border.normalBorderRadius, border: Border.all(color: Colors.grey.shade300, width: 1)),
-                    child: ClipRRect(
-                        borderRadius: context.border.normalBorderRadius,
-                        child: controller.selectedImageBytes.value != null
-                            ? Image.memory(controller.selectedImageBytes.value!, fit: BoxFit.cover)
-                            : (widget.product.img!.isNotEmpty)
-                                ? CustomWidgets.imageWidget(widget.product.img, false)
-                                : CustomWidgets.noImage()),
+          Obx(() {
+            final imageToShow = controller.selectedImageBytes.value != null
+                ? Image.memory(controller.selectedImageBytes.value!, fit: BoxFit.cover)
+                : CustomWidgets.imageWidget(
+                    widget.product.img!,
+                    false,
+                  );
+
+            return Center(
+              child: GestureDetector(
+                onTap: () {
+                  controller.pickImage();
+                },
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  margin: context.padding.verticalMedium,
+                  decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: context.border.normalBorderRadius, border: Border.all(color: Colors.grey.shade300, width: 1)),
+                  child: ClipRRect(
+                    borderRadius: context.border.normalBorderRadius,
+                    child: imageToShow,
                   ),
                 ),
-              )),
+              ),
+            );
+          }),
           _buildTextFields(context),
           AgreeButton(
             onTap: _handleUpdate,

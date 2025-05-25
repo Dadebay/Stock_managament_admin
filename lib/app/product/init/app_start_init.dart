@@ -26,14 +26,13 @@ class AppStartInit {
     HttpOverrides.global = HttpOverridesCustom();
     await Firebase.initializeApp(
         options: const FirebaseOptions(
-      apiKey: 'AIzaSyBb-ONIbH2uZrBKaQQBfsgISqB2nzJCjxQ',
-      appId: '1:808707795977:web:3201cc61a72d911a9a5cd8',
-      messagingSenderId: '808707795977',
-      projectId: 'stock-managament-4ab89',
-      authDomain: 'stock-managament-4ab89.firebaseapp.com',
-      storageBucket: 'stock-managament-4ab89.appspot.com',
-      measurementId: 'G-8Y69HSE8M8',
-    ));
+            apiKey: "AIzaSyBpIrCA8v5_JFWoSkKRdRTM0sEVGj4YecM",
+            authDomain: "stock-managament-new.firebaseapp.com",
+            projectId: "stock-managament-new",
+            storageBucket: "stock-managament-new.firebasestorage.app",
+            messagingSenderId: "645642131883",
+            appId: "1:645642131883:web:5d0d6343aabe97291f9aee",
+            measurementId: "G-NGFYKF85MP"));
     await GetStorage.init();
   }
 }

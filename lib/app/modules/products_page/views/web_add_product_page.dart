@@ -55,10 +55,9 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
         productData[key] = textControllers[i].text;
       }
     }
-
+    controller.selectedImageFileName.value = "${textControllers[0].text.replaceAll(' ', '_')}_image.png";
     await controller.addNewProduct(
       productData: productData,
-      imageFileName: "${textControllers[0].text.replaceAll(' ', '_')}_image.png",
     );
   }
 
@@ -140,9 +139,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
               Map<String, String>? selectableInfo;
               try {
                 selectableInfo = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldApiName);
-              } catch (e) {
-                print("Warning: No entry in StringConstants.four_in_one_names for $fieldApiName");
-              }
+              } catch (e) {}
               if (selectableInfo != null && selectableInfo['url'] != null) {
                 DialogsUtils().showSelectableDialog(
                   context: context,

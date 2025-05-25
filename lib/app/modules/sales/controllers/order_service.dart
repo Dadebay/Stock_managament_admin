@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_service.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
 import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -37,26 +41,21 @@ class OrderService {
       'clientName': model.clientDetailModel!.name,
       'clientAddress': model.clientDetailModel!.address,
       'clientPhone': model.clientDetailModel!.phone,
-      'discount': int.parse(model.discount.toString()),
+      'discount': double.tryParse(model.discount.toString()),
       'coupon': model.coupon,
       'description': model.description,
       "count": int.parse(model.count.toString()),
       'products': products,
     };
-
+    print(body);
     return ApiService().handleApiRequest(
       endpoint: ApiConstants.order,
       method: 'POST',
       body: body,
       requiresToken: true,
       handleSuccess: (responseJson) {
+        print(responseJson);
         if (responseJson.isNotEmpty) {
-          print(responseJson);
-          print(responseJson);
-          print(responseJson);
-          print(responseJson);
-          print(responseJson);
-          print(OrderModel.fromJson(responseJson));
           orderController.addOrder(OrderModel.fromJson(responseJson));
           Get.back();
           CustomWidgets.showSnackBar('success'.tr, 'Order added successfully'.tr, Colors.green);
@@ -67,47 +66,49 @@ class OrderService {
     );
   }
 
-  Future editOrder({required OrderModel model}) async {
-    String apiDate = model.date;
-    if (model.date.contains(',')) {
-      apiDate = model.date.split(',')[0].trim();
-    } else if (model.date.length > 10) {
-      apiDate = model.date.substring(0, 10);
-    }
+  Future<OrderModel?> editOrderManually({required OrderModel model}) async {
+    final AuthStorage _auth = AuthStorage();
 
-    final body = <String, dynamic>{
-      'id': model.id,
-      'status': model.status,
+    final token = await _auth.getToken();
+    final url = Uri.parse(ApiConstants.order + "${model.id}/");
+    print(url);
+    final headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+    };
+
+    final body = json.encode({
+      'status': int.parse(model.status),
       'gaplama': model.gaplama,
-      'date': apiDate,
+      'date': model.date,
       'datetime': model.date,
       'name': model.name,
-      'clientName': model.clientDetailModel!.name,
-      'clientAddress': model.clientDetailModel!.address,
-      'clientPhone': model.clientDetailModel!.phone,
-      'discount': int.tryParse(model.discount.toString().replaceAll('%', '').trim()) ?? 0,
+      'clientName': model.clientDetailModel?.name,
+      'clientAddress': model.clientDetailModel?.address,
+      'clientPhone': model.clientDetailModel?.phone,
+      'discount': double.tryParse(model.discount),
       'coupon': model.coupon,
       'description': model.description,
       "count": model.count,
-    };
+      // 'products': model.products
+    });
+    print(body);
+    print(model.products);
 
-    return ApiService().handleApiRequest(
-      endpoint: ApiConstants.order + "${model.id}/",
-      method: 'PUT',
-      body: body,
-      requiresToken: true,
-      handleSuccess: (responseJson) {
-        if (responseJson.isNotEmpty) {
-          final updatedOrder = OrderModel.fromJson(responseJson);
-          orderController.editOrderInList(updatedOrder);
-          Get.back();
+    final response = await http.put(url, headers: headers, body: body);
+    print(body);
+    print(response.statusCode);
+    print(response.body);
 
-          CustomWidgets.showSnackBar('success'.tr, 'Order updated successfully'.tr, Colors.green);
-        } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Order not updated'.tr, Colors.red);
-        }
-      },
-    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonResponse = json.decode(response.body);
+      final updatedOrder = OrderModel.fromJson(jsonResponse);
+      Get.back();
+
+      return updatedOrder;
+    } else {
+      return null;
+    }
   }
 
   Future deleteOrder({required OrderModel model}) async {

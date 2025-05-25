@@ -33,40 +33,69 @@ class SearchService {
   Future<void> updateProductWithImage({
     required int id,
     required Map<String, String> fields,
-    Uint8List? imageBytes, // optional
-    String? imageFileName, // optional
+    Uint8List? imageBytes,
+    String? imageFileName,
   }) async {
     final uri = Uri.parse(ApiConstants.products + '$id/');
-    print(uri);
-
     final request = http.MultipartRequest('PUT', uri);
-
     final token = await AuthStorage().getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found.');
+    }
     request.headers['Authorization'] = 'Bearer $token';
-
     request.fields.addAll(fields);
+    print("Mana geldi-----------------------------------------------------------------------------");
+    request.fields.forEach((key, value) {
+      print('$key: $value');
+    });
 
-    if (imageBytes != null && imageFileName != null) {
+    if (imageBytes != null && imageFileName != null && imageFileName.isNotEmpty) {
+      String extension = imageFileName.split('.').last.toLowerCase();
+      if (extension.isEmpty) {
+        extension = 'png'; // Varsayılan bir uzantı, eğer dosya adında yoksa
+      }
+      extension = (extension == 'jpg') ? 'jpeg' : extension;
+
       request.files.add(http.MultipartFile.fromBytes(
         'img',
         imageBytes,
         filename: imageFileName,
-        contentType: MediaType('image', 'png'),
+        contentType: MediaType('image', extension), // Dinamik içerik tipi
       ));
     }
-    print(fields);
-    final streamedResponse = await request.send();
-    final statusCode = streamedResponse.statusCode;
-    print(streamedResponse.statusCode);
 
-    if (statusCode == 200) {
+    try {
+      final streamedResponse = await request.send();
       final responseBody = await streamedResponse.stream.bytesToString();
-      final jsonData = jsonDecode(responseBody);
-      final updatedModel = SearchModel.fromJson(jsonData);
-      searchViewController.updateProductLocally(updatedModel);
-      print("✔️ Başarılı: $responseBody");
-    } else {
-      print("❌ Hata: $statusCode");
+      final statusCode = streamedResponse.statusCode;
+
+      print('Update Status Code: $statusCode');
+      print('Update Response Body: $responseBody');
+
+      if (statusCode == 200) {
+        final jsonData = jsonDecode(responseBody);
+        final updatedModel = SearchModel.fromJson(jsonData);
+        searchViewController.updateProductLocally(updatedModel);
+        // SnackBar zaten ProductProfilView içinde gösteriliyor.
+      } else {
+        // Hata durumunu daha iyi ele almak için
+        String errorMessage = "Failed to update product. Status code: $statusCode";
+        try {
+          final errorJson = jsonDecode(responseBody);
+          if (errorJson is Map && errorJson.containsKey('detail')) {
+            errorMessage = errorJson['detail'];
+          } else if (errorJson is Map) {
+            errorMessage = errorJson.toString();
+          }
+        } catch (e) {
+          // JSON parse edilemezse, ham body'yi kullan
+          errorMessage += "\nResponse: $responseBody";
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('Error updating product: $e');
+      throw Exception('Error during product update: $e');
     }
   }
 
@@ -76,15 +105,10 @@ class SearchService {
     String? imageFileName, // optional
   }) async {
     final uri = Uri.parse(ApiConstants.products);
-    print(uri);
-
     final request = http.MultipartRequest('POST', uri);
-
     final token = await AuthStorage().getToken();
     request.headers['Authorization'] = 'Bearer $token';
-
     request.fields.addAll(fields);
-    print(imageBytes);
     if (imageBytes != null && imageFileName != null) {
       request.files.add(http.MultipartFile.fromBytes(
         'img',
@@ -93,20 +117,15 @@ class SearchService {
         contentType: MediaType('image', 'png'),
       ));
     }
-    print(fields);
     final streamedResponse = await request.send();
     final statusCode = streamedResponse.statusCode;
-    print(streamedResponse.statusCode);
-
     if (statusCode == 200 || statusCode == 201) {
       final responseBody = await streamedResponse.stream.bytesToString();
       final jsonData = jsonDecode(responseBody);
       final updatedModel = SearchModel.fromJson(jsonData);
       searchViewController.updateProductLocally(updatedModel);
-      print("✔️ Başarılı: $responseBody");
       return updatedModel;
     } else {
-      print("❌ Hata: $statusCode");
       throw Exception('Failed to create product');
     }
   }

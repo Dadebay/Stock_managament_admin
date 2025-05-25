@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:excel/excel.dart' as ex;
 import 'package:fl_chart/fl_chart.dart';
+import 'package:get/get.dart';
+import 'package:stock_managament_admin/app/modules/home/controllers/home_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class DataItem {
@@ -22,6 +24,9 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  final HomeService _homeService = HomeService();
+  bool _isLoading = false;
+
   List<String> months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   List<double> expences = List.filled(12, 0.0);
@@ -29,107 +34,113 @@ class _HomeViewState extends State<HomeView> {
   List<double> purchases = List.filled(12, 0.0);
   List<double> profit = List.filled(12, 0.0);
   List<double> sumCost = List.filled(12, 0.0);
-  List<double> zeroArray = List.filled(12, 0.0);
 
-  DateTime? selectedDateTime = DateTime.now();
+  DateTime selectedDateTime = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    getData(DateTime.now(), false);
+    getData(selectedDateTime, false);
   }
 
-  Future<void> findProfit(bool runExcel, DateTime date) async {
-    profit = List.filled(12, 0.0);
-    for (int i = 0; i < 12; i++) {
-      profit[i] = sales[i] - (expences[i] + purchases[i]);
-    }
-    findMinimumelement();
-    if (runExcel == true) {
-      var excel = ex.Excel.createExcel();
-      ////
-      List<Map<String, String>> oldExpences = [];
-      DateTime dateeee = DateTime.now();
-      await FirebaseFirestore.instance.collection('expences').get().then((value) {
-        for (var element in value.docs) {
-          DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
-          if (dateTime.year == dateeee.year) {
-            oldExpences.add({'name': element['name'].toString(), 'date': element['date'].toString(), 'cost': element['cost'].toString()});
-          }
-        }
-      });
-      for (int i = 0; i < 12; i++) {
-        ex.Sheet sheetObject = excel[months[i]];
+  Future<void> getData(DateTime dateForYear, bool forExcelExport) async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+    });
 
-        sheetObject.appendRow(["Sales", "Purchases", "Expenses", "Sum Cost", "Net Profit"]);
-        sheetObject.appendRow([sales[i], purchases[i], expences[i], sumCost[i], profit[i]]);
-        sheetObject.appendRow(['']);
-        sheetObject.appendRow(['']);
-        sheetObject.appendRow(['----Expences----']);
-        for (var expence in oldExpences) {
-          String cleanDateStr = expence['date']!.replaceAll(' , ', ' ');
-          DateTime dateTime = DateTime.parse(cleanDateStr);
-          if (dateTime.year == DateTime.now().year && dateTime.month == i + 1) {
-            sheetObject.appendRow([
-              // "kerimmm"
-              expence['name'],
-              expence['date'],
-              expence['cost'],
-            ]);
-          }
+    expences = List.filled(12, 0.0);
+    sales = List.filled(12, 0.0);
+    purchases = List.filled(12, 0.0);
+    sumCost = List.filled(12, 0.0);
+    profit = List.filled(12, 0.0);
+
+    final apiChartData = await _homeService.getChartPageData();
+
+    if (apiChartData != null) {
+      void populateCategoryFromApi(String categoryKey, List<double> targetList) {
+        if (apiChartData.containsKey(categoryKey) && apiChartData[categoryKey] is Map) {
+          final Map<String, dynamic> categoryData = apiChartData[categoryKey] as Map<String, dynamic>;
+          categoryData.forEach((yearMonthKey, value) {
+            try {
+              final parts = yearMonthKey.split('-');
+              if (parts.length == 2) {
+                final year = int.tryParse(parts[0]);
+                final month = int.tryParse(parts[1]);
+
+                if (year != null && month != null && year == dateForYear.year && month >= 1 && month <= 12) {
+                  if (value is num) {
+                    targetList[month - 1] = value.toDouble();
+                  }
+                }
+              }
+            } catch (e) {
+              debugPrint("Error parsing API chart data for key: $yearMonthKey, value: $value. Error: $e");
+            }
+          });
         }
       }
-      excel.save(fileName: "${selectedDateTime.toString().substring(0, 19)}_net_profit.xlsx");
+
+      populateCategoryFromApi('sales', sales);
+      populateCategoryFromApi('sum_cost', sumCost);
+      populateCategoryFromApi('purchases', purchases);
+      populateCategoryFromApi('expences', expences);
+    } else {
+      CustomWidgets.showSnackBar('Error'.tr, 'Failed to load chart data from API.'.tr, Colors.red);
     }
-    setState(() {});
+
+    await _calculateProfitAndGenerateExcel(forExcelExport, dateForYear);
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _calculateProfitAndGenerateExcel(bool generateExcel, DateTime dateForReport) async {
+    profit = List.filled(12, 0.0);
+    for (int i = 0; i < 12; i++) {
+      profit[i] = sales[i] - (purchases[i] + expences[i] + sumCost[i]);
+    }
+    findMinimumelement();
+
+    if (generateExcel) {
+      var excel = ex.Excel.createExcel();
+      for (int i = 0; i < 12; i++) {
+        ex.Sheet sheetObject = excel[months[i]];
+        sheetObject.appendRow(["Item", "Amount"]);
+        sheetObject.appendRow(["Sales", sales[i]]);
+        sheetObject.appendRow(["Purchases", purchases[i]]);
+        sheetObject.appendRow(["Expenses", expences[i]]);
+        sheetObject.appendRow(["Sum Cost (COGS)", sumCost[i]]);
+        sheetObject.appendRow(["Net Profit", profit[i]]);
+      }
+
+      excel.save(fileName: "${dateForReport.year}_financial_report.xlsx");
+      CustomWidgets.showSnackBar('Success'.tr, 'Excel report generated for ${dateForReport.year}'.tr, Colors.green);
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void findMinimumelement() {
-    minElement1 = profit.reduce((value, element) => value < element ? value : element);
-    maxElement1 = sales.reduce((value, element) => value > element ? value : element);
-    maxElement2 = profit.reduce((value, element) => value > element ? value : element);
-    maxElement3 = expences.reduce((value, element) => value > element ? value : element);
-    maxElement4 = purchases.reduce((value, element) => value > element ? value : element);
-    double a = max(maxElement1, maxElement2);
-    double b = max(maxElement3, maxElement4);
-    maxElement = max(a, b);
+    minElement1 = profit.isNotEmpty ? profit.reduce(min) : 0.0;
+    maxElement1 = sales.isNotEmpty ? sales.reduce(max) : 0.0;
+    maxElement2 = profit.isNotEmpty ? profit.reduce(max) : 0.0;
+    maxElement3 = expences.isNotEmpty ? expences.reduce(max) : 0.0;
+    maxElement4 = purchases.isNotEmpty ? purchases.reduce(max) : 0.0;
+
+    double maxElement5 = sumCost.isNotEmpty ? sumCost.reduce(max) : 0.0;
+
+    double positiveMax = [maxElement1, maxElement2, maxElement3, maxElement4, maxElement5, 0.0].reduce(max);
+    maxElement = positiveMax;
   }
 
-  Future<void> getExpences(DateTime date) async {
-    await FirebaseFirestore.instance.collection('expences').get().then((value) {
-      for (var element in value.docs) {
-        DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
-        if (dateTime.year == date.year) {
-          expences[dateTime.month - 1] += double.parse(element['cost'].toString());
-        }
-      }
-    });
-  }
-
-  Future<void> getSales(DateTime date) async {
-    await FirebaseFirestore.instance.collection('sales').orderBy("date", descending: true).get().then((value) {
-      for (var element in value.docs) {
-        if (element['status'].toString().toLowerCase() == 'shipped') {
-          DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
-          if (dateTime.year == date.year) {
-            sales[dateTime.month - 1] += double.parse(element['sum_price'].toString());
-            sumCost[dateTime.month - 1] += double.parse(element['sum_cost'].toString());
-          }
-        }
-      }
-    });
-  }
-
-  Future<void> getPurchases(DateTime date, bool runExcel) async {
-    await FirebaseFirestore.instance.collection('purchases').orderBy("date", descending: true).get().then((value) {
-      for (var element in value.docs) {
-        DateTime dateTime = DateTime.parse(element['date'].toString().substring(0, 10));
-        if (dateTime.year == date.year) {
-          purchases[dateTime.month - 1] += double.parse(element['cost'].toString());
-        }
-      }
-      findProfit(runExcel, date);
-    });
+  Future<void> exportToExcel(BuildContext context) async {
+    await getData(selectedDateTime, true);
   }
 
   double maxElement1 = 0.0;
@@ -141,22 +152,12 @@ class _HomeViewState extends State<HomeView> {
 
   List<bool> valuesColor = [false, false, false, false, false];
   List<bool> valuesText = [false, false, false, false, false];
-  Future<void> getData(DateTime date, bool runExcel) async {
-    expences = List.filled(12, 0.0);
-    sales = List.filled(12, 0.0);
-    purchases = List.filled(12, 0.0);
-    sumCost = List.filled(12, 0.0);
-    getExpences(date);
-    getSales(date);
-    getPurchases(date, runExcel);
-  }
-
-  dynamic exportToExcel(BuildContext context, bool runExcel) async {
-    await getData(selectedDateTime ?? DateTime.now(), runExcel);
-  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       body: Column(
         children: [
@@ -164,49 +165,77 @@ class _HomeViewState extends State<HomeView> {
             padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
               children: [
-                names(name: "Sales", color: Colors.red, index: 0),
-                names(name: "Purchase", color: Colors.amber, index: 1),
-                names(name: "Expences", color: Colors.blue, index: 2),
-                names(name: "Sum Cost", color: Colors.purple, index: 3),
-                names(name: "Net Profit", color: Colors.green, index: 4),
+                Expanded(child: names(name: "Sales", color: Colors.red, index: 0)),
+                Expanded(child: names(name: "Purchase", color: Colors.amber, index: 1)),
+                Expanded(child: names(name: "Expences", color: Colors.blue, index: 2)),
+                Expanded(child: names(name: "Sum Cost", color: Colors.purple, index: 3)),
+                Expanded(child: names(name: "Net Profit", color: Colors.green, index: 4)),
+                const SizedBox(width: 20),
                 yearPicker(context),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: ElevatedButton(
-                      onPressed: () async {
-                        exportToExcel(context, true);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          elevation: 0.0,
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(borderRadius: context.border.normalBorderRadius),
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16)),
-                      child: const Text(
-                        "Export Excel",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      )),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () async {
+                    await exportToExcel(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                    decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+                    child: Text(
+                      "Export Excel".tr,
+                      style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 )
               ],
             ),
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: BarChart(
                 BarChartData(
-                    maxY: maxElement + 50,
-                    minY: minElement1 - 20,
+                    maxY: maxElement == 0 ? 100 : maxElement + (maxElement * 0.1).abs(),
+                    minY: minElement1 - (minElement1 * (minElement1.abs() < 1 ? 1 : (minElement1 < 0 ? 0.2 : 0.1))).abs(),
+                    barTouchData: BarTouchData(touchTooltipData: BarTouchTooltipData(getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      String month = months[group.x.toInt() - 1];
+                      String rodLabel = '';
+                      switch (rodIndex) {
+                        case 0:
+                          rodLabel = 'Sales';
+                          break;
+                        case 1:
+                          rodLabel = 'Sum Cost';
+                          break;
+                        case 2:
+                          rodLabel = 'Purchases';
+                          break;
+                        case 3:
+                          rodLabel = 'Expences';
+                          break;
+                        case 4:
+                          rodLabel = 'Net Profit';
+                          break;
+                      }
+                      return BarTooltipItem(
+                        '$month\n',
+                        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: '$rodLabel: ${rod.toY.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              color: rod.color ?? Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      );
+                    })),
                     barGroups: List.generate(
                             12,
-                            (index) => DataItem(
-                                x: index + 1,
-                                sumCost: valuesColor[3] ? zeroArray[index] : double.parse(sumCost[index].toStringAsFixed(2)),
-                                sales: valuesColor[0] ? zeroArray[index] : sales[index],
-                                purchases: valuesColor[1] ? zeroArray[index] : purchases[index],
-                                expences: valuesColor[2] ? zeroArray[index] : expences[index],
-                                profit: valuesColor[4] ? zeroArray[index] : profit[index]))
+                            (index) =>
+                                DataItem(x: index + 1, sales: valuesColor[0] ? 0.0 : sales[index], sumCost: valuesColor[3] ? 0.0 : sumCost[index], purchases: valuesColor[1] ? 0.0 : purchases[index], expences: valuesColor[2] ? 0.0 : expences[index], profit: valuesColor[4] ? 0.0 : profit[index]))
                         .map((dataItem) => BarChartGroupData(x: dataItem.x, barRods: [
                               BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.sales, width: 15, color: Colors.red),
                               BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.sumCost, width: 15, color: Colors.purple),
@@ -223,12 +252,16 @@ class _HomeViewState extends State<HomeView> {
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
-                            getTitlesWidget: (a, value) {
-                              final int monthIndex = a.toInt();
-                              if (monthIndex >= 1 && monthIndex <= 12) {
-                                return Text(
-                                  months[monthIndex - 1],
-                                  style: const TextStyle(color: Colors.black, fontSize: 20),
+                            reservedSize: 30,
+                            getTitlesWidget: (value, meta) {
+                              final int monthIndex = value.toInt() - 1;
+                              if (monthIndex >= 0 && monthIndex < 12) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    months[monthIndex].substring(0, 3),
+                                    style: TextStyle(color: Colors.black, fontSize: 14.sp),
+                                  ),
                                 );
                               }
                               return const Text('');
@@ -250,18 +283,21 @@ class _HomeViewState extends State<HomeView> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: const Text("Select Year"),
+                title: Text("Select Year".tr),
                 content: SizedBox(
                   width: 300,
                   height: 300,
                   child: YearPicker(
                     firstDate: DateTime(DateTime.now().year - 10, 1),
-                    lastDate: DateTime(DateTime.now().year + 100, 1),
-                    initialDate: DateTime.now(),
+                    lastDate: DateTime(DateTime.now().year + 10, 1),
+                    initialDate: selectedDateTime,
                     selectedDate: selectedDateTime,
                     onChanged: (DateTime dateTime) {
-                      setState(() {});
-                      selectedDateTime = dateTime;
+                      if (mounted) {
+                        setState(() {
+                          selectedDateTime = dateTime;
+                        });
+                      }
                       getData(dateTime, false);
                       Navigator.pop(context);
                     },
@@ -272,17 +308,18 @@ class _HomeViewState extends State<HomeView> {
           );
         },
         child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: context.border.normalBorderRadius),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                "Select Year : ",
-                style: TextStyle(color: Colors.black, fontSize: 20),
+              Text(
+                "${"Year".tr}: ",
+                style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
               Text(
-                selectedDateTime!.year.toString(),
-                style: const TextStyle(color: Colors.black, fontSize: 20),
+                selectedDateTime.year.toString(),
+                style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -290,51 +327,70 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget names({required String name, required Color color, required int index}) {
-    return Expanded(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
             onTap: () {
-              valuesColor[index] = !valuesColor[index];
-              setState(() {});
+              if (mounted) {
+                setState(() {
+                  valuesColor[index] = !valuesColor[index];
+                });
+              }
             },
             child: Container(
-              width: 30,
-              height: 30,
-              margin: EdgeInsets.only(right: 10.w),
+              width: 20.w,
+              height: 20.h,
+              margin: EdgeInsets.only(right: 6.w),
               decoration: BoxDecoration(
-                color: color,
-                border: valuesColor[index] ? Border.all(color: Colors.grey, width: 4) : const Border(),
-                borderRadius: BorderRadius.circular(5),
+                color: valuesColor[index] ? Colors.grey.shade300 : color,
+                border: valuesColor[index] ? Border.all(color: color, width: 2) : Border.all(color: color.withOpacity(0.5)),
+                borderRadius: BorderRadius.circular(4),
               ),
+              child: valuesColor[index] ? Icon(Icons.visibility_off_outlined, size: 14.sp, color: color) : null,
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              valuesText[index] = !valuesText[index];
-              profit = List.filled(12, 0.0);
-              if (!valuesText[0]) {
-                for (int i = 0; i <= 11; i++) {
-                  profit[i] += sales[i];
+          Flexible(
+            child: GestureDetector(
+              onTap: () {
+                if (mounted) {
+                  setState(() {
+                    valuesText[index] = !valuesText[index];
+
+                    profit = List.filled(12, 0.0);
+
+                    if (!valuesText[0]) {
+                      for (int i = 0; i < 12; i++) profit[i] += sales[i];
+                    }
+
+                    if (!valuesText[1]) {
+                      for (int i = 0; i < 12; i++) profit[i] -= purchases[i];
+                    }
+                    if (!valuesText[2]) {
+                      for (int i = 0; i < 12; i++) profit[i] -= expences[i];
+                    }
+
+                    if (!valuesText[3]) {
+                      for (int i = 0; i < 12; i++) profit[i] -= sumCost[i];
+                    }
+
+                    findMinimumelement();
+                  });
                 }
-              }
-              if (!valuesText[1]) {
-                for (int i = 0; i <= 11; i++) {
-                  profit[i] -= purchases[i];
-                }
-              }
-              if (!valuesText[2]) {
-                for (int i = 0; i <= 11; i++) {
-                  profit[i] -= expences[i];
-                }
-              }
-              findMinimumelement();
-              setState(() {});
-            },
-            child: Text(
-              name,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black, decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none, fontSize: 20),
+              },
+              child: Text(
+                name.tr,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(
+                  color: Colors.black,
+                  decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none,
+                  fontSize: 16.sp,
+                  fontWeight: valuesColor[index] ? FontWeight.normal : FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],

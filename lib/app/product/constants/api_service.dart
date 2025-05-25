@@ -24,10 +24,6 @@ class ApiService {
         Uri.parse(endpoint),
         headers: headers,
       );
-      print(response.request);
-      print(response.request?.headers);
-      print(response.statusCode);
-      print(response.request?.url);
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes); // UTF-8 çözümleme burada
         final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
@@ -91,15 +87,6 @@ class ApiService {
         default:
           throw UnsupportedError('Unsupported HTTP method: $method');
       }
-      print(endpoint);
-      print(body);
-      print(method);
-      print(response.statusCode);
-      print(response.statusCode);
-      print(response.statusCode);
-      print(response.statusCode);
-      print(response.statusCode);
-      print(response.statusCode);
       if ([200, 201, 204].contains(response.statusCode)) {
         if (response.statusCode == 204) {
           await handleSuccess!({"statusCode": response.statusCode});

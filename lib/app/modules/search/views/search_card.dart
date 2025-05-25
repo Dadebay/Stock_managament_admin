@@ -23,7 +23,6 @@ class SearchCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        print(disableOnTap);
         if (!disableOnTap) {
           Get.to(() => ProductProfilView(product: product, disableUpdate: addCounterWidget));
         } else {
@@ -56,17 +55,21 @@ class SearchCard extends StatelessWidget {
                     flex: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           product.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.sp),
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 17.sp),
                         ),
-                        Text(
-                          "${"quantity".tr}: ${product.count}",
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey, fontSize: 15.sp, fontWeight: FontWeight.bold),
+                        Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: Text(
+                            "${"quantity".tr}: ${product.count}",
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey, fontSize: 15.sp, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ],
                     ),
@@ -107,7 +110,6 @@ class SearchCard extends StatelessWidget {
                         IconButton(
                           icon: const Icon(CupertinoIcons.add_circled, color: Colors.black),
                           onPressed: () {
-                            print(whcihPage);
                             if (whcihPage == null && selectedCount >= product.count) {
                               CustomWidgets.showSnackBar("Error", "Not in stock", Colors.red);
                             } else {

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
+import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class OrderController extends GetxController {
   RxList<OrderModel> allOrders = <OrderModel>[].obs;
@@ -10,12 +11,12 @@ class OrderController extends GetxController {
   RxInt sumProductCount = 0.obs;
 
   dynamic filterByStatus(String status) {
-    print(status);
     List<OrderModel> orderCardList = [];
-    searchResult.assignAll(allOrders);
+    if (searchResult.isEmpty) {
+      searchResult.assignAll(allOrders);
+    }
     for (var element in allOrders) {
       if (element.status.toString().toLowerCase() == status.toLowerCase()) {
-        print("asdasdasd");
         orderCardList.add(element);
       }
     }
@@ -35,6 +36,15 @@ class OrderController extends GetxController {
     calculateTotals();
   }
 
+  dynamic deleteOrder({required OrderModel model}) async {
+    allOrders.remove(model);
+    if (searchResult.isNotEmpty) {
+      searchResult.remove(model);
+    }
+    update();
+    Get.back();
+  }
+
   void calculateTotals() {
     double totalSell = 0;
     double totalCost = 0;
@@ -52,25 +62,23 @@ class OrderController extends GetxController {
     sumProductCount.value = totalCount;
   }
 
-  dynamic deleteOrder({required OrderModel model}) async {
-    allOrders.remove(model);
-    if (searchResult.isNotEmpty) {
-      searchResult.remove(model);
+  dynamic getProductSortValue(SearchModel model, String key) {
+    switch (key) {
+      case 'count':
+        return model.count;
+      case 'price':
+        return model.price;
+      case 'cost':
+        return model.cost;
+      case 'brends':
+        return model.brend?.name ?? '';
+      case 'category':
+        return model.category?.name ?? '';
+      case 'location':
+        return model.location?.name ?? '';
+      default:
+        return '';
     }
-    update();
-  }
-
-  void editOrderInList(OrderModel updatedOrder) {
-    int index = allOrders.indexWhere((o) => o.id == updatedOrder.id);
-    if (index != -1) {
-      allOrders[index] = updatedOrder;
-    }
-    int searchIndex = searchResult.indexWhere((o) => o.id == updatedOrder.id);
-    if (searchIndex != -1) {
-      searchResult[searchIndex] = updatedOrder;
-    }
-    calculateTotals(); // Toplamları yeniden hesapla
-    update(); // UI'ı güncellemek için
   }
 
   void onSearchTextChanged(String word) {
@@ -81,7 +89,7 @@ class OrderController extends GetxController {
     }
     List<String> searchTerms = word.trim().toLowerCase().split(' ');
     searchResult.value = allOrders.where((product) {
-      final productNameString = (product.name ?? "").toLowerCase();
+      final productNameString = (product.name).toLowerCase();
       final clientPhoneString = (product.clientDetailModel?.phone?.toString() ?? "").toLowerCase();
       final clientNameString = (product.clientDetailModel?.name.toString() ?? "").toLowerCase();
       return searchTerms.every((term) {
@@ -92,5 +100,18 @@ class OrderController extends GetxController {
         return termFoundInProduct;
       });
     }).toList();
+  }
+
+  void editOrderInList(OrderModel updatedOrder) {
+    int index = allOrders.indexWhere((o) => o.id.toString() == updatedOrder.id.toString());
+    if (index != -1) {
+      allOrders[index] = updatedOrder;
+    }
+    int searchIndex = searchResult.indexWhere((o) => o.id == updatedOrder.id);
+    if (searchIndex != -1) {
+      searchResult[searchIndex] = updatedOrder;
+    }
+    calculateTotals(); // Toplamları yeniden hesapla
+    update(); // UI'ı güncellemek için
   }
 }
