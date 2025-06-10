@@ -74,10 +74,17 @@ class _ProductProfilViewState extends State<ProductProfilView> {
           continue;
         }
         productData[key] = selectedId;
+
+        if (productData[key] == '0') {
+          productData[key] = '';
+        }
       } else {
         if (textControllers[i].text == '' || textControllers[i].text.isEmpty) {
           productData[key] = '';
           continue;
+        }
+        if (productData[key] == '0') {
+          productData[key] = '';
         }
         productData[key] = textControllers[i].text;
       }
@@ -90,7 +97,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         finalImageFileName = "${widget.product.name}_updated.png";
       }
     }
-
+    print(productData);
     await SearchService()
         .updateProductWithImage(
       id: widget.product.id,

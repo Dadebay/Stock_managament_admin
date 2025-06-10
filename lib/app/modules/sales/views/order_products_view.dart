@@ -33,12 +33,12 @@ class _OrderProductsViewState extends State<OrderProductsView> {
       {'label': 'phone', 'editable': true},
       {'label': 'address', 'editable': true},
       {'label': 'gaplama', 'editable': true},
-      {'label': 'discount', 'editable': false},
+      {'label': 'discount', 'editable': true},
       {'label': 'coupon', 'editable': true},
       {'label': 'description', 'editable': true},
-      {'label': 'count', 'editable': false},
-      {'label': 'totalsum', 'editable': false},
-      {'label': 'totalchykdajy', 'editable': false},
+      {'label': 'count', 'editable': true},
+      {'label': 'totalsum', 'editable': true},
+      {'label': 'totalchykdajy', 'editable': true},
     ];
   }
 
@@ -110,7 +110,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
     if (_currentOrder.id == 0) {
       return SizedBox(height: 300, child: Center(child: Text("Order ID is missing".tr)));
     }
-    return FutureBuilder<List<SearchModel>>(
+    return FutureBuilder<List<ProductModel>>(
       future: OrderService().getOrderProduct(_currentOrder.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) return CustomWidgets.spinKit();
@@ -136,17 +136,20 @@ class _OrderProductsViewState extends State<OrderProductsView> {
 
         final products = snapshot.data!;
         return ListView.builder(
-          itemCount: products.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 30.w),
-          itemBuilder: (context, index) => SearchCard(
-            product: products[index],
-            disableOnTap: true,
-            addCounterWidget: false,
-            whcihPage: '',
-          ),
-        );
+            itemCount: products.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 30.w),
+            itemBuilder: (context, index) {
+              final productModel = products[index];
+              return SearchCard(
+                product: productModel.product!,
+                externalCount: productModel.count,
+                disableOnTap: true,
+                addCounterWidget: false,
+                whcihPage: '',
+              );
+            });
       },
     );
   }
@@ -416,6 +419,14 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
         return current.copyWith(coupon: value);
       case 'description':
         return current.copyWith(description: value);
+      case 'discount':
+        return current.copyWith(discount: value);
+      case 'count':
+        return current.copyWith(count: int.parse(value));
+      case 'totalsum':
+        return current.copyWith(totalsum: value);
+      case 'totalchykdajy':
+        return current.copyWith(totalchykdajy: value);
       default:
         return current;
     }

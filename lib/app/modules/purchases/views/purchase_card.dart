@@ -46,7 +46,7 @@ class PurchaseCard extends StatelessWidget {
         maxLines: 1,
         textAlign: textAlign ?? TextAlign.start,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: big ? Colors.black : Colors.grey, fontSize: big ? 18.sp : 16.sp, fontWeight: big ? FontWeight.w600 : FontWeight.normal),
+        style: TextStyle(color: big ? Colors.black : Colors.grey, fontSize: big ? 17.sp : 15.sp, fontWeight: big ? FontWeight.w600 : FontWeight.normal),
       ),
     );
   }

@@ -7,7 +7,7 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 class EnterService {
   final EnterController clientsController = Get.find();
   Future<List<EnterModel>> getClients() async {
-    final uri = Uri.parse("${ApiConstants.clients}");
+    final uri = Uri.parse("${ApiConstants.users}");
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
     if (data is Map && data['results'] != null) {
       return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
@@ -20,17 +20,17 @@ class EnterService {
 
   Future addClient({required EnterModel model}) async {
     return ApiService().handleApiRequest(
-      endpoint: ApiConstants.clients,
+      endpoint: ApiConstants.register,
       method: 'POST',
       body: <String, dynamic>{
-        'name': model.name,
-        'address': model.address,
-        'phone': "+993${model.phone}",
+        'username': model.username,
+        'password': model.password,
+        'is_superuser': model.isSuperUser,
       },
       requiresToken: true,
       handleSuccess: (responseJson) {
         if (responseJson.isNotEmpty) {
-          clientsController.addClient(EnterModel.fromJson(responseJson));
+          clientsController.addClient(model);
           Get.back();
 
           CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
@@ -43,15 +43,19 @@ class EnterService {
 
   Future editClients({required EnterModel model}) async {
     return ApiService().handleApiRequest(
-      endpoint: ApiConstants.clients + "${model.id}/",
+      endpoint: ApiConstants.users + "${model.id}/",
       method: 'PUT',
       body: <String, dynamic>{
-        'name': model.name,
-        'address': model.address,
-        'phone': model.phone.contains("+993") ? model.phone : "+993${model.phone}",
+        'username': model.username,
+        'password': model.password,
+        'is_superuser': model.isSuperUser,
       },
       requiresToken: true,
       handleSuccess: (responseJson) {
+        print(responseJson);
+        print(responseJson);
+        print(responseJson);
+        print(responseJson);
         if (responseJson.isNotEmpty) {
           clientsController.editClient(EnterModel.fromJson(responseJson));
           Get.back();
@@ -66,7 +70,7 @@ class EnterService {
 
   Future deleteClient({required int id}) async {
     return ApiService().handleApiRequest(
-      endpoint: ApiConstants.clients + "$id/",
+      endpoint: ApiConstants.users + "$id/",
       method: 'DELETE',
       requiresToken: true,
       handleSuccess: (responseJson) async {

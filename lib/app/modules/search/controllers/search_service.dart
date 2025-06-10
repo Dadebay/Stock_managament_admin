@@ -119,6 +119,8 @@ class SearchService {
     }
     final streamedResponse = await request.send();
     final statusCode = streamedResponse.statusCode;
+    print(statusCode);
+    print(streamedResponse.stream.bytesToString());
     if (statusCode == 200 || statusCode == 201) {
       final responseBody = await streamedResponse.stream.bytesToString();
       final jsonData = jsonDecode(responseBody);

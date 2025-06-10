@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:stock_managament_admin/app/modules/products_page/views/web_add_product_page.dart';
+import 'package:stock_managament_admin/app/modules/search/views/web_add_product_page.dart';
 import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 

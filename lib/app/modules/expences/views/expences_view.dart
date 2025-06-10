@@ -170,7 +170,7 @@ class ExpencesView extends StatelessWidget {
                 ),
                 Expanded(
                   child: Obx(() => Text(
-                        expencesController.totalPrice.value.toString(),
+                        expencesController.totalPrice.value.toStringAsFixed(2),
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                         style: context.general.textTheme.displayLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),

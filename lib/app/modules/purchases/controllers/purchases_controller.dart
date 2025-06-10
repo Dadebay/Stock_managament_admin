@@ -25,6 +25,19 @@ class PurchasesController extends GetxController {
     update();
   }
 
+  void editClient(PurchasesModel updatedModel) {
+    print(updatedModel.id);
+    final index = purchasesMainList.indexWhere((element) {
+      print(element.id.toString() == updatedModel.id.toString());
+      return element.id.toString() == updatedModel.id.toString();
+    });
+    print(index);
+    if (index != -1) {
+      purchasesMainList[index] = updatedModel;
+      calculateTotals();
+    }
+  }
+
   void deleteProduct(int id) {
     purchasesMainList.removeWhere((element) => element.id == id);
     calculateTotals();

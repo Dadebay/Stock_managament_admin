@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/components/client_add_button.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/client_model.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_service.dart';
+import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_service.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
@@ -82,7 +83,7 @@ class ClientsView extends StatelessWidget {
                             itemBuilder: (context, index) {
                               return ClientCard(
                                 client: displayList[index],
-                                count: (clientsController.clients.length - index),
+                                count: (displayList.length - index),
                                 topTextColumnSize: StringConstants.clientNames,
                               );
                             },
@@ -113,8 +114,16 @@ class ClientsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () {
-              clientsController.exportToExcel();
+            onPressed: () async {
+              await SignInService().getClients('didario', "Didar123#");
+              await AuthStorage().getAdminStatus().then((value) {
+                print(value);
+                if (value == true) {
+                  clientsController.exportToExcel();
+                } else {
+                  CustomWidgets.showSnackBar("Error", "You are not admin", Colors.red);
+                }
+              });
             },
             backgroundColor: Colors.black,
             child: const Icon(

@@ -45,7 +45,7 @@ class PhoneNumberTextField extends StatelessWidget {
           errorStyle: const TextStyle(),
           prefixIcon: controller.text.contains('+993')
               ? SizedBox.shrink()
-              : const Padding(
+              : Padding(
                   padding: EdgeInsets.only(
                     left: 15,
                   ),
@@ -53,7 +53,7 @@ class PhoneNumberTextField extends StatelessWidget {
                     '+ 993',
                     style: TextStyle(
                       color: Colors.grey,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                     ),
                   ),
                 ),

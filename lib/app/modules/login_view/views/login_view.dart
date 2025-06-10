@@ -68,7 +68,9 @@ class LoginView extends StatelessWidget {
                         if (_formKey.currentState!.validate()) {
                           homeController.agreeButton.value = !homeController.agreeButton.value;
 
-                          await SignInService().login(username: textEditingController.text, password: textEditingController1.text).then((value) {
+                          await SignInService().login(username: textEditingController.text, password: textEditingController1.text).then((value) async {
+                            await SignInService().getClients(textEditingController.text, textEditingController1.text);
+
                             if (value != null) {
                               Get.offAll(() => const NavBarPageView());
                             } else {

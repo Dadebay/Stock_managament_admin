@@ -20,6 +20,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
+    _searchController.selectedProductsToOrder.clear();
     super.initState();
   }
 
@@ -67,6 +68,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
           CustomTextField(
             labelName: "Cost",
             maxLine: 1,
+            isNumberOnly: true,
             controller: textControllers[3],
             focusNode: focusNodes[3],
             requestfocusNode: focusNodes[4],
@@ -95,7 +97,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   description: textControllers[4].text,
                   id: 0,
                   cost: textControllers[3].text,
-                  count: 0,
+                  count: _searchController.selectedProductsToOrder.length,
                   products: [],
                 );
                 await PurchasesService().addPurchase(model: model, products: products);

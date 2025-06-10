@@ -48,7 +48,7 @@ class EnteringAppView extends StatelessWidget {
                     },
                   ),
                   ListviewTopText<EnterModel>(
-                    names: StringConstants.clientNames,
+                    names: StringConstants.userNames,
                     listToSort: displayList,
                     setSortedList: (newList) {
                       if (isSearching) {
@@ -59,16 +59,12 @@ class EnteringAppView extends StatelessWidget {
                     },
                     getSortValue: (item, key) {
                       switch (key) {
-                        case 'name':
-                          return item.name;
-                        case 'address':
-                          return item.address;
-                        case 'number':
-                          return item.phone;
-                        case 'order_count':
-                          return item.orderCount;
-                        case 'sum_price':
-                          return item.sumPrice;
+                        case 'username':
+                          return item.username;
+                        case 'password':
+                          return item.password;
+                        case 'isSuperUser':
+                          return item.isSuperUser;
                         default:
                           return '';
                       }
@@ -84,7 +80,7 @@ class EnteringAppView extends StatelessWidget {
                               return EnterCard(
                                 client: displayList[index],
                                 count: (clientsController.clients.length - index),
-                                topTextColumnSize: StringConstants.clientNames,
+                                topTextColumnSize: StringConstants.userNames,
                               );
                             },
                             separatorBuilder: (BuildContext context, int index) {

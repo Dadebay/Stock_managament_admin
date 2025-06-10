@@ -9,11 +9,6 @@ dependencies:
   # CORE & FIREBASE
   cupertino_icons: ^1.0.6         # iOS-style icons for Cupertino widgets
   flutter_lints:                  # Recommended linter rules for Flutter
-  firebase_core:                  # Required for all Firebase features
-  cloud_firestore:                # Cloud Firestore database integration
-  firebase_storage:               # Firebase file storage
-  firebase_pagination: ^3.1.0     # Firestore pagination utility
-  firebase_storage_web: ^3.9.0           # Firebase Storage for web
 
   # STATE MANAGEMENT & UTILITIES
   get: ^4.6.6                      # GetX for state management, routing, and DI

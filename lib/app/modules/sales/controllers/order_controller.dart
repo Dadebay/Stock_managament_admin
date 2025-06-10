@@ -50,8 +50,8 @@ class OrderController extends GetxController {
     double totalCost = 0;
     int totalCount = 0;
     for (var product in allOrders) {
-      final sell = double.tryParse(product.totalchykdajy) ?? 0.0;
-      final cost = double.tryParse(product.totalsum) ?? 0.0;
+      final sell = double.tryParse(product.totalsum) ?? 0.0;
+      final cost = double.tryParse(product.totalchykdajy) ?? 0.0;
       final count = product.count ?? 0;
       totalSell += sell * count;
       totalCost += cost * count;

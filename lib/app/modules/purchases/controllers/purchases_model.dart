@@ -47,3 +47,31 @@ class PurchasesModel {
     };
   }
 }
+
+class ProductModelPurchases {
+  final int id;
+  final int count;
+  final SearchModel? product;
+
+  ProductModelPurchases({
+    required this.id,
+    required this.count,
+    required this.product,
+  });
+
+  factory ProductModelPurchases.fromJson(Map<String, dynamic> json) {
+    return ProductModelPurchases(
+      id: json['id'] ?? 0,
+      count: json['count'] ?? 0,
+      product: SearchModel.fromJson(json['product']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'count': count,
+      'product': product,
+    };
+  }
+}

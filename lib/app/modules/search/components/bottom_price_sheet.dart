@@ -16,7 +16,8 @@ class BottomPriceSheet extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              CustomWidgets.textWidgetPrice('Products:   ', searchViewController.sumCount.value.toString()),
+              CustomWidgets.textWidgetPrice('Products:   ', searchViewController.productsList.length.toString()),
+              CustomWidgets.textWidgetPrice('In Stock :   ', searchViewController.sumCount.value.toString()),
               CustomWidgets.textWidgetPrice('Sum Sell :   ', '${searchViewController.sumSell.value.toStringAsFixed(0)} \$'),
               CustomWidgets.textWidgetPrice('Sum Cost :    ', '${searchViewController.sumCost.value.toStringAsFixed(0)} \$'),
             ],

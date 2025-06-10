@@ -24,15 +24,6 @@ class AppStartInit {
     WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     HttpOverrides.global = HttpOverridesCustom();
-    await Firebase.initializeApp(
-        options: const FirebaseOptions(
-            apiKey: "AIzaSyBpIrCA8v5_JFWoSkKRdRTM0sEVGj4YecM",
-            authDomain: "stock-managament-new.firebaseapp.com",
-            projectId: "stock-managament-new",
-            storageBucket: "stock-managament-new.firebasestorage.app",
-            messagingSenderId: "645642131883",
-            appId: "1:645642131883:web:5d0d6343aabe97291f9aee",
-            measurementId: "G-NGFYKF85MP"));
     await GetStorage.init();
   }
 }

@@ -36,10 +36,10 @@ class SearchModel {
     return SearchModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
-      category: json['category_detail'] != null ? CategoryModel.fromJson(json['category_detail']) : null,
-      brend: json['brends_detail'] != null ? BrendModel.fromJson(json['brends_detail']) : null,
-      material: json['materials_detail'] != null ? MaterialModel.fromJson(json['materials_detail']) : null,
-      location: json['location_detail'] != null ? LocationModel.fromJson(json['location_detail']) : null,
+      category: json['category_detail'] != null ? CategoryModel.fromJson(json['category_detail']) : CategoryModel(id: 0, name: ""),
+      brend: json['brends_detail'] != null ? BrendModel.fromJson(json['brends_detail']) : BrendModel(id: 0, name: ""),
+      material: json['materials_detail'] != null ? MaterialModel.fromJson(json['materials_detail']) : MaterialModel(id: 0, name: ""),
+      location: json['location_detail'] != null ? LocationModel.fromJson(json['location_detail']) : LocationModel(id: 0, name: ""),
       price: json['price'] ?? '',
       gramm: json['gram'] ?? '',
       count: json['count'] ?? 0,
@@ -152,5 +152,34 @@ class LocationModel {
       notes: json['notes'],
       address: json['address'],
     );
+  }
+}
+
+class ProductModel {
+  final int id;
+  final int count;
+  final SearchModel? product;
+
+  ProductModel({
+    required this.id,
+    required this.count,
+    required this.product,
+  });
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json['id'] ?? 0,
+      count: json['count'] ?? 0,
+      product: SearchModel.fromJson(json['product']),
+    );
+  }
+
+  // Nesneyi JSON'a çevirme
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'count': count,
+      'product': product,
+    };
   }
 }

@@ -12,20 +12,18 @@ class OrderService {
   Future<List<OrderModel>> getOrders() async {
     final data = await ApiService().getRequest(ApiConstants.order, requiresToken: true);
     if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => OrderModel.fromJson(item)).toList().reversed.toList();
+      return (data['results'] as List).map((item) => OrderModel.fromJson(item)).toList();
     } else if (data is List) {
-      return (data).map((item) => OrderModel.fromJson(item)).toList().reversed.toList();
+      return (data).map((item) => OrderModel.fromJson(item)).toList();
     } else {
       return [];
     }
   }
 
-  Future<List<SearchModel>> getOrderProduct(int id) async {
-    final data = await ApiService().getRequest(ApiConstants.order + "$id/", requiresToken: true);
-    if (data is Map && data['product_detail'] != null) {
-      return (data['product_detail'] as List).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
-    } else if (data is List) {
-      return (data).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
+  Future<List<ProductModel>> getOrderProduct(int id) async {
+    final data = await ApiService().getRequest("${ApiConstants.getOrderProducts}$id/", requiresToken: true);
+    if (data is List) {
+      return (data).map((item) => ProductModel.fromJson(item)).toList();
     } else {
       return [];
     }

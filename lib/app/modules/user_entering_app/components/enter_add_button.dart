@@ -1,31 +1,40 @@
-// ignore_for_file: must_be_immutable
-
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_model.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
-class EnterAddButton extends StatelessWidget {
+class EnterAddButton extends StatefulWidget {
   final EnterModel? model;
 
+  const EnterAddButton({super.key, this.model});
+
+  @override
+  State<EnterAddButton> createState() => _EnterAddButtonState();
+}
+
+class _EnterAddButtonState extends State<EnterAddButton> {
   final TextEditingController userNameEditingController = TextEditingController();
-  final TextEditingController addressEditingController = TextEditingController();
-  final TextEditingController phoneNumberEditingController = TextEditingController();
+  final TextEditingController passwordEditingController = TextEditingController();
   FocusNode focusNode = FocusNode();
   FocusNode focusNode1 = FocusNode();
-  FocusNode focusNode2 = FocusNode();
 
-  EnterAddButton({super.key, this.model});
+  bool isSuperUser = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.model != null) {
+      userNameEditingController.text = widget.model!.username ?? '';
+      passwordEditingController.text = widget.model!.password ?? '';
+      isSuperUser = widget.model!.isSuperUser ?? false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isEdit = model != null;
+    final isEdit = widget.model != null;
 
-    if (isEdit) {
-      userNameEditingController.text = model!.name;
-      addressEditingController.text = model!.address;
-      phoneNumberEditingController.text = model!.phone;
-    }
     return AlertDialog(
       title: Text(
         isEdit ? "Edit Client" : "add_client".tr,
@@ -48,28 +57,44 @@ class EnterAddButton extends StatelessWidget {
               requestfocusNode: focusNode1,
             ),
             CustomTextField(
-              labelName: 'address',
-              controller: addressEditingController,
+              labelName: 'Password',
+              controller: passwordEditingController,
               focusNode: focusNode1,
-              requestfocusNode: focusNode2,
+              requestfocusNode: focusNode,
             ),
-            PhoneNumberTextField(mineFocus: focusNode2, controller: phoneNumberEditingController, requestFocus: focusNode, style: true, unFocus: false),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Super User",
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                  ),
+                  CupertinoSwitch(
+                    value: isSuperUser,
+                    onChanged: (value) {
+                      setState(() {
+                        isSuperUser = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
             AgreeButton(
               onTap: () async {
-                if (model == null) {
-                  final newModel = EnterModel(id: 0, name: userNameEditingController.text, address: addressEditingController.text, phone: phoneNumberEditingController.text, orderCount: 0, sumPrice: '');
+                final newModel = EnterModel(
+                  id: widget.model?.id ?? 0,
+                  username: userNameEditingController.text,
+                  password: passwordEditingController.text,
+                  isSuperUser: isSuperUser,
+                );
 
+                if (widget.model == null) {
+                  print("add new user bolyar su tayda -----------------------------------------------------------------------");
                   await EnterService().addClient(model: newModel);
                 } else {
-                  final newModel = EnterModel(
-                    id: model!.id ?? 0,
-                    name: userNameEditingController.text,
-                    address: addressEditingController.text,
-                    phone: phoneNumberEditingController.text,
-                    orderCount: 0,
-                    sumPrice: '',
-                  );
-
                   await EnterService().editClients(model: newModel);
                 }
               },

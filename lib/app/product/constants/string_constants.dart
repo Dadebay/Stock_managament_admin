@@ -66,6 +66,11 @@ class StringConstants {
     {'name': 'Order count', 'sortName': "order_count", 'size': ColumnSize.small.toString()},
     {'name': 'Sum price', 'sortName': "sum_price", 'size': ColumnSize.small.toString()},
   ];
+  static List<Map<String, String>> userNames = [
+    {'name': 'Username', 'sortName': "username", 'size': ColumnSize.small.toString()},
+    {'name': 'Password', 'sortName': "password", 'size': ColumnSize.small.toString()},
+    {'name': 'Admin', 'sortName': "isSuperUser", 'size': ColumnSize.small.toString()},
+  ];
   static List<Map<String, String>> expencesNames = [
     {'name': 'Expences Name', 'sortName': "name", 'size': ColumnSize.medium.toString()},
     {'name': 'Date', 'sortName': "date", 'size': ColumnSize.medium.toString()},
@@ -105,6 +110,7 @@ class StringConstants {
   static final List<String> fieldLabels = [
     'Name',
     'Sell price',
+    "Date",
     'Category',
     'Brand',
     'Location',
@@ -119,6 +125,7 @@ class StringConstants {
   static final List<String> apiFieldNames = [
     'name',
     'price',
+    'created_at',
     'category',
     'brends',
     'location',

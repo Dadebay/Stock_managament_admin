@@ -14,21 +14,20 @@ class EnterController extends GetxController {
     }
     List<String> words = word.trim().toLowerCase().split(' ');
     searchResult.value = clients.where((client) {
-      final name = client.name.toLowerCase();
-      final phone = client.phone.toLowerCase();
-      final address = client.address.toLowerCase();
-      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()) || address.contains(word.toLowerCase()));
+      final name = client.username!.toLowerCase();
+      final phone = client.password!.toLowerCase();
+      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()));
     }).toList();
   }
 
   Future<void> exportToExcel() async {
     var excel = Excel.createExcel();
     var sheet = excel['Clients'];
-    sheet.appendRow(['Name', 'Number', 'Address', 'Order Count', 'Sum Price']);
+    sheet.appendRow(['Username', 'Password', 'Admin']);
     for (var client in clients) {
-      sheet.appendRow([client.name.toString(), client.phone.toString(), client.address.toString(), client.orderCount.toString(), client.sumPrice.toString()]);
+      sheet.appendRow([client.username.toString(), client.password.toString(), client.isSuperUser.toString()]);
     }
-    excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");
+    excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_users.xlsx");
   }
 
   void addClient(EnterModel model) {
@@ -45,6 +44,8 @@ class EnterController extends GetxController {
   }
 
   void editClient(EnterModel model) {
+    print(model.id);
+    print(model.id);
     final index = clients.indexWhere((item) => item.id == model.id);
     if (index == -1) {
       return;

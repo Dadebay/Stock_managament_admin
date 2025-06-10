@@ -30,11 +30,17 @@ class _MyAppState extends State<_MyApp> {
 
   dynamic getLoginValue() async {
     final String? accessToken = await AuthStorage().getToken();
+    print(accessToken);
+    print(accessToken);
+    print(accessToken);
+    print(accessToken);
+    print(accessToken);
     if (accessToken != null) {
       isLoginFuture = true;
     } else {
       isLoginFuture = false;
     }
+    print(isLoginFuture);
     setState(() {});
   }
 

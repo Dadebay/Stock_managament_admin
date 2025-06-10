@@ -72,7 +72,7 @@ class ClientCard extends StatelessWidget {
       case 'address':
         return client.address;
       case 'number':
-        return "+993 " + client.phone;
+        return client.phone;
       case 'order_count':
         return client.orderCount.toString();
       case 'sum_price':

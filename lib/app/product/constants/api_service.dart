@@ -120,6 +120,9 @@ class ApiService {
       case 401:
         errorMessage = '${'unauthorized'.tr}: $message';
         break;
+      case 403:
+        errorMessage = '${'Error you are not ADMIN'.tr}: $message';
+        break;
       case 404:
         errorMessage = '${'notFound'.tr}: $message';
         break;
@@ -133,9 +136,9 @@ class ApiService {
         errorMessage = '${'errorStatus'.tr} $statusCode: $message';
     }
     if (statusCode == 409) {
-      CustomWidgets.showSnackBar('apiError'.tr, errorMessage, Colors.orange);
+      CustomWidgets.showSnackBar('Error'.tr, errorMessage, Colors.orange);
     } else {
-      CustomWidgets.showSnackBar('apiError'.tr, errorMessage, Colors.red);
+      CustomWidgets.showSnackBar('Error'.tr, errorMessage, Colors.red);
     }
   }
 }

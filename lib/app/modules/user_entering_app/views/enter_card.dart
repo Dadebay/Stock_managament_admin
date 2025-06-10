@@ -23,9 +23,9 @@ class EnterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = context.general.textTheme.titleMedium!;
     final fadedTextStyle = textStyle.copyWith(
-      fontSize: 15.sp,
-      fontWeight: FontWeight.w500,
-      color: ColorConstants.greyColor,
+      fontSize: 18.sp,
+      fontWeight: FontWeight.w600,
+      color: ColorConstants.blackColor,
     );
 
     return Padding(
@@ -54,12 +54,15 @@ class EnterCard extends StatelessWidget {
       final value = _getClientFieldBySortName(column['sortName']);
       return Expanded(
         flex: flex,
-        child: Text(
-          value ?? '',
-          maxLines: 3,
-          textAlign: flex == 1 ? TextAlign.end : TextAlign.start,
-          overflow: TextOverflow.ellipsis,
-          style: faded,
+        child: Container(
+          margin: EdgeInsets.only(left: 20.w),
+          child: Text(
+            value ?? '',
+            maxLines: 3,
+            textAlign: TextAlign.start,
+            overflow: TextOverflow.ellipsis,
+            style: faded,
+          ),
         ),
       );
     }).toList();
@@ -67,16 +70,12 @@ class EnterCard extends StatelessWidget {
 
   String? _getClientFieldBySortName(String key) {
     switch (key) {
-      case 'name':
-        return client.name;
-      case 'address':
-        return client.address;
-      case 'number':
-        return "+993 " + client.phone;
-      case 'order_count':
-        return client.orderCount.toString();
-      case 'sum_price':
-        return client.sumPrice;
+      case 'username':
+        return client.username;
+      case 'password':
+        return client.password;
+      case 'isSuperUser':
+        return client.isSuperUser.toString();
       default:
         return '';
     }
@@ -93,7 +92,7 @@ class EnterCard extends StatelessWidget {
               clientsController.deleteClient(client.id!);
 
               await EnterService().deleteClient(id: client.id!);
-              CustomWidgets.showSnackBar("deleted", "${client.name} " + "clientDeleted".tr, ColorConstants.redColor);
+              CustomWidgets.showSnackBar("deleted", "${client.username} " + "clientDeleted".tr, ColorConstants.redColor);
             },
             icon: const Icon(
               IconlyLight.delete,

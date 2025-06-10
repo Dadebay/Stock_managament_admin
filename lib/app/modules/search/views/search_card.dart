@@ -9,12 +9,14 @@ class SearchCard extends StatelessWidget {
     required this.disableOnTap,
     required this.addCounterWidget,
     required this.whcihPage,
+    this.externalCount,
     super.key,
   });
 
   final bool disableOnTap;
   final bool addCounterWidget;
   final String? whcihPage;
+  final int? externalCount;
   final SearchModel product;
 
   @override
@@ -61,14 +63,14 @@ class SearchCard extends StatelessWidget {
                           product.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 17.sp),
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.sp),
                         ),
                         Padding(
                           padding: EdgeInsets.only(top: 10.h),
                           child: Text(
-                            "${"quantity".tr}: ${product.count}",
+                            "${"quantity".tr}: ${externalCount ?? product.count}",
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.grey, fontSize: 15.sp, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Colors.grey, fontSize: 14.sp, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],

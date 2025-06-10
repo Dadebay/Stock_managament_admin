@@ -17,7 +17,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   List<FocusNode> focusNodes = List.generate(9, (_) => FocusNode());
   final SearchViewController _searchController = Get.find<SearchViewController>();
 
-  CollectionReference products = FirebaseFirestore.instance.collection('products');
   final OrderController salesController = Get.put(OrderController());
   String selectedStatus = "Preparing"; // Set an initial value
   List<TextEditingController> textControllers = List.generate(9, (_) => TextEditingController());

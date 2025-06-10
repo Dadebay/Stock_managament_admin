@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -12,7 +13,7 @@ class WebAddProductPage extends StatefulWidget {
 
 class _WebAddProductPageState extends State<WebAddProductPage> {
   final SearchViewController controller = Get.find<SearchViewController>();
-  final int fieldCount = 11;
+  final int fieldCount = 12;
   late List<TextEditingController> textControllers;
   late List<FocusNode> focusNodes;
   late List<String?> selectedIds;
@@ -49,13 +50,17 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     for (int i = 0; i < fieldCount; i++) {
       final key = StringConstants.apiFieldNames[i];
 
-      if (i == 2 || i == 3 || i == 4 || i == 5) {
+      if (i == 3 || i == 4 || i == 5 || i == 6) {
         productData[key] = selectedIds[i] ?? '';
       } else {
         productData[key] = textControllers[i].text;
       }
     }
     controller.selectedImageFileName.value = "${textControllers[0].text.replaceAll(' ', '_')}_image.png";
+    print(productData);
+    productData['gram'] = (productData['gram'] == '' ? '0' : productData['gram'])!;
+    print(productData);
+
     await controller.addNewProduct(
       productData: productData,
     );
@@ -129,29 +134,44 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
       children: List.generate(fieldCount, (index) {
         final label = StringConstants.fieldLabels[index];
 
-        final isSelectableField = index == 2 || index == 3 || index == 4 || index == 5;
+        final isSelectableField = index == 3 || index == 4 || index == 5 || index == 6;
 
         return CustomTextField(
           onTap: () {
-            if (isSelectableField) {
-              focusNodes[index].unfocus();
-              final fieldApiName = StringConstants.apiFieldNames[index];
-              Map<String, String>? selectableInfo;
-              try {
-                selectableInfo = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldApiName);
-              } catch (e) {}
-              if (selectableInfo != null && selectableInfo['url'] != null) {
-                DialogsUtils().showSelectableDialog(
-                  context: context,
-                  title: "Select $label",
-                  url: selectableInfo['url']!,
-                  targetController: textControllers[index],
-                  onIdSelected: (id) {
-                    selectedIds[index] = id;
-                  },
-                );
-              } else {
-                CustomWidgets.showSnackBar("Configuration Error", "Cannot find URL for $label", Colors.red);
+            if (label.toLowerCase() == "date") {
+              DateTime? selectedDateTime;
+              showDateTimePicker(BuildContext context) async {
+                final result = await CustomWidgets.showDateTimePickerWidget(context: context);
+                if (result != null) {
+                  setState(() {
+                    selectedDateTime = result;
+                    textControllers[2].text = DateFormat('yyyy-MM-dd, HH:mm').format(selectedDateTime!);
+                  });
+                }
+              }
+
+              showDateTimePicker(context);
+            } else {
+              if (isSelectableField) {
+                focusNodes[index].unfocus();
+                final fieldApiName = StringConstants.apiFieldNames[index];
+                Map<String, String>? selectableInfo;
+                try {
+                  selectableInfo = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldApiName);
+                } catch (e) {}
+                if (selectableInfo != null && selectableInfo['url'] != null) {
+                  DialogsUtils().showSelectableDialog(
+                    context: context,
+                    title: "Select $label",
+                    url: selectableInfo['url']!,
+                    targetController: textControllers[index],
+                    onIdSelected: (id) {
+                      selectedIds[index] = id;
+                    },
+                  );
+                } else {
+                  CustomWidgets.showSnackBar("Configuration Error", "Cannot find URL for $label", Colors.red);
+                }
               }
             }
           },

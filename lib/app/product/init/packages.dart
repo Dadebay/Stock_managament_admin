@@ -1,8 +1,6 @@
 export 'dart:io';
 
 export 'package:cached_network_image/cached_network_image.dart';
-export 'package:cloud_firestore/cloud_firestore.dart';
-export 'package:firebase_core/firebase_core.dart';
 export 'package:flutter/material.dart';
 export 'package:flutter/services.dart';
 export 'package:flutter_iconly/flutter_iconly.dart';
