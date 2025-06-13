@@ -16,6 +16,7 @@ class ApiService {
   }) async {
     try {
       final token = await _auth.getToken();
+      print(token);
       final headers = <String, String>{
         if (requiresToken && token != null) 'Authorization': 'Bearer $token',
       };
@@ -87,6 +88,9 @@ class ApiService {
         default:
           throw UnsupportedError('Unsupported HTTP method: $method');
       }
+      print(response.statusCode);
+      print(response.body);
+
       if ([200, 201, 204].contains(response.statusCode)) {
         if (response.statusCode == 204) {
           await handleSuccess!({"statusCode": response.statusCode});
@@ -99,11 +103,22 @@ class ApiService {
         return responseJson ?? response.statusCode;
       } else {
         final responseJson = response.body.isNotEmpty ? json.decode(response.body) : {};
-        _handleApiError(
-          response.statusCode,
-          responseJson['message']?.toString() ?? 'anErrorOccurred'.tr,
-        );
-        return response.statusCode;
+        print(responseJson);
+        String a = responseJson;
+        print(a.isEmpty);
+        if (a.isEmpty) {
+          _handleApiError(
+            response.statusCode,
+            responseJson['message']?.toString() ?? 'anErrorOccurred'.tr,
+          );
+        } else {
+          _handleApiError(
+            response.statusCode,
+            a.toString(),
+          );
+        }
+
+        return null;
       }
     } on SocketException {
       CustomWidgets.showSnackBar('networkError'.tr, 'noInternet'.tr, Colors.red);
@@ -121,7 +136,7 @@ class ApiService {
         errorMessage = '${'unauthorized'.tr}: $message';
         break;
       case 403:
-        errorMessage = '${'Error you are not ADMIN'.tr}: $message';
+        errorMessage = '$message';
         break;
       case 404:
         errorMessage = '${'notFound'.tr}: $message';

@@ -7,8 +7,8 @@ import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class ProductProfilView extends StatefulWidget {
-  const ProductProfilView({super.key, required this.product, required this.disableUpdate});
-
+  const ProductProfilView({super.key, required this.product, required this.disableUpdate, required this.isAdmin});
+  final bool isAdmin;
   final SearchModel product;
   final bool disableUpdate;
 
@@ -19,7 +19,7 @@ class ProductProfilView extends StatefulWidget {
 class _ProductProfilViewState extends State<ProductProfilView> {
   final SearchViewController controller = Get.find<SearchViewController>();
 
-  final int fieldCount = 11;
+  final int fieldCount = 12;
   late List<FocusNode> focusNodes;
   late List<TextEditingController> textControllers;
   late List<String?> selectedIds;
@@ -47,19 +47,20 @@ class _ProductProfilViewState extends State<ProductProfilView> {
   void _populateTextFields() {
     textControllers[0].text = widget.product.name;
     textControllers[1].text = widget.product.price;
-    textControllers[2].text = widget.product.category?.name ?? '';
-    textControllers[3].text = widget.product.brend?.name ?? '';
-    textControllers[4].text = widget.product.location?.name ?? '';
-    textControllers[5].text = widget.product.material?.name ?? '';
-    textControllers[6].text = widget.product.gramm;
-    textControllers[7].text = widget.product.count.toString();
-    textControllers[8].text = widget.product.description;
-    textControllers[9].text = widget.product.gaplama;
-    textControllers[10].text = widget.product.cost;
-    selectedIds[2] = widget.product.category?.id.toString(); // category
-    selectedIds[3] = widget.product.brend?.id.toString(); // brend
-    selectedIds[4] = widget.product.location?.id.toString(); // location
-    selectedIds[5] = widget.product.material?.id.toString();
+    textControllers[2].text = widget.product.createdAT.toString().replaceAll("T", " ").substring(0, 15);
+    textControllers[3].text = widget.product.category?.name ?? '';
+    textControllers[4].text = widget.product.brend?.name ?? '';
+    textControllers[5].text = widget.product.location?.name ?? '';
+    textControllers[6].text = widget.product.material?.name ?? '';
+    textControllers[7].text = widget.product.gramm;
+    textControllers[8].text = widget.product.count.toString();
+    textControllers[9].text = widget.product.description;
+    textControllers[10].text = widget.product.gaplama;
+    textControllers[11].text = widget.product.cost;
+    selectedIds[3] = widget.product.category?.id.toString(); // category
+    selectedIds[4] = widget.product.brend?.id.toString(); // brend
+    selectedIds[5] = widget.product.location?.id.toString(); // location
+    selectedIds[6] = widget.product.material?.id.toString();
   }
 
   Future<void> _handleUpdate() async {
@@ -67,7 +68,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     for (int i = 0; i < fieldCount; i++) {
       final key = StringConstants.apiFieldNames[i];
 
-      if ([2, 3, 4, 5].contains(i)) {
+      if ([3, 4, 5, 6].contains(i)) {
         final selectedId = selectedIds[i];
         if (selectedId == null || selectedId.isEmpty) {
           productData[key] = '';
@@ -109,7 +110,6 @@ class _ProductProfilViewState extends State<ProductProfilView> {
       Navigator.pop(context);
       CustomWidgets.showSnackBar("Success", "Product updated successfully", Colors.green);
     }).catchError((error) {
-      print(error.toString());
       CustomWidgets.showSnackBar("Error", "Failed to update product: $error", Colors.red);
     });
   }
@@ -142,7 +142,7 @@ class _ProductProfilViewState extends State<ProductProfilView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: true, icon: IconButton(tooltip: "Delete Product", onPressed: _handleDeleteRequest, icon: Icon(IconlyLight.delete, color: Colors.red)), name: "${widget.product.name}"),
+      appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: widget.isAdmin ? true : false, icon: IconButton(tooltip: "Delete Product", onPressed: _handleDeleteRequest, icon: Icon(IconlyLight.delete, color: Colors.red)), name: "${widget.product.name}"),
       body: ListView(
         padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 4) : context.padding.horizontalMedium,
         children: [
@@ -157,7 +157,9 @@ class _ProductProfilViewState extends State<ProductProfilView> {
             return Center(
               child: GestureDetector(
                 onTap: () {
-                  controller.pickImage();
+                  if (widget.isAdmin) {
+                    controller.pickImage();
+                  }
                 },
                 child: Container(
                   width: 300,
@@ -173,10 +175,12 @@ class _ProductProfilViewState extends State<ProductProfilView> {
             );
           }),
           _buildTextFields(context),
-          AgreeButton(
-            onTap: _handleUpdate,
-            text: "Update Product",
-          ),
+          widget.isAdmin
+              ? AgreeButton(
+                  onTap: _handleUpdate,
+                  text: "Update Product",
+                )
+              : SizedBox(),
           SizedBox(height: 30.h),
         ],
       ),
@@ -187,25 +191,28 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     return Column(
       children: List.generate(fieldCount, (index) {
         final label = StringConstants.fieldLabels[index];
-        final isSelectableField = index == 2 || index == 3 || index == 4 || index == 5;
+        final isSelectableField = index == 3 || index == 4 || index == 5 || index == 6;
 
         return CustomTextField(
           onTap: () {
-            if (isSelectableField) {
-              final fieldName = StringConstants.apiFieldNames[index];
-              final url = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldName)['url'].toString();
-              DialogsUtils().showSelectableDialog(
-                context: context,
-                title: label,
-                url: url,
-                targetController: textControllers[index],
-                onIdSelected: (id) {
-                  selectedIds[index] = id;
-                },
-              );
+            if (widget.isAdmin) {
+              if (isSelectableField) {
+                final fieldName = StringConstants.apiFieldNames[index];
+                final url = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldName)['url'].toString();
+                DialogsUtils().showSelectableDialog(
+                  context: context,
+                  title: label,
+                  url: url,
+                  targetController: textControllers[index],
+                  onIdSelected: (id) {
+                    selectedIds[index] = id;
+                  },
+                );
+              }
             }
           },
           labelName: label,
+          readOnly: widget.isAdmin ? false : true,
           controller: textControllers[index],
           focusNode: focusNodes[index],
           requestfocusNode: (index < fieldCount - 1) ? focusNodes[index + 1] : focusNodes[0],

@@ -7,7 +7,6 @@ class HomeService {
 
   Future<List<OrderModel>> getOrdersData() async {
     final data = await _apiService.getRequest(ApiConstants.order, requiresToken: true);
-    print(data);
     if (data is Map && data['data'] != null && data['data'] is List) {
       return (data['data'] as List).map((item) => OrderModel.fromJson(item)).toList().reversed.toList();
     } else if (data is List) {

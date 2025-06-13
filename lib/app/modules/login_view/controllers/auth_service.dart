@@ -57,22 +57,37 @@ class SignInService {
   final AuthStorage _auth = AuthStorage();
 
   Future<List<EnterModel>> getClients(String userName, String password) async {
+    await _auth.setAdmin(false);
+
     final uri = Uri.parse(ApiConstants.users);
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
     if (data is Map && data['results'] != null) {
       return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList();
     } else if (data is List) {
       List<EnterModel> list = [];
-      print(data);
+
       list = (data).map((item) => EnterModel.fromJson(item)).toList();
+      print(list);
       for (var element in list) {
-        print(element.username);
         if (element.username == userName && element.password == password) {
-          print("geldi Mana");
-          await _auth.setAdmin(true);
+          if (element.isSuperUser == true) {
+            await _auth.setAdmin(true);
+          }
         }
       }
       return list;
+    } else {
+      return [];
+    }
+  }
+
+  Future<dynamic> logOut() async {
+    final uri = Uri.parse("${ApiConstants.logOut}");
+    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+    if (data is Map && data['results'] != null) {
+      return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
+    } else if (data is List) {
+      return (data).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
     } else {
       return [];
     }

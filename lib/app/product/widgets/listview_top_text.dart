@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
@@ -116,8 +117,8 @@ class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
                     children: [
                       Flexible(
                         child: Text(
-                          widget.names[i]['name']!,
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: Colors.black),
+                          "${widget.names[i]['name']!}".tr,
+                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

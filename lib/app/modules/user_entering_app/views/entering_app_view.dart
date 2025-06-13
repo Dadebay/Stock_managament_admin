@@ -14,10 +14,16 @@ import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 import '../controllers/enter_controller.dart';
 
 class EnteringAppView extends StatelessWidget {
+  final bool isAdmin;
   final EnterController clientsController = Get.put<EnterController>(EnterController());
   TextEditingController searchEditingController = TextEditingController();
+
+  EnteringAppView({super.key, required this.isAdmin});
   @override
   Widget build(BuildContext context) {
+    print(isAdmin);
+    print(isAdmin);
+    print(isAdmin);
     return Stack(
       children: [
         FutureBuilder<List<EnterModel>>(
@@ -78,6 +84,7 @@ class EnteringAppView extends StatelessWidget {
                             itemCount: displayList.length,
                             itemBuilder: (context, index) {
                               return EnterCard(
+                                isAdmin: isAdmin,
                                 client: displayList[index],
                                 count: (clientsController.clients.length - index),
                                 topTextColumnSize: StringConstants.userNames,
@@ -96,7 +103,7 @@ class EnteringAppView extends StatelessWidget {
             });
           },
         ),
-        bottomButtons(),
+        isAdmin ? bottomButtons() : SizedBox.shrink(),
       ],
     );
   }

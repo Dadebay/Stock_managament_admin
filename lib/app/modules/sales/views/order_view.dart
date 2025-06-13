@@ -11,8 +11,8 @@ import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dar
 import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 
 class OrderView extends StatefulWidget {
-  const OrderView({super.key});
-
+  const OrderView({super.key, required this.isAdmin});
+  final bool isAdmin;
   @override
   State<OrderView> createState() => _OrderViewState();
 }
@@ -25,17 +25,19 @@ class _OrderViewState extends State<OrderView> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FloatingActionButton(
-          heroTag: "add_product",
-          backgroundColor: ColorConstants.blackColor,
-          onPressed: () {
-            Get.to(() => const OrderCreateView());
-          },
-          child: Icon(
-            IconlyLight.plus,
-            color: Colors.amber,
-          ),
-        ),
+        widget.isAdmin
+            ? FloatingActionButton(
+                heroTag: "add_product",
+                backgroundColor: ColorConstants.blackColor,
+                onPressed: () {
+                  Get.to(() => OrderCreateView(isAdmin: widget.isAdmin));
+                },
+                child: Icon(
+                  IconlyLight.plus,
+                  color: Colors.amber,
+                ),
+              )
+            : SizedBox(),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 20.w),
           child: FloatingActionButton(
@@ -102,7 +104,7 @@ class _OrderViewState extends State<OrderView> {
         itemCount: list.length,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
-          return OrderCardView(order: list[index], index: list.length - index);
+          return OrderCardView(order: list[index], isAdmin: widget.isAdmin, index: list.length - index);
         });
   }
 

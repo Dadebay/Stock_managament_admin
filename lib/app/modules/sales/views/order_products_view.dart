@@ -8,8 +8,8 @@ import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dar
 
 class OrderProductsView extends StatefulWidget {
   final OrderModel order;
-
-  const OrderProductsView({super.key, required this.order});
+  final bool isAdmin;
+  const OrderProductsView({super.key, required this.order, required this.isAdmin});
 
   @override
   State<OrderProductsView> createState() => _OrderProductsViewState();
@@ -50,7 +50,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
       appBar: CustomAppBar(
         backArrow: true,
         centerTitle: true,
-        actionIcon: true,
+        actionIcon: widget.isAdmin ? true : false,
         icon: IconButton(
           onPressed: () async {
             final confirm = await Get.defaultDialog<bool>(
@@ -89,6 +89,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
                     });
                     orderController.editOrderInList(updatedOrderFromField);
                   },
+                  isAdmin: widget.isAdmin,
                 );
               }),
             ),
@@ -127,6 +128,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
                 product: products[index],
                 disableOnTap: true,
                 addCounterWidget: false,
+                isAdmin: widget.isAdmin,
                 whcihPage: '',
               ),
             );
@@ -147,6 +149,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
                 externalCount: productModel.count,
                 disableOnTap: true,
                 addCounterWidget: false,
+                isAdmin: widget.isAdmin,
                 whcihPage: '',
               );
             });
@@ -158,6 +161,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
 class OrderDetailField extends StatefulWidget {
   final String label;
   final bool isEditable;
+  final bool isAdmin;
   final OrderModel currentOrder;
   final Function(OrderModel) onUpdate;
 
@@ -167,6 +171,7 @@ class OrderDetailField extends StatefulWidget {
     required this.isEditable,
     required this.currentOrder,
     required this.onUpdate,
+    required this.isAdmin,
   });
 
   @override
@@ -232,16 +237,20 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
     return GestureDetector(
       onTap: !widget.isEditable
           ? null
-          : () => showEditDialog(
-                context: context,
-                label: widget.label,
-                initialValue: _displayedValue, // Dialog için başlangıç değeri
-                currentOrder: widget.currentOrder,
-                onSave: (locallyUpdatedOrder) async {
-                  await OrderService().editOrderManually(model: locallyUpdatedOrder);
-                  widget.onUpdate(locallyUpdatedOrder);
-                },
-              ),
+          : () {
+              print(widget.isAdmin);
+              if (widget.isAdmin)
+                showEditDialog(
+                  context: context,
+                  label: widget.label,
+                  initialValue: _displayedValue, // Dialog için başlangıç değeri
+                  currentOrder: widget.currentOrder,
+                  onSave: (locallyUpdatedOrder) async {
+                    await OrderService().editOrderManually(model: locallyUpdatedOrder);
+                    widget.onUpdate(locallyUpdatedOrder);
+                  },
+                );
+            },
       child: Container(
         color: Colors.white,
         child: Column(
@@ -266,7 +275,7 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                               border: Border.all(color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color']!, width: 1),
                               borderRadius: BorderRadius.circular(10)),
                           child: Text(
-                            "${StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['name']} ",
+                            "${StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['name']}".tr,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color'], fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -328,7 +337,7 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                       color: (statusItem['color'] as Color).withOpacity(0.2),
                     ),
                     child: Text(
-                      statusItem['name']!,
+                      "${statusItem['name']!}".tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: statusItem['color'] as Color, fontWeight: FontWeight.bold),
                     ),

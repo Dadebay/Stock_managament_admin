@@ -15,7 +15,10 @@ import '../controllers/clients_controller.dart';
 
 class ClientsView extends StatelessWidget {
   final ClientsController clientsController = Get.find();
+  final bool isAdmin;
   TextEditingController searchEditingController = TextEditingController();
+
+  ClientsView({super.key, required this.isAdmin});
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -82,6 +85,7 @@ class ClientsView extends StatelessWidget {
                             itemCount: displayList.length,
                             itemBuilder: (context, index) {
                               return ClientCard(
+                                isAdmin: isAdmin,
                                 client: displayList[index],
                                 count: (displayList.length - index),
                                 topTextColumnSize: StringConstants.clientNames,
@@ -100,7 +104,7 @@ class ClientsView extends StatelessWidget {
             });
           },
         ),
-        bottomButtons(),
+        isAdmin ? bottomButtons() : SizedBox()
       ],
     );
   }
@@ -117,7 +121,6 @@ class ClientsView extends StatelessWidget {
             onPressed: () async {
               await SignInService().getClients('didario', "Didar123#");
               await AuthStorage().getAdminStatus().then((value) {
-                print(value);
                 if (value == true) {
                   clientsController.exportToExcel();
                 } else {

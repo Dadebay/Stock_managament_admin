@@ -6,8 +6,8 @@ import 'package:stock_managament_admin/app/modules/search/views/search_view.dart
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class CreatePurchasesView extends StatefulWidget {
-  const CreatePurchasesView({super.key});
-
+  const CreatePurchasesView({super.key, required this.isAdmin});
+  final bool isAdmin;
   @override
   State<CreatePurchasesView> createState() => _CreatePurchasesViewState();
 }
@@ -81,7 +81,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
             requestfocusNode: focusNodes[0],
           ),
           selectedProductsView(),
-          AgreeButton(onTap: () => Get.to(() => SearchView(selectableProducts: true, whichPage: 'purhcase')), text: 'selectProducts'),
+          AgreeButton(onTap: () => Get.to(() => SearchView(selectableProducts: true, isAdmin: widget.isAdmin, whichPage: 'purhcase')), text: 'selectProducts'),
           AgreeButton(
               onTap: () async {
                 List<Map<String, int>> products = [];
@@ -141,6 +141,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                 return SearchCard(
                   product: _searchController.selectedProductsToOrder[index]['product'],
                   disableOnTap: false,
+                  isAdmin: widget.isAdmin,
                   addCounterWidget: true,
                   whcihPage: 'purhcase',
                 );

@@ -5,21 +5,25 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class RightSideButtons extends StatelessWidget {
   final SearchViewController searchViewController = Get.find();
+  final bool isAdmin;
 
+  RightSideButtons({super.key, required this.isAdmin});
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FloatingActionButton(
-          backgroundColor: Colors.black,
-          heroTag: "add_product",
-          onPressed: () => Get.to(() => const WebAddProductPage()),
-          child: const Icon(
-            IconlyLight.plus,
-            color: Colors.amber,
-          ),
-        ),
+        isAdmin
+            ? FloatingActionButton(
+                backgroundColor: Colors.black,
+                heroTag: "add_product",
+                onPressed: () => Get.to(() => const WebAddProductPage()),
+                child: const Icon(
+                  IconlyLight.plus,
+                  color: Colors.amber,
+                ),
+              )
+            : SizedBox(),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 20.w),
           child: FloatingActionButton(

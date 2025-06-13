@@ -9,8 +9,9 @@ import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 import '../../../product/init/packages.dart';
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key, required this.selectableProducts, this.whichPage});
+  const SearchView({super.key, required this.selectableProducts, this.whichPage, required this.isAdmin});
   final bool selectableProducts;
+  final bool isAdmin;
   final String? whichPage;
   @override
   State<SearchView> createState() => _SearchViewState();
@@ -72,7 +73,7 @@ class _SearchViewState extends State<SearchView> {
                 Positioned(
                   bottom: 70.0,
                   right: 20.0,
-                  child: RightSideButtons(),
+                  child: RightSideButtons(isAdmin: widget.isAdmin),
                 ),
                 Positioned(
                   bottom: 0.0,
@@ -140,7 +141,7 @@ class _SearchViewState extends State<SearchView> {
         itemCount: list.length,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
-          return SecondProductCard(product: list[index]);
+          return SecondProductCard(product: list[index], isAdmin: widget.isAdmin);
         });
   }
 
@@ -159,6 +160,7 @@ class _SearchViewState extends State<SearchView> {
                   product: list[index],
                   addCounterWidget: widget.selectableProducts,
                   whcihPage: widget.whichPage,
+                  isAdmin: widget.isAdmin,
                 ),
               )
             ],

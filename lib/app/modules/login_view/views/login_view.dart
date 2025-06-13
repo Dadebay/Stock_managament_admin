@@ -69,14 +69,13 @@ class LoginView extends StatelessWidget {
                           homeController.agreeButton.value = !homeController.agreeButton.value;
 
                           await SignInService().login(username: textEditingController.text, password: textEditingController1.text).then((value) async {
-                            await SignInService().getClients(textEditingController.text, textEditingController1.text);
-
                             if (value != null) {
+                              await SignInService().getClients(textEditingController.text, textEditingController1.text);
+
                               Get.offAll(() => const NavBarPageView());
                             } else {
                               textEditingController.clear();
                               textEditingController1.clear();
-                              CustomWidgets.showSnackBar('errorTitle', 'alreadyExist', Colors.red);
                             }
                           });
                           homeController.agreeButton.value = !homeController.agreeButton.value;

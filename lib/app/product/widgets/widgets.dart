@@ -79,6 +79,7 @@ class CustomWidgets {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
+            flex: 4,
             child: Text(
               text1,
               maxLines: 1,
@@ -89,6 +90,7 @@ class CustomWidgets {
           ),
           SizedBox(width: 5.w),
           Expanded(
+            flex: 3,
             child: Text(
               text2,
               textAlign: TextAlign.start,

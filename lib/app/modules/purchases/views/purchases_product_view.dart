@@ -8,7 +8,8 @@ import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dar
 
 class PurchasesProductsView extends StatefulWidget {
   final PurchasesModel purchasesModel;
-  const PurchasesProductsView({required this.purchasesModel});
+  final bool isAdmin;
+  const PurchasesProductsView({required this.purchasesModel, required this.isAdmin});
   @override
   State<PurchasesProductsView> createState() => _PurchasesProductsViewState();
 }
@@ -72,6 +73,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                     disableOnTap: true,
                     product: snapshot.data![index].product!,
                     addCounterWidget: false,
+                    isAdmin: widget.isAdmin,
                     externalCount: snapshot.data![index].count,
                     whcihPage: '',
                   ),
@@ -139,70 +141,72 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
 
     return GestureDetector(
       onTap: () {
-        Get.defaultDialog(
-          title: labelName,
-          titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
-          titlePadding: EdgeInsets.only(top: 20),
-          content: Container(
-            width: Get.size.width / 3,
-            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomTextField(
-                  onTap: () {
-                    if (labelName == 'Date') {
-                      DateTime? selectedDateTime;
-                      showDateTimePicker(BuildContext context) async {
-                        final result = await CustomWidgets.showDateTimePickerWidget(context: context);
-                        if (result != null) {
-                          setState(() {
-                            selectedDateTime = result;
-                            textEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
-                          });
+        if (widget.isAdmin) {
+          Get.defaultDialog(
+            title: labelName,
+            titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
+            titlePadding: EdgeInsets.only(top: 20),
+            content: Container(
+              width: Get.size.width / 3,
+              padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomTextField(
+                    onTap: () {
+                      if (labelName == 'Date') {
+                        DateTime? selectedDateTime;
+                        showDateTimePicker(BuildContext context) async {
+                          final result = await CustomWidgets.showDateTimePickerWidget(context: context);
+                          if (result != null) {
+                            setState(() {
+                              selectedDateTime = result;
+                              textEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
+                            });
+                          }
                         }
-                      }
 
-                      showDateTimePicker(context);
-                    }
-                  },
-                  labelName: labelName.toString(),
-                  controller: textEditingController,
-                  focusNode: focusNode,
-                  requestfocusNode: focusNode,
-                ),
-                AgreeButton(
-                  onTap: () async {
-                    final updatedModel = PurchasesModel(
-                      id: _localModel.id,
-                      title: labelName == 'Title' ? textEditingController.text : _localModel.title,
-                      date: labelName == 'Date' ? textEditingController.text.substring(0, 10) : _localModel.date,
-                      source: labelName == 'Source' ? textEditingController.text : _localModel.source,
-                      cost: labelName == 'Cost' ? textEditingController.text : _localModel.cost,
-                      description: labelName == 'Description' ? textEditingController.text : _localModel.description,
-                      count: _localModel.count,
-                      products: _localModel.products,
-                    );
-                    final result = await PurchasesService().editOrderManually(model: updatedModel);
-                    if (result != null) {
-                      setState(() {
-                        _localModel = result;
-                      });
-                    }
-                  },
-                  text: "Change Data",
-                ),
-                AgreeButton(
-                  onTap: () {
-                    Get.back();
-                  },
-                  showBorder: true,
-                  text: "Cancel",
-                ),
-              ],
+                        showDateTimePicker(context);
+                      }
+                    },
+                    labelName: labelName.toString(),
+                    controller: textEditingController,
+                    focusNode: focusNode,
+                    requestfocusNode: focusNode,
+                  ),
+                  AgreeButton(
+                    onTap: () async {
+                      final updatedModel = PurchasesModel(
+                        id: _localModel.id,
+                        title: labelName == 'Title' ? textEditingController.text : _localModel.title,
+                        date: labelName == 'Date' ? textEditingController.text.substring(0, 10) : _localModel.date,
+                        source: labelName == 'Source' ? textEditingController.text : _localModel.source,
+                        cost: labelName == 'Cost' ? textEditingController.text : _localModel.cost,
+                        description: labelName == 'Description' ? textEditingController.text : _localModel.description,
+                        count: _localModel.count,
+                        products: _localModel.products,
+                      );
+                      final result = await PurchasesService().editOrderManually(model: updatedModel);
+                      if (result != null) {
+                        setState(() {
+                          _localModel = result;
+                        });
+                      }
+                    },
+                    text: "Change Data",
+                  ),
+                  AgreeButton(
+                    onTap: () {
+                      Get.back();
+                    },
+                    showBorder: true,
+                    text: "Cancel",
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
       child: Container(
         color: Colors.white,

@@ -92,7 +92,6 @@ class _EnterAddButtonState extends State<EnterAddButton> {
                 );
 
                 if (widget.model == null) {
-                  print("add new user bolyar su tayda -----------------------------------------------------------------------");
                   await EnterService().addClient(model: newModel);
                 } else {
                   await EnterService().editClients(model: newModel);

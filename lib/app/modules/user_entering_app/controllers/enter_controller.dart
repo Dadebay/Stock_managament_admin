@@ -44,8 +44,6 @@ class EnterController extends GetxController {
   }
 
   void editClient(EnterModel model) {
-    print(model.id);
-    print(model.id);
     final index = clients.indexWhere((item) => item.id == model.id);
     if (index == -1) {
       return;

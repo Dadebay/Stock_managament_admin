@@ -9,6 +9,8 @@ class EnterService {
   Future<List<EnterModel>> getClients() async {
     final uri = Uri.parse("${ApiConstants.users}");
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+    print(data);
+    print(data);
     if (data is Map && data['results'] != null) {
       return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
     } else if (data is List) {
@@ -52,10 +54,6 @@ class EnterService {
       },
       requiresToken: true,
       handleSuccess: (responseJson) {
-        print(responseJson);
-        print(responseJson);
-        print(responseJson);
-        print(responseJson);
         if (responseJson.isNotEmpty) {
           clientsController.editClient(EnterModel.fromJson(responseJson));
           Get.back();

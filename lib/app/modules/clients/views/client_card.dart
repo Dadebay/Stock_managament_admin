@@ -9,14 +9,15 @@ class ClientCard extends StatelessWidget {
   ClientCard({
     required this.client,
     required this.count,
+    required this.isAdmin,
     required this.topTextColumnSize,
     super.key,
   });
 
   final ClientModel client;
   final int count;
+  final bool isAdmin;
   final List<Map<String, dynamic>> topTextColumnSize;
-
   final ClientsController clientsController = Get.find();
 
   @override
@@ -39,7 +40,7 @@ class ClientCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ..._buildDynamicTextWidgets(fadedTextStyle),
-                _buildActionButtons(),
+                isAdmin ? _buildActionButtons() : Expanded(flex: 1, child: SizedBox()),
               ],
             ),
           ),

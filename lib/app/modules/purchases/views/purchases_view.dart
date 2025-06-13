@@ -10,15 +10,16 @@ import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dar
 import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 
 class PurchasesView extends StatefulWidget {
-  const PurchasesView({super.key});
-
+  const PurchasesView({super.key, required this.isAdmin});
+  final bool isAdmin;
   @override
   State<PurchasesView> createState() => _PurchasesViewState();
 }
 
 class _PurchasesViewState extends State<PurchasesView> {
-  final PurchasesController purchasesController = Get.put(PurchasesController());
+  final PurchasesController purchasesController = Get.find<PurchasesController>();
   final TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,26 +59,29 @@ class _PurchasesViewState extends State<PurchasesView> {
                                         purchasesModel: displayList[index],
                                         showInProductProfil: false,
                                         index: displayList.length - index,
+                                        isAdmin: widget.isAdmin,
                                       );
                                     },
                                   )),
                   ],
                 ),
-                Positioned(
-                  bottom: 70.0,
-                  right: 20.0,
-                  child: FloatingActionButton(
-                    backgroundColor: Colors.black,
-                    heroTag: "add_purchase",
-                    onPressed: () {
-                      Get.to(() => CreatePurchasesView());
-                    },
-                    child: const Icon(
-                      IconlyLight.plus,
-                      color: Colors.amber,
-                    ),
-                  ),
-                ),
+                widget.isAdmin
+                    ? Positioned(
+                        bottom: 70.0,
+                        right: 20.0,
+                        child: FloatingActionButton(
+                          backgroundColor: Colors.black,
+                          heroTag: "add_purchase",
+                          onPressed: () {
+                            Get.to(() => CreatePurchasesView(isAdmin: widget.isAdmin));
+                          },
+                          child: const Icon(
+                            IconlyLight.plus,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      )
+                    : SizedBox.shrink(),
                 Positioned(
                   bottom: 0.0,
                   left: 0.0,

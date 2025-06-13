@@ -45,14 +45,12 @@ class OrderService {
       "count": int.parse(model.count.toString()),
       'products': products,
     };
-    print(body);
     return ApiService().handleApiRequest(
       endpoint: ApiConstants.order,
       method: 'POST',
       body: body,
       requiresToken: true,
       handleSuccess: (responseJson) {
-        print(responseJson);
         if (responseJson.isNotEmpty) {
           orderController.addOrder(OrderModel.fromJson(responseJson));
           Get.back();
@@ -69,7 +67,6 @@ class OrderService {
 
     final token = await _auth.getToken();
     final url = Uri.parse(ApiConstants.order + "${model.id}/");
-    print(url);
     final headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
@@ -90,14 +87,7 @@ class OrderService {
       "count": model.count,
       // 'products': model.products
     });
-    print(body);
-    print(model.products);
-
     final response = await http.put(url, headers: headers, body: body);
-    print(body);
-    print(response.statusCode);
-    print(response.body);
-
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       final updatedOrder = OrderModel.fromJson(jsonResponse);

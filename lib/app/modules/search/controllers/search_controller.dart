@@ -109,13 +109,19 @@ class SearchViewController extends GetxController {
 
   Future<void> addNewProduct({
     required Map<String, String> productData,
+    required Uint8List? selectedImageBytes,
+    required String? selectedImageFileName,
   }) async {
     try {
+      final HomeController homeController = Get.find();
+      homeController.agreeButton.value = true;
+
       final SearchModel? newProduct = await SearchService().createProductWithImage(
         fields: productData,
-        imageBytes: selectedImageBytes.value, // Controller'daki byte'ları kullan
-        imageFileName: selectedImageFileName.value, // Controller'daki dosya adını kullan
+        imageBytes: selectedImageBytes, // Controller'daki byte'ları kullan
+        imageFileName: selectedImageFileName, // Controller'daki dosya adını kullan
       );
+      homeController.agreeButton.value = false;
 
       if (newProduct != null) {
         productsList.add(newProduct);
@@ -148,31 +154,21 @@ class SearchViewController extends GetxController {
   }
 
   void updateProductLocally(SearchModel updatedProduct) {
-    print("updateProductLocally çağrıldı. Gelen ürün ID: ${updatedProduct.id}, Yeni img: ${updatedProduct.img}");
-
     final indexInProducts = productsList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInProducts != -1) {
-      print("productsList içinde bulundu, güncelleniyor. Eski img: ${productsList[indexInProducts].img}");
       productsList[indexInProducts] = updatedProduct;
-    } else {
-      print("productsList içinde ürün bulunamadı: ${updatedProduct.id}");
-    }
+    } else {}
 
     final indexInSearch = searchResult.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInSearch != -1) {
-      print("searchResult içinde bulundu, güncelleniyor. Eski img: ${searchResult[indexInSearch].img}");
       searchResult[indexInSearch] = updatedProduct;
-    } else {
-      print("searchResult içinde ürün bulunamadı: ${updatedProduct.id}");
-    }
+    } else {}
 
     calculateTotals();
 
     productsList.refresh();
     searchResult.refresh();
     update();
-
-    print("Güncelleme sonrası productsList[${indexInProducts}].img: ${productsList.firstWhereOrNull((p) => p.id == updatedProduct.id)?.img}");
   }
 
   void calculateTotals() {

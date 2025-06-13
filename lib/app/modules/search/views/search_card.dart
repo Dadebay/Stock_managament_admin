@@ -11,8 +11,10 @@ class SearchCard extends StatelessWidget {
     required this.whcihPage,
     this.externalCount,
     super.key,
+    required this.isAdmin,
   });
 
+  final bool isAdmin;
   final bool disableOnTap;
   final bool addCounterWidget;
   final String? whcihPage;
@@ -26,7 +28,7 @@ class SearchCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (!disableOnTap) {
-          Get.to(() => ProductProfilView(product: product, disableUpdate: addCounterWidget));
+          Get.to(() => ProductProfilView(product: product, disableUpdate: addCounterWidget, isAdmin: isAdmin));
         } else {
           CustomWidgets.showSnackBar('Error', 'Cannot show this product because it is SOLD', ColorConstants.redColor);
         }
@@ -63,20 +65,20 @@ class SearchCard extends StatelessWidget {
                           product.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.sp),
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 16.sp),
                         ),
                         Padding(
                           padding: EdgeInsets.only(top: 10.h),
                           child: Text(
                             "${"quantity".tr}: ${externalCount ?? product.count}",
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.grey, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Colors.grey, fontSize: 14.sp, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 50.w),
+                  SizedBox(width: 20.w),
                   Expanded(child: Text("${product.cost} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14.sp))),
                   Expanded(child: Text("${product.price} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14.sp))),
                   Expanded(child: Text("${product.brend?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
@@ -133,14 +135,15 @@ class SearchCard extends StatelessWidget {
 class SecondProductCard extends StatelessWidget {
   const SecondProductCard({
     required this.product,
+    required this.isAdmin,
   });
-
+  final bool isAdmin;
   final SearchModel product;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(() => ProductProfilView(product: product, disableUpdate: false)),
+      onTap: () => Get.to(() => ProductProfilView(product: product, disableUpdate: false, isAdmin: isAdmin)),
       child: Container(
           margin: EdgeInsets.only(right: 15.w),
           decoration: BoxDecoration(

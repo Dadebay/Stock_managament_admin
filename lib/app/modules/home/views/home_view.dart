@@ -17,8 +17,8 @@ class DataItem {
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
-
+  const HomeView({super.key, required this.isAdmin});
+  final bool isAdmin;
   @override
   State<HomeView> createState() => _HomeViewState();
 }
@@ -166,27 +166,29 @@ class _HomeViewState extends State<HomeView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(child: names(name: "Sales", color: Colors.red, index: 0)),
-                Expanded(child: names(name: "Purchase", color: Colors.amber, index: 1)),
-                Expanded(child: names(name: "Expences", color: Colors.blue, index: 2)),
-                Expanded(child: names(name: "Sum Cost", color: Colors.purple, index: 3)),
-                Expanded(child: names(name: "Net Profit", color: Colors.green, index: 4)),
+                Expanded(child: names(name: "salesChart", color: Colors.red, index: 0)),
+                Expanded(child: names(name: "sumCostChart", color: Colors.purple, index: 3)),
+                Expanded(child: names(name: "purchases", color: Colors.amber, index: 1)),
+                Expanded(child: names(name: "expences", color: Colors.blue, index: 2)),
+                Expanded(child: names(name: "netProfit", color: Colors.green, index: 4)),
                 const SizedBox(width: 20),
                 yearPicker(context),
                 const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () async {
-                    await exportToExcel(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
-                    child: Text(
-                      "Export Excel".tr,
-                      style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )
+                widget.isAdmin
+                    ? GestureDetector(
+                        onTap: () async {
+                          await exportToExcel(context);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+                          child: Text(
+                            "Export Excel".tr,
+                            style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      )
+                    : SizedBox()
               ],
             ),
           ),
@@ -202,19 +204,19 @@ class _HomeViewState extends State<HomeView> {
                       String rodLabel = '';
                       switch (rodIndex) {
                         case 0:
-                          rodLabel = 'Sales';
+                          rodLabel = 'salesChart';
                           break;
                         case 1:
-                          rodLabel = 'Sum Cost';
+                          rodLabel = 'sumCostChart';
                           break;
                         case 2:
-                          rodLabel = 'Purchases';
+                          rodLabel = 'purchases';
                           break;
                         case 3:
-                          rodLabel = 'Expences';
+                          rodLabel = 'expences';
                           break;
                         case 4:
-                          rodLabel = 'Net Profit';
+                          rodLabel = 'netProfit';
                           break;
                       }
                       return BarTooltipItem(
@@ -222,11 +224,11 @@ class _HomeViewState extends State<HomeView> {
                         const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                         children: <TextSpan>[
                           TextSpan(
-                            text: '$rodLabel: ${rod.toY.toStringAsFixed(2)}',
+                            text: "$rodLabel".tr + ': ${rod.toY.toStringAsFixed(2)}',
                             style: TextStyle(
-                              color: rod.color ?? Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],

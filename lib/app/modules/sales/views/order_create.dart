@@ -7,8 +7,8 @@ import 'package:stock_managament_admin/app/product/constants/string_constants.da
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class OrderCreateView extends StatefulWidget {
-  const OrderCreateView({super.key});
-
+  const OrderCreateView({super.key, required this.isAdmin});
+  final bool isAdmin;
   @override
   State<OrderCreateView> createState() => _OrderCreateViewState();
 }
@@ -136,7 +136,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
           selectedProductsView(),
           AgreeButton(
               onTap: () {
-                Get.to(() => const SearchView(selectableProducts: true));
+                Get.to(() => SearchView(selectableProducts: true, isAdmin: widget.isAdmin));
               },
               text: 'selectProducts'),
           submitOrder(),
@@ -162,8 +162,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                 products.add({'id': element['product'].id, 'count': element['count']});
               },
             );
-            print(key);
-            print(products);
             final OrderModel model = OrderModel(
               id: 0,
               status: key.toString(),
@@ -218,6 +216,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                       product: product,
                       disableOnTap: false,
                       addCounterWidget: true,
+                      isAdmin: widget.isAdmin,
                       whcihPage: '',
                     );
                   },

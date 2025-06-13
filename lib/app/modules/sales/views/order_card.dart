@@ -6,14 +6,18 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 // ignore: must_be_immutable
 class OrderCardView extends StatelessWidget {
-  OrderCardView({Key? key, required this.order, required this.index}) : super(key: key);
+  OrderCardView({Key? key, required this.order, required this.index, required this.isAdmin}) : super(key: key);
   final OrderModel order;
   final int index;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(() => OrderProductsView(order: order)),
+      onTap: () => Get.to(() => OrderProductsView(
+            order: order,
+            isAdmin: isAdmin,
+          )),
       child: Container(
         color: Colors.white,
         padding: EdgeInsets.only(top: 10.h, bottom: 10.h, right: 15.w),
@@ -74,7 +78,7 @@ class OrderCardView extends StatelessWidget {
                     border: Border.all(color: StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['color'] ?? Colors.transparent, width: 1),
                     borderRadius: BorderRadius.circular(10)),
                 child: Text(
-                  "${StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['name']} ",
+                  "${StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['name']}".tr,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status)['color'], fontSize: 16.sp, fontWeight: FontWeight.bold),

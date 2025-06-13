@@ -13,9 +13,9 @@ class SearchService {
   Future<List<SearchModel>> getProducts() async {
     final data = await ApiService().getRequest(ApiConstants.products, requiresToken: true);
     if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
+      return (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList();
     } else if (data is List) {
-      return (data).map((item) => SearchModel.fromJson(item)).toList().reversed.toList();
+      return (data).map((item) => SearchModel.fromJson(item)).toList();
     } else {
       return [];
     }
@@ -44,10 +44,6 @@ class SearchService {
     }
     request.headers['Authorization'] = 'Bearer $token';
     request.fields.addAll(fields);
-    print("Mana geldi-----------------------------------------------------------------------------");
-    request.fields.forEach((key, value) {
-      print('$key: $value');
-    });
 
     if (imageBytes != null && imageFileName != null && imageFileName.isNotEmpty) {
       String extension = imageFileName.split('.').last.toLowerCase();
@@ -63,22 +59,18 @@ class SearchService {
         contentType: MediaType('image', extension), // Dinamik içerik tipi
       ));
     }
-
+    print(request.fields);
     try {
       final streamedResponse = await request.send();
       final responseBody = await streamedResponse.stream.bytesToString();
       final statusCode = streamedResponse.statusCode;
-
-      print('Update Status Code: $statusCode');
-      print('Update Response Body: $responseBody');
-
+      print(responseBody);
+      print(statusCode);
       if (statusCode == 200) {
         final jsonData = jsonDecode(responseBody);
         final updatedModel = SearchModel.fromJson(jsonData);
         searchViewController.updateProductLocally(updatedModel);
-        // SnackBar zaten ProductProfilView içinde gösteriliyor.
       } else {
-        // Hata durumunu daha iyi ele almak için
         String errorMessage = "Failed to update product. Status code: $statusCode";
         try {
           final errorJson = jsonDecode(responseBody);
@@ -88,13 +80,11 @@ class SearchService {
             errorMessage = errorJson.toString();
           }
         } catch (e) {
-          // JSON parse edilemezse, ham body'yi kullan
           errorMessage += "\nResponse: $responseBody";
         }
         throw Exception(errorMessage);
       }
     } catch (e) {
-      print('Error updating product: $e');
       throw Exception('Error during product update: $e');
     }
   }
@@ -110,21 +100,28 @@ class SearchService {
     request.headers['Authorization'] = 'Bearer $token';
     request.fields.addAll(fields);
     if (imageBytes != null && imageFileName != null) {
+      String extension = imageFileName.split('.').last.toLowerCase();
+      extension = (extension == 'jpg') ? 'jpeg' : extension;
+
       request.files.add(http.MultipartFile.fromBytes(
         'img',
         imageBytes,
         filename: imageFileName,
-        contentType: MediaType('image', 'png'),
+        contentType: MediaType('image', extension),
       ));
     }
     final streamedResponse = await request.send();
+
     final statusCode = streamedResponse.statusCode;
-    print(statusCode);
-    print(streamedResponse.stream.bytesToString());
+    request.fields.forEach((key, value) => print('$key: $value'));
+
     if (statusCode == 200 || statusCode == 201) {
       final responseBody = await streamedResponse.stream.bytesToString();
       final jsonData = jsonDecode(responseBody);
       final updatedModel = SearchModel.fromJson(jsonData);
+
+      print("Status code: $statusCode");
+      print("Response body: $jsonData");
       searchViewController.updateProductLocally(updatedModel);
       return updatedModel;
     } else {

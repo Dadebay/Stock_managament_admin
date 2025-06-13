@@ -49,13 +49,17 @@ class OrderController extends GetxController {
     double totalSell = 0;
     double totalCost = 0;
     int totalCount = 0;
+    print(allOrders.length);
     for (var product in allOrders) {
-      final sell = double.tryParse(product.totalsum) ?? 0.0;
-      final cost = double.tryParse(product.totalchykdajy) ?? 0.0;
-      final count = product.count ?? 0;
-      totalSell += sell * count;
-      totalCost += cost * count;
-      totalCount += count;
+      if (product.status == "2") {
+        final sell = double.tryParse(product.totalsum) ?? 0.0;
+        final cost = double.tryParse(product.totalchykdajy) ?? 0.0;
+        final count = product.count ?? 0;
+
+        totalSell += sell;
+        totalCost += cost;
+        totalCount += count;
+      }
     }
     sumPrice.value = totalSell;
     sumCost.value = totalCost;

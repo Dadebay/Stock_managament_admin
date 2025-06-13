@@ -12,8 +12,11 @@ import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dar
 import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 
 class ExpencesView extends StatelessWidget {
-  final ExpencesController expencesController = Get.put<ExpencesController>(ExpencesController());
+  final bool isAdmin;
+  final ExpencesController expencesController = Get.find<ExpencesController>();
   TextEditingController searchEditingController = TextEditingController();
+
+  ExpencesView({super.key, required this.isAdmin});
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +90,7 @@ class ExpencesView extends StatelessWidget {
                             padding: context.padding.onlyBottomHigh,
                             itemBuilder: (context, index) {
                               return ExpencesCard(
+                                isAdmin: isAdmin,
                                 expencesModel: displayList[index],
                                 count: displayList.length - index,
                                 topTextColumnSize: StringConstants.expencesNames,
@@ -106,7 +110,7 @@ class ExpencesView extends StatelessWidget {
           },
         ),
         Align(alignment: Alignment.bottomCenter, child: bottomSumPrice(context)),
-        bottomButtons(context),
+        isAdmin ? bottomButtons(context) : SizedBox(),
       ],
     );
   }
@@ -161,7 +165,7 @@ class ExpencesView extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    "Sum of expences :",
+                    "cost".tr + " :  ",
                     maxLines: 1,
                     textAlign: TextAlign.end,
                     overflow: TextOverflow.ellipsis,

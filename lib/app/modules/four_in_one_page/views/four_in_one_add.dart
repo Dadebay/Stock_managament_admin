@@ -39,20 +39,20 @@ class AddEditFourInOneDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             CustomTextField(
-              labelName: 'Name',
+              labelName: 'name',
               controller: nameController,
               focusNode: nameFocusNode,
               requestfocusNode: notesFocusNode,
             ),
             CustomTextField(
-              labelName: 'Note',
+              labelName: 'note',
               controller: notesController,
               focusNode: notesFocusNode,
               requestfocusNode: addressFocusNode,
             ),
             name == 'location'
                 ? CustomTextField(
-                    labelName: 'Address',
+                    labelName: 'address',
                     controller: addressController,
                     focusNode: addressFocusNode,
                     requestfocusNode: nameFocusNode,
@@ -67,7 +67,7 @@ class AddEditFourInOneDialog extends StatelessWidget {
                   await FourInOnePageService().addFourInOne(model: newModel, location: name == 'location' ? addressController.text : null, url: url, key: editKey);
                 }
               },
-              text: isEdit ? "Update" : "Add",
+              text: isEdit ? "update" : "add",
             ),
           ],
         ),

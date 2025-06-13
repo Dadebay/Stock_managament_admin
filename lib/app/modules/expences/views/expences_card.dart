@@ -9,12 +9,14 @@ class ExpencesCard extends StatelessWidget {
   ExpencesCard({
     required this.expencesModel,
     required this.count,
+    required this.isAdmin,
     required this.topTextColumnSize,
     super.key,
   });
 
   final ExpencesModel expencesModel;
   final int count;
+  final bool isAdmin;
   final List<Map<String, dynamic>> topTextColumnSize;
 
   final ExpencesController expencesController = Get.find();
@@ -39,7 +41,7 @@ class ExpencesCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ..._buildDynamicTextWidgets(fadedTextStyle),
-                _buildDeleteButton(context),
+                isAdmin ? _buildDeleteButton(context) : SizedBox.shrink(),
               ],
             ),
           ),
@@ -93,6 +95,7 @@ class ExpencesCard extends StatelessWidget {
           child: IconButton(
             onPressed: () async {
               await ExpencesService().deleteExpence(model: expencesModel);
+              expencesController.totalPrice.value -= double.tryParse(expencesModel.cost.toString()) ?? 0.0;
             },
             icon: const Icon(
               IconlyLight.delete,

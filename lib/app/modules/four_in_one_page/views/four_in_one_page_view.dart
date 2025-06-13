@@ -8,8 +8,8 @@ import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class FourInOnePageView extends StatefulWidget {
-  const FourInOnePageView({super.key});
-
+  const FourInOnePageView({super.key, required this.isAdmin});
+  final bool isAdmin;
   @override
   State<FourInOnePageView> createState() => _FourInOnePageViewState();
 }
@@ -28,7 +28,7 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 title: Text(
-                  StringConstants.four_in_one_names[index]['pageView'].toString(),
+                  "${StringConstants.four_in_one_names[index]['pageView'].toString()}".tr,
                   style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 18.sp),
                 ),
                 children: [
@@ -62,6 +62,7 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
                               fourInOneModel: list[i],
                               dataKey: key.toString(),
                               url: StringConstants.four_in_one_names[index]['url'].toString(),
+                              isAdmin: widget.isAdmin,
                             );
                           },
                         );
@@ -79,16 +80,18 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
             );
           },
         ),
-        Positioned(
-            bottom: 15,
-            right: 15,
-            child: FloatingActionButton(
-                backgroundColor: Colors.black,
-                onPressed: () => DialogsUtils.fourInOneAddData(),
-                child: const Icon(
-                  IconlyLight.plus,
-                  color: Colors.amber,
-                ))),
+        widget.isAdmin
+            ? Positioned(
+                bottom: 15,
+                right: 15,
+                child: FloatingActionButton(
+                    backgroundColor: Colors.black,
+                    onPressed: () => DialogsUtils.fourInOneAddData(),
+                    child: const Icon(
+                      IconlyLight.plus,
+                      color: Colors.amber,
+                    )))
+            : SizedBox(),
       ],
     );
   }

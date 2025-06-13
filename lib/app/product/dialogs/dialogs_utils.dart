@@ -47,7 +47,7 @@ class DialogsUtils {
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: ColorConstants.kPrimaryColor2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
                   child: Text(
-                    "Clear Filter",
+                    "clearFilter".tr,
                     style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
                   ))
             ],
@@ -56,8 +56,9 @@ class DialogsUtils {
   }
 
   static orderFilterDialog() {
-    List nameMapping = ['Preparing', 'Shipped', 'Cancelled', 'Refund', 'Ready to ship'];
+    List nameMapping = ['preparing', 'shipped', 'canceled', 'refund', 'readyToShip'];
     List numberMapping = [1, 2, 3, 4, 5];
+    List<Color> colorMapping = [ColorConstants.kPrimaryColor2, Colors.green, Colors.red, Colors.red, Colors.purple];
     final OrderController orderViewController = Get.find();
     return Get.defaultDialog(
         title: 'Filter by status',
@@ -75,18 +76,22 @@ class DialogsUtils {
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      onTap: () {
-                        orderViewController.filterByStatus(numberMapping[index].toString());
-                        Get.back();
-                      },
-                      minVerticalPadding: 10.h,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      title: Text(
-                        nameMapping[index].toString(),
-                        style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        onTap: () {
+                          orderViewController.filterByStatus(numberMapping[index].toString());
+                          Get.back();
+                        },
+                        minVerticalPadding: 10.h,
+                        tileColor: colorMapping[index].withOpacity(.2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: colorMapping[index])),
+                        title: Text(
+                          nameMapping[index].toString().tr,
+                          style: TextStyle(color: Colors.black, fontSize: 22.sp, fontWeight: FontWeight.w500),
+                        ),
+                        trailing: const Icon(IconlyLight.arrowRightCircle),
                       ),
-                      trailing: const Icon(IconlyLight.arrowRightCircle),
                     );
                   },
                 ),
@@ -97,7 +102,7 @@ class DialogsUtils {
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: ColorConstants.kPrimaryColor2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
                   child: Text(
-                    "Clear Filter",
+                    "clearFilter".tr,
                     style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
                   ))
             ],
@@ -113,7 +118,7 @@ class DialogsUtils {
     required void Function(String id) onIdSelected,
   }) {
     Get.defaultDialog(
-      title: title,
+      title: title.tr,
       titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
       titlePadding: EdgeInsets.only(top: 20),
       content: Container(
@@ -140,7 +145,7 @@ class DialogsUtils {
                   minVerticalPadding: 10.h,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   title: Text(
-                    item.name,
+                    item.name.tr,
                     style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
                   ),
                   trailing: const Icon(IconlyLight.arrowRightCircle),
@@ -208,7 +213,7 @@ class DialogsUtils {
 
   static fourInOneAddData() {
     return Get.defaultDialog(
-      title: "Add data",
+      title: "addData".tr,
       titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
       titlePadding: EdgeInsets.only(top: 20),
       content: SizedBox(
@@ -228,7 +233,7 @@ class DialogsUtils {
                 );
               },
               title: Text(
-                StringConstants.four_in_one_names[index]['pageView'].toString(),
+                StringConstants.four_in_one_names[index]['pageView'].toString().tr,
                 style: TextStyle(color: const Color.fromARGB(255, 115, 109, 109), fontSize: 22.sp, fontWeight: FontWeight.w500),
               ),
               minVerticalPadding: 10.h,

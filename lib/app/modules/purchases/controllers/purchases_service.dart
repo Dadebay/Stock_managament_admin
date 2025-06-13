@@ -23,13 +23,9 @@ class PurchasesService {
 
   Future<List<ProductModelPurchases>> getPurchasesByID(int id) async {
     final data = await ApiService().getRequest(ApiConstants.getPurchasesID + "$id/", requiresToken: true);
-    print(ApiConstants.getPurchasesID + "$id/");
     if (data is Map) {
-      print(data);
-
       return (data as List).map((item) => ProductModelPurchases.fromJson(item)).toList();
     } else if (data is List) {
-      print(data);
       return (data).map((item) => ProductModelPurchases.fromJson(item)).toList();
     } else {
       return [];
@@ -41,21 +37,12 @@ class PurchasesService {
 
     final token = await _auth.getToken();
     final url = Uri.parse(ApiConstants.purchases + "${model.id}/");
-    print(url);
     final headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-    print(model.products.length);
-    model.products.forEach((element) {
-      print(element);
-    });
     final body = json.encode({'title': model.title, 'date': model.date, 'source': model.source, 'cost': double.tryParse(model.cost) ?? 0, 'description': model.description, 'products': model.products});
     final response = await http.put(url, headers: headers, body: body);
-    print(body);
-    print(response.statusCode);
-    print(response.body);
-
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       final updatedOrder = PurchasesModel.fromJson(jsonResponse);

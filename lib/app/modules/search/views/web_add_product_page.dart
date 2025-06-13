@@ -57,13 +57,12 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
       }
     }
     controller.selectedImageFileName.value = "${textControllers[0].text.replaceAll(' ', '_')}_image.png";
-    print(productData);
     productData['gram'] = (productData['gram'] == '' ? '0' : productData['gram'])!;
     print(productData);
-
-    await controller.addNewProduct(
-      productData: productData,
-    );
+    print(productData);
+    print(productData);
+    print(controller.selectedImageFileName.value);
+    await controller.addNewProduct(productData: productData, selectedImageBytes: controller.selectedImageBytes.value, selectedImageFileName: "${textControllers[0].text.replaceAll(' ', '_')}_image.png");
   }
 
   @override
@@ -118,9 +117,11 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
                 ),
                 _buildTextFields(context),
                 SizedBox(height: 20.h),
-                AgreeButton(
-                  onTap: _handleAddProduct,
-                  text: "Add Product",
+                Center(
+                  child: AgreeButton(
+                    onTap: _handleAddProduct,
+                    text: "Add Product",
+                  ),
                 ),
                 SizedBox(height: 30.h),
               ],

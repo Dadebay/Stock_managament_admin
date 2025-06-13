@@ -9,12 +9,13 @@ class PurchaseCard extends StatelessWidget {
   final PurchasesModel purchasesModel;
   final bool showInProductProfil;
   final int index;
-  const PurchaseCard({required this.purchasesModel, required this.showInProductProfil, required this.index});
+  final bool isAdmin;
+  const PurchaseCard({required this.purchasesModel, required this.showInProductProfil, required this.index, required this.isAdmin});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(() => PurchasesProductsView(purchasesModel: purchasesModel)),
+      onTap: () => Get.to(() => PurchasesProductsView(purchasesModel: purchasesModel, isAdmin: isAdmin)),
       child: Container(
         color: Colors.white,
         padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
@@ -27,12 +28,18 @@ class PurchaseCard extends StatelessWidget {
             _textWidget(big: false, text: purchasesModel.source),
             _textWidget(big: false, text: purchasesModel.count.toString(), textAlign: TextAlign.center),
             showInProductProfil ? const SizedBox.shrink() : _textWidget(big: true, text: purchasesModel.cost + " \$", textAlign: TextAlign.center),
-            IconButton(
-                onPressed: () async {
-                  await PurchasesService().deletePurchases(id: purchasesModel.id);
-                },
-                icon: Icon(IconlyLight.delete, color: Colors.red, size: 20.sp)),
-            IconButton(onPressed: () => Get.to(() => PurchasesProductsView(purchasesModel: purchasesModel)), icon: Icon(IconlyLight.editSquare, color: Colors.black, size: 20.sp)),
+            isAdmin
+                ? IconButton(
+                    onPressed: () async {
+                      await PurchasesService().deletePurchases(id: purchasesModel.id);
+                    },
+                    icon: Icon(IconlyLight.delete, color: Colors.red, size: 20.sp))
+                : SizedBox.shrink(),
+            isAdmin
+                ? IconButton(onPressed: () => Get.to(() => PurchasesProductsView(purchasesModel: purchasesModel, isAdmin: isAdmin)), icon: Icon(IconlyLight.editSquare, color: Colors.black, size: 20.sp))
+                : Container(
+                    width: 80,
+                  ),
           ],
         ),
       ),

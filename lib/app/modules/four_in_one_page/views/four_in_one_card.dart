@@ -6,12 +6,14 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 class FourInOneCard extends StatelessWidget {
   final int count;
   final String dataKey;
+  final bool isAdmin;
   final String url;
   final FourInOneModel fourInOneModel;
 
   FourInOneCard({
     required this.count,
     required this.dataKey,
+    required this.isAdmin,
     required this.fourInOneModel,
     super.key,
     required this.url,
@@ -44,7 +46,7 @@ class FourInOneCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: textStyle.copyWith(
                       fontSize: 17.sp,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w400,
                       color: ColorConstants.blackColor,
                     ),
                   ),
@@ -58,7 +60,7 @@ class FourInOneCard extends StatelessWidget {
                     style: fadedTextStyle,
                   ),
                 ),
-                _buildActionButtons(context),
+                isAdmin ? _buildActionButtons(context) : SizedBox(),
               ],
             ),
           ),

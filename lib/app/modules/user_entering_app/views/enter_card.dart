@@ -10,11 +10,13 @@ class EnterCard extends StatelessWidget {
     required this.client,
     required this.count,
     required this.topTextColumnSize,
+    required this.isAdmin,
     super.key,
   });
 
   final EnterModel client;
   final int count;
+  final bool isAdmin;
   final List<Map<String, dynamic>> topTextColumnSize;
 
   final EnterController clientsController = Get.find();
@@ -39,7 +41,7 @@ class EnterCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ..._buildDynamicTextWidgets(fadedTextStyle),
-                _buildActionButtons(),
+                isAdmin ? _buildActionButtons() : SizedBox(),
               ],
             ),
           ),
