@@ -194,9 +194,9 @@ class CustomWidgets {
           ),
         ),
       ),
-      placeholder: (context, url) => spinKit(),
+      placeholder: (context, url) => Center(child: CircularProgressIndicator()),
       errorWidget: (context, url, error) {
-        return ClipRRect(borderRadius: BorderRadius.circular(20), child: Icon(IconlyLight.infoSquare));
+        return Icon(IconlyLight.infoSquare);
       },
     );
   }

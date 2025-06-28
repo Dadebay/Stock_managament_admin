@@ -21,9 +21,6 @@ class EnteringAppView extends StatelessWidget {
   EnteringAppView({super.key, required this.isAdmin});
   @override
   Widget build(BuildContext context) {
-    print(isAdmin);
-    print(isAdmin);
-    print(isAdmin);
     return Stack(
       children: [
         FutureBuilder<List<EnterModel>>(

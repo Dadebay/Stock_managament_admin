@@ -120,18 +120,19 @@ class _OrderProductsViewState extends State<OrderProductsView> {
           if (_currentOrder.products.isNotEmpty) {
             final products = _currentOrder.products;
             return ListView.builder(
-              itemCount: products.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 30.w),
-              itemBuilder: (context, index) => SearchCard(
-                product: products[index],
-                disableOnTap: true,
-                addCounterWidget: false,
-                isAdmin: widget.isAdmin,
-                whcihPage: '',
-              ),
-            );
+                itemCount: products.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 30.w),
+                itemBuilder: (context, index) {
+                  return SearchCard(
+                    product: products[index],
+                    disableOnTap: true,
+                    addCounterWidget: false,
+                    isAdmin: widget.isAdmin,
+                    whcihPage: '',
+                  );
+                });
           }
           return SizedBox(height: 300, child: CustomWidgets.emptyData());
         }
@@ -238,7 +239,6 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
       onTap: !widget.isEditable
           ? null
           : () {
-              print(widget.isAdmin);
               if (widget.isAdmin)
                 showEditDialog(
                   context: context,

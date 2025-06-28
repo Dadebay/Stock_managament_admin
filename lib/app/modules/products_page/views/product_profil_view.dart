@@ -98,7 +98,6 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         finalImageFileName = "${widget.product.name}_updated.png";
       }
     }
-    print(productData);
     await SearchService()
         .updateProductWithImage(
       id: widget.product.id,

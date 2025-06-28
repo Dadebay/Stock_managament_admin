@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, require_trailing_commas, avoid_void_async, avoid_bool_literals_in_conditional_expressions, depend_on_referenced_packages
 
+import 'package:stock_managament_admin/app/modules/login_view/views/login_view.dart';
 import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
@@ -67,7 +68,6 @@ class SignInService {
       List<EnterModel> list = [];
 
       list = (data).map((item) => EnterModel.fromJson(item)).toList();
-      print(list);
       for (var element in list) {
         if (element.username == userName && element.password == password) {
           if (element.isSuperUser == true) {
@@ -81,16 +81,11 @@ class SignInService {
     }
   }
 
-  Future<dynamic> logOut() async {
+  Future<dynamic> logOut(BuildContext context) async {
     final uri = Uri.parse("${ApiConstants.logOut}");
-    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
-    if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
-    } else if (data is List) {
-      return (data).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
-    } else {
-      return [];
-    }
+    await ApiService().getRequest(uri.toString(), requiresToken: true);
+    await AuthStorage().logout();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginView()));
   }
 
   Future login({required String username, required String password}) async {

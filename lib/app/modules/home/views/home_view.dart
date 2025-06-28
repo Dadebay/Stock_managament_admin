@@ -101,7 +101,8 @@ class _HomeViewState extends State<HomeView> {
   Future<void> _calculateProfitAndGenerateExcel(bool generateExcel, DateTime dateForReport) async {
     profit = List.filled(12, 0.0);
     for (int i = 0; i < 12; i++) {
-      profit[i] = sales[i] - (purchases[i] + expences[i] + sumCost[i]);
+      // profit[i] = sales[i] - (purchases[i] + expences[i] + sumCost[i]);
+      profit[i] = sales[i] - (purchases[i] + expences[i]);
     }
     findMinimumelement();
 

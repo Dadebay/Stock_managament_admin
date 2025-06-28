@@ -49,7 +49,6 @@ class OrderController extends GetxController {
     double totalSell = 0;
     double totalCost = 0;
     int totalCount = 0;
-    print(allOrders.length);
     for (var product in allOrders) {
       if (product.status == "2") {
         final sell = double.tryParse(product.totalsum) ?? 0.0;

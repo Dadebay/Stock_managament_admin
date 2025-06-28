@@ -16,7 +16,6 @@ class ApiService {
   }) async {
     try {
       final token = await _auth.getToken();
-      print(token);
       final headers = <String, String>{
         if (requiresToken && token != null) 'Authorization': 'Bearer $token',
       };
@@ -25,8 +24,11 @@ class ApiService {
         Uri.parse(endpoint),
         headers: headers,
       );
+
+      // DÜZELTME: Gelen yanıtın ham baytlarını UTF-8 olarak çözüyoruz.
+      final decodedBody = utf8.decode(response.bodyBytes);
+
       if (response.statusCode == 200) {
-        final decodedBody = utf8.decode(response.bodyBytes); // UTF-8 çözümleme burada
         final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
 
         if (handleSuccess != null) {
@@ -34,7 +36,8 @@ class ApiService {
         }
         return responseJson;
       } else {
-        final responseJson = response.body.isNotEmpty ? json.decode(response.body) : {};
+        // DÜZELTME: Hata durumunda bile doğru karakter setini kullanıyoruz.
+        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
         _handleApiError(response.statusCode, responseJson['message']?.toString() ?? 'anErrorOccurred'.tr);
         return null;
       }
@@ -88,36 +91,33 @@ class ApiService {
         default:
           throw UnsupportedError('Unsupported HTTP method: $method');
       }
-      print(response.statusCode);
-      print(response.body);
+
+      // DÜZELTME: Yanıtı her zaman önce UTF-8 olarak çözüyoruz.
+      final decodedBody = utf8.decode(response.bodyBytes);
 
       if ([200, 201, 204].contains(response.statusCode)) {
         if (response.statusCode == 204) {
-          await handleSuccess!({"statusCode": response.statusCode});
+          if (handleSuccess != null) {
+            await handleSuccess({"statusCode": response.statusCode});
+          }
           return {"statusCode": response.statusCode};
         }
-        final responseJson = response.body.isNotEmpty ? json.decode(response.body) : null;
+
+        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : null;
         if (handleSuccess != null && responseJson != null) {
           await handleSuccess(responseJson);
         }
         return responseJson ?? response.statusCode;
       } else {
-        final responseJson = response.body.isNotEmpty ? json.decode(response.body) : {};
-        print(responseJson);
-        String a = responseJson;
-        print(a.isEmpty);
-        if (a.isEmpty) {
-          _handleApiError(
-            response.statusCode,
-            responseJson['message']?.toString() ?? 'anErrorOccurred'.tr,
-          );
-        } else {
-          _handleApiError(
-            response.statusCode,
-            a.toString(),
-          );
-        }
+        // DÜZELTME: Hata yanıtını da UTF-8 olarak çözüyoruz.
+        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
+        // Hata mesajı artık bir Map olabilir, bu yüzden toString() kullanmak daha güvenli.
+        String errorMessage = responseJson.toString();
 
+        _handleApiError(
+          response.statusCode,
+          errorMessage,
+        );
         return null;
       }
     } on SocketException {

@@ -24,6 +24,12 @@ class SearchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SearchViewController seacrhViewController = Get.find<SearchViewController>();
+    String url = '';
+    if (product.img!.contains(ApiConstants.imageURL)) {
+      url = product.img!;
+    } else {
+      url = ApiConstants.imageURL2 + product.img!;
+    }
 
     return GestureDetector(
       onTap: () {
@@ -46,10 +52,10 @@ class SearchCard extends StatelessWidget {
               margin: EdgeInsets.only(right: 15.w),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
+                color: Colors.grey.shade200,
                 boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 5, spreadRadius: 5)],
               ),
-              child: CustomWidgets.imageWidget(product.img, false),
+              child: CustomWidgets.imageWidget(url, false),
             ),
             Expanded(
               child: Row(

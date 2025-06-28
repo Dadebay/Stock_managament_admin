@@ -11,6 +11,7 @@ class OrderService {
   final OrderController orderController = Get.find();
   Future<List<OrderModel>> getOrders() async {
     final data = await ApiService().getRequest(ApiConstants.order, requiresToken: true);
+
     if (data is Map && data['results'] != null) {
       return (data['results'] as List).map((item) => OrderModel.fromJson(item)).toList();
     } else if (data is List) {
@@ -63,15 +64,18 @@ class OrderService {
   }
 
   Future<OrderModel?> editOrderManually({required OrderModel model}) async {
-    final AuthStorage _auth = AuthStorage();
+    final AuthStorage auth = AuthStorage();
 
-    final token = await _auth.getToken();
-    final url = Uri.parse(ApiConstants.order + "${model.id}/");
+    final token = await auth.getToken();
+    final url = Uri.parse("${ApiConstants.order}${model.id}/");
     final headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-
+    // List<Map<String, int>> products = [];
+    // for (var element in model.products) {
+    //   products.add({'id': element.id, 'count': element.count});
+    // }
     final body = json.encode({
       'status': int.parse(model.status),
       'gaplama': model.gaplama,
@@ -85,9 +89,11 @@ class OrderService {
       'coupon': model.coupon,
       'description': model.description,
       "count": model.count,
-      // 'products': model.products
+      // 'products': products
     });
+
     final response = await http.put(url, headers: headers, body: body);
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       final updatedOrder = OrderModel.fromJson(jsonResponse);

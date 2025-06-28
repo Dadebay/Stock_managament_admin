@@ -111,7 +111,7 @@ class StringConstants {
     'count',
     'note',
     'Package (Gaplama)',
-    'sellPrice',
+    'costPrice',
   ];
 
   static final List<String> apiFieldNames = [
@@ -153,6 +153,7 @@ class StringConstants {
     IconlyLight.wallet,
     IconlyLight.user3,
     IconlyLight.setting,
+    IconlyLight.document,
     IconlyLight.logout,
   ];
   static List adminIcons = [
@@ -174,6 +175,7 @@ class StringConstants {
     IconlyBold.wallet,
     IconlyBold.user3,
     IconlyBold.setting,
+    IconlyBold.document,
     IconlyBold.logout,
   ];
   static List selectedAdminIcons = [
@@ -187,5 +189,5 @@ class StringConstants {
     IconlyBold.logout,
   ];
   static List adminTitles = ['home', 'sales', 'search', 'purchases', 'category', 'expences', 'clients', 'log_out'];
-  static List titles = ['home', 'sales', 'search', 'purchases', 'category', 'expences', 'clients', 'users', 'log_out'];
+  static List titles = ['home', 'sales', 'search', 'purchases', 'category', 'expences', 'clients', 'users', 'logs', 'log_out'];
 }

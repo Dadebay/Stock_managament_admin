@@ -9,8 +9,6 @@ class EnterService {
   Future<List<EnterModel>> getClients() async {
     final uri = Uri.parse("${ApiConstants.users}");
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
-    print(data);
-    print(data);
     if (data is Map && data['results'] != null) {
       return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList().reversed.toList();
     } else if (data is List) {
@@ -79,5 +77,18 @@ class EnterService {
         }
       },
     );
+  }
+}
+
+class LogService {
+  Future<List<LogModel>> fetchLogs() async {
+    final uri = Uri.parse("http://216.250.12.49:9000/api/getlog/");
+    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+
+    if (data is List) {
+      return data.map((e) => LogModel.fromJson(e)).toList();
+    } else {
+      return [];
+    }
   }
 }

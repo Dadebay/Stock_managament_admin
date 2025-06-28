@@ -59,13 +59,10 @@ class SearchService {
         contentType: MediaType('image', extension), // Dinamik içerik tipi
       ));
     }
-    print(request.fields);
     try {
       final streamedResponse = await request.send();
       final responseBody = await streamedResponse.stream.bytesToString();
       final statusCode = streamedResponse.statusCode;
-      print(responseBody);
-      print(statusCode);
       if (statusCode == 200) {
         final jsonData = jsonDecode(responseBody);
         final updatedModel = SearchModel.fromJson(jsonData);
@@ -113,15 +110,11 @@ class SearchService {
     final streamedResponse = await request.send();
 
     final statusCode = streamedResponse.statusCode;
-    request.fields.forEach((key, value) => print('$key: $value'));
 
     if (statusCode == 200 || statusCode == 201) {
       final responseBody = await streamedResponse.stream.bytesToString();
       final jsonData = jsonDecode(responseBody);
       final updatedModel = SearchModel.fromJson(jsonData);
-
-      print("Status code: $statusCode");
-      print("Response body: $jsonData");
       searchViewController.updateProductLocally(updatedModel);
       return updatedModel;
     } else {
