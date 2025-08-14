@@ -36,13 +36,13 @@ class StringConstants {
       'size': ColumnSize.small.toString(),
     },
     {
-      'name': 'sellPrice',
-      'sortName': "totalsum",
+      'name': 'cost',
+      'sortName': "totalchykdajy",
       'size': ColumnSize.small.toString(),
     },
     {
-      'name': 'cost',
-      'sortName': "totalchykdajy",
+      'name': 'totalIncome',
+      'sortName': "totalsum",
       'size': ColumnSize.small.toString(),
     },
     {
@@ -76,6 +76,12 @@ class StringConstants {
     {'name': 'count', 'sortName': "count", 'size': ColumnSize.small.toString()},
     {'name': 'cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
   ];
+  static List<Map<String, String>> productInsidePurchase = [
+    {'name': 'purchases', 'sortName': "title", 'size': ColumnSize.small.toString()},
+    {'name': 'date', 'sortName': "date", 'size': ColumnSize.small.toString()},
+    {'name': 'cost', 'sortName': "cost", 'size': ColumnSize.small.toString()},
+    {'name': 'count', 'sortName': "count", 'size': ColumnSize.small.toString()},
+  ];
   static List<Map<String, String>> searchViewFilters = [
     {'name': 'brand', 'searchName': 'brends'},
     {'name': 'Categories', 'searchName': 'category'},
@@ -90,6 +96,7 @@ class StringConstants {
     {'name': 'category', 'sortName': "category", 'size': ColumnSize.small.toString()},
     {'name': 'location', 'sortName': "location", 'size': ColumnSize.small.toString()},
   ];
+
   static List<Map<String, String>> salesTopText = [
     {'name': 'productName', 'sortName': "count", 'size': ColumnSize.large.toString()},
     {'name': 'costPrice', 'sortName': "cost", 'size': ColumnSize.small.toString()},

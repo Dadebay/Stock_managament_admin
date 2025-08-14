@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
-import 'package:stock_managament_admin/app/modules/sales/controllers/order_service.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/order_card.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/order_create.dart';
 import 'package:stock_managament_admin/app/modules/search/components/bottom_price_sheet.dart';
@@ -19,7 +18,20 @@ class OrderView extends StatefulWidget {
 
 class _OrderViewState extends State<OrderView> {
   TextEditingController searchController = TextEditingController();
-  final OrderController orderController = Get.put(OrderController());
+  final OrderController orderController = Get.find<OrderController>();
+  @override
+  void initState() {
+    super.initState();
+    searchController.addListener(() {
+      orderController.onSearchTextChanged(searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   dynamic _rightSideButtons() {
     return Column(
@@ -57,9 +69,7 @@ class _OrderViewState extends State<OrderView> {
   SearchWidget _searchWidget() {
     return SearchWidget(
       controller: searchController,
-      onChanged: (value) {
-        orderController.onSearchTextChanged(value);
-      },
+      onChanged: (value) {},
       onClear: () {
         searchController.clear();
         orderController.searchResult.clear();
@@ -112,53 +122,44 @@ class _OrderViewState extends State<OrderView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: FutureBuilder<List<OrderModel>>(
-        future: OrderService().getOrders(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CustomWidgets.spinKit();
-          } else if (snapshot.hasError) {
-            return CustomWidgets.errorData();
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return CustomWidgets.emptyData();
-          }
-          orderController.allOrders.assignAll(snapshot.data!);
-          orderController.searchResult.assignAll(snapshot.data!);
-          orderController.calculateTotals();
-          return Obx(() {
-            final isSearching = searchController.text.isNotEmpty;
-            final hasResult = orderController.searchResult.isNotEmpty;
-            final displayList = (isSearching) ? (hasResult ? orderController.searchResult.toList() : <OrderModel>[]) : orderController.allOrders.toList();
-            return Stack(
+      body: Obx(() {
+        if (orderController.isLoading.value) {
+          return CustomWidgets.spinKit(); // Yüklenirken animasyon göster
+        }
+
+        if (orderController.allOrders.isEmpty && searchController.text.isEmpty) {
+          return CustomWidgets.emptyData(); // Hiç veri yoksa
+        }
+
+        // Görüntülenecek liste her zaman controller'daki `allOrders` olacak.
+        // Arama ve filtreleme bu listeyi güncelleyecek.
+        final displayList = orderController.allOrders;
+
+        return Stack(
+          children: [
+            Column(
               children: [
-                Column(
-                  children: [
-                    _searchWidget(),
-                    _topText(displayList),
-                    Expanded(
-                        child: displayList.isEmpty && isSearching
-                            ? Center(child: Text("No results found for '${searchController.text}'"))
-                            : displayList.isEmpty
-                                ? CustomWidgets.emptyData()
-                                : listViewStyle(displayList))
-                  ],
-                ),
-                Positioned(
-                  bottom: 70.0,
-                  right: 20.0,
-                  child: _rightSideButtons(),
-                ),
-                Positioned(
-                  bottom: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                  child: BottomPriceSheetSalesView(),
+                _searchWidget(),
+                _topText(displayList),
+                Expanded(
+                  child: displayList.isEmpty && searchController.text.isNotEmpty ? Center(child: Text("No results found for '${searchController.text}'")) : listViewStyle(displayList.toList()), // Obx listesini normal listeye çevir
                 )
               ],
-            );
-          });
-        },
-      ),
+            ),
+            Positioned(
+              bottom: 70.0,
+              right: 20.0,
+              child: _rightSideButtons(),
+            ),
+            Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: BottomPriceSheetSalesView(),
+            )
+          ],
+        );
+      }),
     );
   }
 }

@@ -58,6 +58,10 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
     }
     controller.selectedImageFileName.value = "${textControllers[0].text.replaceAll(' ', '_')}_image.png";
     productData['gram'] = (productData['gram'] == '' ? '0' : productData['gram'])!;
+    print(productData);
+    print(controller.selectedImageBytes.value);
+    print("${textControllers[0].text.replaceAll(' ', '_')}_image.png");
+
     await controller.addNewProduct(productData: productData, selectedImageBytes: controller.selectedImageBytes.value, selectedImageFileName: "${textControllers[0].text.replaceAll(' ', '_')}_image.png");
   }
 

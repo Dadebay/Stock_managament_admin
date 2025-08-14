@@ -11,6 +11,8 @@ class CustomTextField extends StatefulWidget {
   final bool? enabled;
   final Function()? onTap;
   final bool isNumberOnly;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
   final bool readOnly;
   const CustomTextField({
     required this.labelName,
@@ -24,6 +26,8 @@ class CustomTextField extends StatefulWidget {
     this.enabled,
     this.onTap,
     Key? key,
+    this.textInputAction,
+    this.onSubmitted,
   }) : super(key: key);
 
   @override
@@ -46,12 +50,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
           return null;
         },
         readOnly: widget.readOnly,
+        textInputAction: widget.textInputAction,
+        onFieldSubmitted: widget.onSubmitted,
         onEditingComplete: () => widget.requestfocusNode.requestFocus(),
         maxLines: widget.maxLine ?? 1,
         keyboardType: widget.isNumberOnly ? TextInputType.number : TextInputType.text,
         inputFormatters: widget.isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
         focusNode: widget.focusNode,
-        textInputAction: TextInputAction.done,
         enableSuggestions: false,
         autocorrect: false,
         decoration: InputDecoration(

@@ -5,6 +5,7 @@ import 'package:stock_managament_admin/app/modules/search/controllers/search_ser
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
+import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
 
 class ProductProfilView extends StatefulWidget {
   const ProductProfilView({super.key, required this.product, required this.disableUpdate, required this.isAdmin});
@@ -139,19 +140,82 @@ class _ProductProfilViewState extends State<ProductProfilView> {
 
   @override
   Widget build(BuildContext context) {
+    List<PurchaseModelInsideProduct> purchList = widget.product.purch.reversed.toList();
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(backArrow: true, centerTitle: true, actionIcon: widget.isAdmin ? true : false, icon: IconButton(tooltip: "Delete Product", onPressed: _handleDeleteRequest, icon: Icon(IconlyLight.delete, color: Colors.red)), name: "${widget.product.name}"),
-      body: ListView(
-        padding: Get.size.width > 1000 ? EdgeInsets.symmetric(horizontal: Get.size.width / 4) : context.padding.horizontalMedium,
+      appBar: CustomAppBar(
+          backArrow: true,
+          centerTitle: true,
+          actionIcon: widget.isAdmin ? true : false,
+          icon: IconButton(tooltip: "Delete Product", onPressed: _handleDeleteRequest, icon: Icon(IconlyLight.delete, color: Colors.red)),
+          name: "${widget.product.name}"),
+      body: Row(
+        children: [
+          _mainBody(context),
+          Expanded(
+            child: Column(
+              children: [
+                _topText(purchList),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: purchList.length,
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Row(
+                        children: [
+                          CustomWidgets.counter(purchList.length - index),
+                          _textPart(index, purchList[index].purchaseName!),
+                          _textPart(index, purchList[index].datePurhcase!),
+                          _textPart(index, purchList[index].priceOfSale!),
+                          _textPart(index, purchList[index].count!),
+                        ],
+                      );
+                    },
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Expanded _textPart(int index, String title) => Expanded(child: Text(title, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontSize: 20)));
+
+  Widget _topText(List<PurchaseModelInsideProduct> displayList) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 14),
+      child: ListviewTopText<PurchaseModelInsideProduct>(
+        names: StringConstants.productInsidePurchase,
+        listToSort: displayList,
+        setSortedList: (newList) {},
+        getSortValue: (model, key) {
+          switch (key) {
+            case 'title':
+              return model.purchaseName ?? 0;
+            case 'date':
+              return model.datePurhcase.toString();
+            case 'cost':
+              return model.priceOfSale.toString();
+            case 'count':
+              return model.count.toString();
+
+            default:
+              return '';
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _mainBody(BuildContext context) {
+    return Expanded(
+      child: ListView(
+        padding: context.padding.horizontalMedium,
         children: [
           Obx(() {
-            final imageToShow = controller.selectedImageBytes.value != null
-                ? Image.memory(controller.selectedImageBytes.value!, fit: BoxFit.cover)
-                : CustomWidgets.imageWidget(
-                    widget.product.img!,
-                    false,
-                  );
+            final imageToShow = controller.selectedImageBytes.value != null ? Image.memory(controller.selectedImageBytes.value!, fit: BoxFit.cover) : CustomWidgets.imageWidget(widget.product.img!);
 
             return Center(
               child: GestureDetector(

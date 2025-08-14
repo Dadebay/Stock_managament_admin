@@ -30,7 +30,12 @@ class PurchasesController extends GetxController {
       return element.id.toString() == updatedModel.id.toString();
     });
     if (index != -1) {
+      int sumCount = 0;
+      sumCount = purchasesMainList[index].count;
       purchasesMainList[index] = updatedModel;
+      if (purchasesMainList[index].count.toString() == '0') {
+        purchasesMainList[index].count = sumCount;
+      }
       calculateTotals();
     }
   }

@@ -16,7 +16,6 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
   List<FocusNode> focusNodes = List.generate(5, (_) => FocusNode());
   final SearchViewController _searchController = Get.find<SearchViewController>();
   List<TextEditingController> textControllers = List.generate(5, (_) => TextEditingController());
-  final PurchasesController purchasesController = Get.put(PurchasesController());
   @override
   void initState() {
     textControllers[0].text = DateTime.now().toString().substring(0, 19);
@@ -65,14 +64,14 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
             focusNode: focusNodes[2],
             requestfocusNode: focusNodes[3],
           ),
-          CustomTextField(
-            labelName: "Cost",
-            maxLine: 1,
-            isNumberOnly: true,
-            controller: textControllers[3],
-            focusNode: focusNodes[3],
-            requestfocusNode: focusNodes[4],
-          ),
+          // CustomTextField(
+          //   labelName: "Cost",
+          //   maxLine: 1,
+          //   isNumberOnly: true,
+          //   controller: textControllers[3],
+          //   focusNode: focusNodes[3],
+          //   requestfocusNode: focusNodes[4],
+          // ),
           CustomTextField(
             labelName: "Description",
             maxLine: 5,
@@ -81,22 +80,36 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
             requestfocusNode: focusNodes[0],
           ),
           selectedProductsView(),
-          AgreeButton(onTap: () => Get.to(() => SearchView(selectableProducts: true, isAdmin: widget.isAdmin, whichPage: 'purhcase')), text: 'selectProducts'),
+          AgreeButton(
+              onTap: () => Get.to(() => SearchView(
+                    selectableProducts: false,
+                    isAdmin: widget.isAdmin,
+                    whichPage: 'purhcase',
+                    addCounterWidget: true,
+                  )),
+              text: 'selectProducts'),
           AgreeButton(
               onTap: () async {
+                double costAll = 0.0;
+
                 List<Map<String, int>> products = [];
                 _searchController.selectedProductsToOrder.forEach(
                   (element) {
                     products.add({'id': element['product'].id, 'count': element['count']});
+                    costAll += double.parse(element['product'].cost.toString()) * int.parse(element['count'].toString());
                   },
                 );
+                if (textControllers[3].text.isEmpty) {
+                } else {
+                  costAll = double.parse(textControllers[3].text.toString());
+                }
                 final PurchasesModel model = PurchasesModel(
                   title: textControllers[1].text,
                   date: textControllers[0].text.substring(0, 10),
                   source: textControllers[2].text,
                   description: textControllers[4].text,
                   id: 0,
-                  cost: textControllers[3].text,
+                  cost: costAll.toString(),
                   count: _searchController.selectedProductsToOrder.length,
                   products: [],
                 );
@@ -144,6 +157,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   isAdmin: widget.isAdmin,
                   addCounterWidget: true,
                   whcihPage: 'purhcase',
+                  counter: _searchController.selectedProductsToOrder.length - index,
                 );
               },
             ),

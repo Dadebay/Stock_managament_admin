@@ -19,7 +19,7 @@ class ApiService {
       final headers = <String, String>{
         if (requiresToken && token != null) 'Authorization': 'Bearer $token',
       };
-
+      print(token);
       final response = await http.get(
         Uri.parse(endpoint),
         headers: headers,
@@ -94,7 +94,8 @@ class ApiService {
 
       // DÜZELTME: Yanıtı her zaman önce UTF-8 olarak çözüyoruz.
       final decodedBody = utf8.decode(response.bodyBytes);
-
+      print(decodedBody);
+      print(response.statusCode);
       if ([200, 201, 204].contains(response.statusCode)) {
         if (response.statusCode == 204) {
           if (handleSuccess != null) {

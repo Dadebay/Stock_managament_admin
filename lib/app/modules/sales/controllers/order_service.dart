@@ -8,7 +8,7 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class OrderService {
-  final OrderController orderController = Get.find();
+  // final OrderController orderController = Get.find();
   Future<List<OrderModel>> getOrders() async {
     final data = await ApiService().getRequest(ApiConstants.order, requiresToken: true);
 
@@ -30,7 +30,7 @@ class OrderService {
     }
   }
 
-  Future createOrder({required OrderModel model, required List<Map<String, dynamic>> products}) async {
+  Future<OrderModel?> createOrder({required OrderModel model, required List<Map<String, int>> products}) async {
     final body = <String, dynamic>{
       'status': model.status,
       'gaplama': model.gaplama,
@@ -46,21 +46,18 @@ class OrderService {
       "count": int.parse(model.count.toString()),
       'products': products,
     };
-    return ApiService().handleApiRequest(
+    final responseJson = await ApiService().handleApiRequest(
       endpoint: ApiConstants.order,
       method: 'POST',
       body: body,
       requiresToken: true,
-      handleSuccess: (responseJson) {
-        if (responseJson.isNotEmpty) {
-          orderController.addOrder(OrderModel.fromJson(responseJson));
-          Get.back();
-          CustomWidgets.showSnackBar('success'.tr, 'Order added successfully'.tr, Colors.green);
-        } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Order not added'.tr, Colors.red);
-        }
-      },
     );
+
+    if (responseJson != null && responseJson is Map<String, dynamic>) {
+      return OrderModel.fromJson(responseJson);
+    } else {
+      return null;
+    }
   }
 
   Future<OrderModel?> editOrderManually({required OrderModel model}) async {
@@ -72,10 +69,6 @@ class OrderService {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-    // List<Map<String, int>> products = [];
-    // for (var element in model.products) {
-    //   products.add({'id': element.id, 'count': element.count});
-    // }
     final body = json.encode({
       'status': int.parse(model.status),
       'gaplama': model.gaplama,
@@ -89,11 +82,10 @@ class OrderService {
       'coupon': model.coupon,
       'description': model.description,
       "count": model.count,
-      // 'products': products
+      "totalsum": model.totalsum,
+      "totalchykdajy": model.totalchykdajy,
     });
-
     final response = await http.put(url, headers: headers, body: body);
-
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       final updatedOrder = OrderModel.fromJson(jsonResponse);
@@ -105,20 +97,23 @@ class OrderService {
     }
   }
 
-  Future deleteOrder({required OrderModel model}) async {
-    return ApiService().handleApiRequest(
-      endpoint: ApiConstants.order + "${model.id}/",
+  Future<bool> deleteOrder({required int orderId}) async {
+    final response = await ApiService().handleApiRequest(
+      endpoint: "${ApiConstants.order}$orderId/",
       method: 'DELETE',
       requiresToken: true,
-      handleSuccess: (responseJson) async {
-        if (responseJson.isNotEmpty) {
-          orderController.deleteOrder(model: model);
-
-          CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
-        } else {
-          CustomWidgets.showSnackBar('error'.tr, 'clientNotAdded'.tr, Colors.red);
-        }
-      },
     );
+
+    // DEĞİŞİKLİK: Yanıtı kontrol et.
+    // Yanıt null değilse ve 'success': true içeriyorsa veya doğrudan bir Map ise başarılıdır.
+    if (response != null && response is Map && response['success'] == true) {
+      return true;
+    }
+    // Eski handleApiRequest uyumluluğu için
+    if (response != null && response is Map && response['statusCode'] == 204) {
+      return true;
+    }
+
+    return false;
   }
 }

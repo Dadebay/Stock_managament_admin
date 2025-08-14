@@ -65,20 +65,14 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
-            return Row(
-              children: [
-                CustomWidgets.counter(index + 1),
-                Expanded(
-                  child: SearchCard(
-                    disableOnTap: true,
-                    product: snapshot.data![index].product!,
-                    addCounterWidget: false,
-                    isAdmin: widget.isAdmin,
-                    externalCount: snapshot.data![index].count,
-                    whcihPage: '',
-                  ),
-                )
-              ],
+            return SearchCard(
+              disableOnTap: true,
+              product: snapshot.data![index].product!,
+              addCounterWidget: false,
+              isAdmin: widget.isAdmin,
+              externalCount: snapshot.data![index].count,
+              whcihPage: '',
+              counter: snapshot.data!.length - index,
             );
           },
         );
@@ -120,7 +114,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
       {'text1': 'Date', "text2": _localModel.date},
       {'text1': 'Source', "text2": _localModel.source},
       {'text1': 'Cost', "text2": _localModel.cost},
-      {'text1': 'Products Count', "text2": _localModel.count.toString()},
+      {'text1': 'Products Count', "text2": _localModel.count.toString() == '0' ? widget.purchasesModel.products.length.toString() : _localModel.count.toString()},
       {'text1': 'Description', "text2": _localModel.description},
     ];
     return Wrap(
@@ -186,6 +180,7 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                         count: _localModel.count,
                         products: _localModel.products,
                       );
+
                       final result = await PurchasesService().editOrderManually(model: updatedModel);
                       if (result != null) {
                         setState(() {

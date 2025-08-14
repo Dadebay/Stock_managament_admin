@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/search/components/bottom_price_sheet.dart';
 import 'package:stock_managament_admin/app/modules/search/components/right_side_buttons.dart';
@@ -8,9 +10,22 @@ import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 
 import '../../../product/init/packages.dart';
 
+class Debouncer {
+  Debouncer({required this.milliseconds});
+  final int milliseconds;
+  VoidCallback? action;
+  Timer? _timer;
+
+  run(VoidCallback action) {
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
+}
+
 class SearchView extends StatefulWidget {
-  const SearchView({super.key, required this.selectableProducts, this.whichPage, required this.isAdmin});
+  const SearchView({super.key, required this.selectableProducts, required this.addCounterWidget, this.whichPage, required this.isAdmin});
   final bool selectableProducts;
+  final bool addCounterWidget;
   final bool isAdmin;
   final String? whichPage;
   @override
@@ -18,7 +33,7 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
-  final SearchViewController searchViewController = Get.put(SearchViewController());
+  final SearchViewController searchViewController = Get.find<SearchViewController>();
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -61,7 +76,7 @@ class _SearchViewState extends State<SearchView> {
                     _searchWidget(),
                     searchViewController.showInGrid.value ? SizedBox.shrink() : _topText(displayList),
                     Expanded(
-                        child: displayList.isEmpty && snapshot.hasData
+                        child: displayList.isEmpty && isSearching == false
                             ? CustomWidgets.spinKit()
                             : displayList.isEmpty && isSearching
                                 ? Center(child: Text("No results found for '${searchController.text}'"))
@@ -148,22 +163,18 @@ class _SearchViewState extends State<SearchView> {
   ListView listViewStyle(List<SearchModel> list) {
     return ListView.builder(
         itemCount: list.length,
+        itemExtent: 100.h,
+        cacheExtent: 500.0,
         padding: EdgeInsets.only(bottom: 50.h),
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
-          return Row(
-            children: [
-              CustomWidgets.counter(list.length - index),
-              Expanded(
-                child: SearchCard(
-                  disableOnTap: widget.selectableProducts,
-                  product: list[index],
-                  addCounterWidget: widget.selectableProducts,
-                  whcihPage: widget.whichPage,
-                  isAdmin: widget.isAdmin,
-                ),
-              )
-            ],
+          return SearchCard(
+            disableOnTap: widget.selectableProducts,
+            product: list[index],
+            addCounterWidget: widget.addCounterWidget,
+            whcihPage: widget.whichPage,
+            isAdmin: widget.isAdmin,
+            counter: list.length - index,
           );
         });
   }

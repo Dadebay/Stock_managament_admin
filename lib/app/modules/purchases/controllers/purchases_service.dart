@@ -67,7 +67,7 @@ class PurchasesService {
       "count": int.parse(products.length.toString()),
       'products': products,
     };
-
+    print(body);
     return ApiService().handleApiRequest(
       endpoint: ApiConstants.purchases,
       method: 'POST',
@@ -76,6 +76,8 @@ class PurchasesService {
       handleSuccess: (responseJson) {
         if (responseJson.isNotEmpty) {
           purchasesController.addClient(PurchasesModel.fromJson(responseJson));
+          getPurchases();
+
           Get.back();
           CustomWidgets.showSnackBar('success'.tr, 'Purchases added successfully'.tr, Colors.green);
         } else {

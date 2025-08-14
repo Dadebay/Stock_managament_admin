@@ -6,7 +6,7 @@ class PurchasesModel {
   final String date;
   final String source;
   final String cost;
-  final int count;
+  int count;
   final String description;
   final List<SearchModel> products;
 

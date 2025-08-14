@@ -59,6 +59,14 @@ class SearchService {
         contentType: MediaType('image', extension), // Dinamik içerik tipi
       ));
     }
+    print(token);
+    print(fields);
+    request.files.forEach((file) {
+      print(file.field);
+      print(file.filename);
+    });
+    print(request.files);
+    print(request);
     try {
       final streamedResponse = await request.send();
       final responseBody = await streamedResponse.stream.bytesToString();
@@ -107,10 +115,18 @@ class SearchService {
         contentType: MediaType('image', extension),
       ));
     }
+    print(token);
+    print(fields);
+    request.files.forEach((file) {
+      print(file.field);
+      print(file.filename);
+    });
+    print(request.files);
+    print(request);
     final streamedResponse = await request.send();
 
     final statusCode = streamedResponse.statusCode;
-
+    print(statusCode);
     if (statusCode == 200 || statusCode == 201) {
       final responseBody = await streamedResponse.stream.bytesToString();
       final jsonData = jsonDecode(responseBody);

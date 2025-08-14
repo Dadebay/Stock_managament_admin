@@ -16,7 +16,7 @@ class OrderProductsView extends StatefulWidget {
 }
 
 class _OrderProductsViewState extends State<OrderProductsView> {
-  final OrderController orderController = Get.put<OrderController>(OrderController());
+  final OrderController orderController = Get.find<OrderController>();
   late OrderModel _currentOrder;
 
   @override
@@ -37,8 +37,8 @@ class _OrderProductsViewState extends State<OrderProductsView> {
       {'label': 'coupon', 'editable': true},
       {'label': 'description', 'editable': true},
       {'label': 'count', 'editable': true},
-      {'label': 'totalsum', 'editable': true},
-      {'label': 'totalchykdajy', 'editable': true},
+      {'label': 'cost', 'editable': true},
+      {'label': 'totalIncome', 'editable': true},
     ];
   }
 
@@ -63,7 +63,8 @@ class _OrderProductsViewState extends State<OrderProductsView> {
               onCancel: () => Get.back(result: false),
             );
             if (confirm == true) {
-              await OrderService().deleteOrder(model: _currentOrder);
+              // await OrderService().deleteOrder(model: _currentOrder);
+              orderController.deleteOrderFromUI(model: _currentOrder);
             }
           },
           icon: Icon(IconlyLight.delete, color: Colors.red),
@@ -152,6 +153,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
                 addCounterWidget: false,
                 isAdmin: widget.isAdmin,
                 whcihPage: '',
+                counter: products.length - index,
               );
             });
       },
@@ -197,38 +199,6 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
           _displayedValue = newValue;
         });
       }
-    }
-  }
-
-  String _getValue(String label, OrderModel order) {
-    switch (label) {
-      case 'status':
-        return StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status, orElse: () => {'name': 'Unknown'})['name']!;
-      case 'date':
-        return order.date.toString().substring(0, 16).replaceAll("T", ' ');
-      case 'clientName':
-        return order.clientDetailModel?.name ?? 'N/A';
-      case 'phone':
-        final phoneNum = order.clientDetailModel?.phone ?? 'N/A';
-        return phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum; // Display without +993
-      case 'address':
-        return order.clientDetailModel?.address ?? 'N/A';
-      case 'gaplama':
-        return order.gaplama.toString();
-      case 'discount':
-        return "${order.discount} % ";
-      case 'coupon':
-        return order.coupon.toString();
-      case 'description':
-        return order.description.toString();
-      case 'count':
-        return order.count.toString();
-      case 'totalsum':
-        return "${order.totalchykdajy} \$";
-      case 'totalchykdajy':
-        return "${order.totalsum} \$";
-      default:
-        return 'Bilinmeyen Alan'.tr;
     }
   }
 
@@ -325,6 +295,7 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                   onTap: () async {
                     final updatedOrder = currentOrder.copyWith(status: statusItem['sortName']!);
                     Get.back();
+
                     await onSave(updatedOrder);
                   },
                   child: Container(
@@ -394,6 +365,7 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                   onTap: () async {
                     final newValueFromInput = controller.text;
                     OrderModel updatedOrderWithNewValue = _copyUpdatedOrder(label, newValueFromInput, currentOrder);
+
                     Get.back();
                     await onSave(updatedOrderWithNewValue); // onSave çağrısı
                   },
@@ -406,6 +378,39 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
         },
       ),
     );
+  }
+
+  String _getValue(String label, OrderModel order) {
+    switch (label) {
+      case 'status':
+        return StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status, orElse: () => {'name': 'Unknown'})['name']!;
+      case 'date':
+        return order.date.toString().substring(0, 16).replaceAll("T", ' ');
+      case 'clientName':
+        return order.clientDetailModel?.name ?? 'N/A';
+      case 'phone':
+        final phoneNum = order.clientDetailModel?.phone ?? 'N/A';
+        return phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum; // Display without +993
+      case 'address':
+        return order.clientDetailModel?.address ?? 'N/A';
+      case 'gaplama':
+        return order.gaplama.toString();
+      case 'discount':
+        return "${order.discount}  ";
+      case 'coupon':
+        return order.coupon.toString();
+      case 'description':
+        return order.description.toString();
+      case 'count':
+        return order.count.toString();
+
+      case 'cost':
+        return "${order.totalchykdajy}";
+      case 'totalIncome':
+        return "${order.totalsum}";
+      default:
+        return 'Bilinmeyen Alan'.tr;
+    }
   }
 
   OrderModel _copyUpdatedOrder(String label, String value, OrderModel current) {
@@ -432,10 +437,10 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
         return current.copyWith(discount: value);
       case 'count':
         return current.copyWith(count: int.parse(value));
-      case 'totalsum':
-        return current.copyWith(totalsum: value);
-      case 'totalchykdajy':
+      case 'cost':
         return current.copyWith(totalchykdajy: value);
+      case 'totalIncome':
+        return current.copyWith(totalsum: value);
       default:
         return current;
     }

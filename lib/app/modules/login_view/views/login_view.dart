@@ -12,6 +12,25 @@ class LoginView extends StatelessWidget {
   TextEditingController textEditingController = TextEditingController();
   TextEditingController textEditingController1 = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  dynamic loginButtonOnTap() async {
+    if (_formKey.currentState!.validate()) {
+      homeController.agreeButton.value = !homeController.agreeButton.value;
+
+      await SignInService().login(username: textEditingController.text, password: textEditingController1.text).then((value) async {
+        if (value != null) {
+          await SignInService().getClients(textEditingController.text, textEditingController1.text);
+
+          Get.offAll(() => const NavBarPageView());
+        } else {
+          textEditingController.clear();
+          textEditingController1.clear();
+        }
+      });
+      homeController.agreeButton.value = !homeController.agreeButton.value;
+    } else {
+      CustomWidgets.showSnackBar('errorTitle', 'loginErrorFillBlanks', Colors.red);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +71,8 @@ class LoginView extends StatelessWidget {
                     controller: textEditingController,
                     focusNode: focusNode,
                     requestfocusNode: focusNode1,
+                    textInputAction: TextInputAction.next,
+                    onSubmitted: (_) => FocusScope.of(context).requestFocus(focusNode1),
                   ),
                   Padding(
                     padding: context.padding.verticalNormal,
@@ -60,29 +81,13 @@ class LoginView extends StatelessWidget {
                       controller: textEditingController1,
                       focusNode: focusNode1,
                       requestfocusNode: focusNode,
+                      textInputAction: TextInputAction.done, // “Done/Enter” tuşu
+                      onSubmitted: (_) => loginButtonOnTap(),
                     ),
                   ),
                   Center(
                     child: AgreeButton(
-                      onTap: () async {
-                        if (_formKey.currentState!.validate()) {
-                          homeController.agreeButton.value = !homeController.agreeButton.value;
-
-                          await SignInService().login(username: textEditingController.text, password: textEditingController1.text).then((value) async {
-                            if (value != null) {
-                              await SignInService().getClients(textEditingController.text, textEditingController1.text);
-
-                              Get.offAll(() => const NavBarPageView());
-                            } else {
-                              textEditingController.clear();
-                              textEditingController1.clear();
-                            }
-                          });
-                          homeController.agreeButton.value = !homeController.agreeButton.value;
-                        } else {
-                          CustomWidgets.showSnackBar('errorTitle', 'loginErrorFillBlanks', Colors.red);
-                        }
-                      },
+                      onTap: () => loginButtonOnTap(),
                       text: "login",
                     ),
                   ),

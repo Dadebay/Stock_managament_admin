@@ -15,7 +15,8 @@ import '../controllers/enter_controller.dart';
 
 class EnteringAppView extends StatelessWidget {
   final bool isAdmin;
-  final EnterController clientsController = Get.put<EnterController>(EnterController());
+  final EnterController clientsController = Get.find<EnterController>();
+
   TextEditingController searchEditingController = TextEditingController();
 
   EnteringAppView({super.key, required this.isAdmin});

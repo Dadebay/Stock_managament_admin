@@ -78,6 +78,15 @@ class OrderCardView extends StatelessWidget {
                 style: TextStyle(color: Colors.grey, fontSize: 16.sp),
               ),
             ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                "${order.totalchykdajy.toString()} \$",
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
+              ),
+            ),
             // TOTAL SUM
             Expanded(
               flex: 2,
@@ -89,15 +98,7 @@ class OrderCardView extends StatelessWidget {
               ),
             ),
             // TOTAL COST
-            Expanded(
-              flex: 2,
-              child: Text(
-                "${order.totalchykdajy.toString()} \$",
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
-              ),
-            ),
+
             // STATUS
             Expanded(
               flex: 2,

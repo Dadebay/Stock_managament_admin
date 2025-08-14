@@ -146,9 +146,9 @@ class SearchViewController extends GetxController {
     List<String> words = word.trim().toLowerCase().split(' ');
     searchResult.value = productsList.where((product) {
       final name = product.name.toLowerCase();
-      final price = product.price.toLowerCase();
-
-      return words.every((w) => name.contains(w) || price.contains(w));
+      final price = product.price.toLowerCase().toString();
+      final cost = product.cost.toLowerCase().toString();
+      return words.every((w) => name.contains(w) || price.contains(w.toString()) || cost.contains(w.toString()));
     }).toList();
     update();
   }

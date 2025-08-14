@@ -182,9 +182,12 @@ class CustomWidgets {
     );
   }
 
-  static Widget imageWidget(String? url, bool fit) {
+  static Widget imageWidget(String? url, {bool fit = false, int? cacheWidth, int? cacheHeight}) {
     return CachedNetworkImage(
       imageUrl: url!,
+      // Bellekte yeniden boyutlama için:
+      memCacheWidth: cacheWidth ?? 200, // örneğin 200px genişlik
+      memCacheHeight: cacheHeight ?? 200, // örneğin 200px yükseklik
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -194,10 +197,13 @@ class CustomWidgets {
           ),
         ),
       ),
-      placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-      errorWidget: (context, url, error) {
-        return Icon(IconlyLight.infoSquare);
-      },
+      placeholder: (context, url) => Center(
+          child: SizedBox(
+        width: 30,
+        height: 30,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      )),
+      errorWidget: (context, url, error) => Icon(IconlyLight.infoSquare),
     );
   }
 }

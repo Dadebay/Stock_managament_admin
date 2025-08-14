@@ -22,7 +22,6 @@ class MyTranslations extends Translations {
           "clientAdded": "Ulanyjy üstünlikli goşuldy",
           "clientNotAdded": "Maglumatlary barlaň we gaýtadan synanyşyň",
           "deleted": "Pozuldy",
-
           "clientDeleted": "Ulanyjy pozuldy",
           "clientName": "Ulanyjy ady",
           "phone": "Telefon belgisi",
@@ -222,8 +221,10 @@ class MyTranslations extends Translations {
           'waitMyMan': 'Garaşyň',
           'waitMyManSubtitle': 'Maglumat ýüklenýänça garaşyň',
           'yes': 'Hawwa',
+          'totalIncome': "Jemi girdeji",
         },
         'ru': {
+          'totalIncome': "Общий доход",
           "addBrend": "Добавить бренд",
           "addCategory": "Добавить категорию",
           "addLocation": "Добавить местоположение",

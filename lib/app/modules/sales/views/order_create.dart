@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
-import 'package:stock_managament_admin/app/modules/sales/controllers/order_service.dart';
 import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -17,7 +16,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   List<FocusNode> focusNodes = List.generate(9, (_) => FocusNode());
   final SearchViewController _searchController = Get.find<SearchViewController>();
 
-  final OrderController salesController = Get.put(OrderController());
   String selectedStatus = "Preparing"; // Set an initial value
   List<TextEditingController> textControllers = List.generate(9, (_) => TextEditingController());
   final _formKey = GlobalKey<FormState>();
@@ -136,7 +134,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
           selectedProductsView(),
           AgreeButton(
               onTap: () {
-                Get.to(() => SearchView(selectableProducts: true, isAdmin: widget.isAdmin));
+                Get.to(() => SearchView(selectableProducts: true, addCounterWidget: true, isAdmin: widget.isAdmin));
               },
               text: 'selectProducts'),
           submitOrder(),
@@ -145,6 +143,8 @@ class _OrderCreateViewState extends State<OrderCreateView> {
       ),
     );
   }
+
+  final OrderController _orderController = Get.find<OrderController>();
 
   AgreeButton submitOrder() {
     return AgreeButton(
@@ -186,7 +186,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
               totalsum: '',
               totalchykdajy: '',
             );
-            await OrderService().createOrder(model: model, products: products);
+            await _orderController.createNewOrder(model: model, products: products);
           } else {
             CustomWidgets.showSnackBar('errorTitle', 'loginErrorFillBlanks', Colors.red);
           }
@@ -213,12 +213,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                   itemBuilder: (BuildContext context, int index) {
                     final SearchModel product = _searchController.selectedProductsToOrder[index]['product'];
                     return SearchCard(
-                      product: product,
-                      disableOnTap: false,
-                      addCounterWidget: true,
-                      isAdmin: widget.isAdmin,
-                      whcihPage: '',
-                    );
+                        product: product, disableOnTap: false, addCounterWidget: true, isAdmin: widget.isAdmin, whcihPage: '', counter: _searchController.selectedProductsToOrder.length - index);
                   },
                 ),
               ],

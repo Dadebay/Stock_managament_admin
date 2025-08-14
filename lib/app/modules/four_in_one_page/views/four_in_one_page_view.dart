@@ -15,7 +15,7 @@ class FourInOnePageView extends StatefulWidget {
 }
 
 class _FourInOnePageViewState extends State<FourInOnePageView> {
-  FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
+  final FourInOnePageController fourInOnePageController = Get.find<FourInOnePageController>();
   @override
   Widget build(BuildContext context) {
     return Stack(

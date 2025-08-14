@@ -9,6 +9,7 @@ import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_s
 import 'package:stock_managament_admin/app/modules/purchases/views/purchases_view.dart';
 import 'package:stock_managament_admin/app/modules/sales/views/order_view.dart';
 import 'package:stock_managament_admin/app/modules/search/views/search_view.dart';
+import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_controller.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/views/entering_app_view.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/views/logs_view.dart';
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
@@ -29,20 +30,26 @@ class _NavBarPageViewState extends State<NavBarPageView> {
   final SearchViewController seacrhViewController = Get.put(SearchViewController());
   final ClientsController clientsController = Get.put(ClientsController());
   final FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
-  final OrderController salesController = Get.put(OrderController());
   final PurchasesController purchasesController = Get.put(PurchasesController());
-  final ExpencesController expencesController = Get.put<ExpencesController>(ExpencesController());
+  final ExpencesController expencesController = Get.put(ExpencesController());
+  final OrderController orderController = Get.put(OrderController());
+  final HomeController homeController = Get.put(HomeController());
+  final EnterController enterController = Get.put(EnterController());
 
   bool isAdmin = false;
+
   @override
   void initState() {
     super.initState();
-    FindAdminStatus();
+    findAdminStatus(); // Metod isimleri genellikle küçük harfle başlar (Dart konvansiyonu)
   }
 
-  FindAdminStatus() async {
+  void findAdminStatus() async {
     isAdmin = await AuthStorage().getAdminStatus();
-    setState(() {});
+    if (mounted) {
+      // initState'de async işlem sonrası setState için kontrol
+      setState(() {});
+    }
   }
 
   @override
@@ -51,7 +58,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
         ? [
             HomeView(isAdmin: isAdmin),
             OrderView(isAdmin: isAdmin),
-            SearchView(selectableProducts: false, isAdmin: isAdmin),
+            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin),
             PurchasesView(isAdmin: isAdmin),
             FourInOnePageView(isAdmin: isAdmin),
             ExpencesView(isAdmin: isAdmin),
@@ -63,7 +70,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
         : [
             HomeView(isAdmin: isAdmin),
             OrderView(isAdmin: isAdmin),
-            SearchView(selectableProducts: false, isAdmin: isAdmin),
+            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin),
             PurchasesView(isAdmin: isAdmin),
             FourInOnePageView(isAdmin: isAdmin),
             ExpencesView(isAdmin: isAdmin),
@@ -79,9 +86,6 @@ class _NavBarPageViewState extends State<NavBarPageView> {
           drawer(width, pages, context),
           Expanded(
             flex: 6,
-            //  child: Container(color: Colors.white, child: OrderView(isAdmin: isAdmin))
-            //  ),
-
             child: Container(
               color: Colors.white,
               child: pages[selecedIndex],

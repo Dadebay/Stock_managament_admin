@@ -9,7 +9,7 @@ class AgreeButton extends StatelessWidget {
   final bool? showBorder;
 
   AgreeButton({required this.onTap, required this.text, this.showBorder});
-  final HomeController homeController = Get.put(HomeController());
+  final HomeController homeController = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +19,7 @@ class AgreeButton extends StatelessWidget {
   Widget animatedContaner(BuildContext context) {
     return Obx(() {
       return AnimatedContainer(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20), color: showBorder == true ? Colors.transparent : ColorConstants.kPrimaryColor2, border: Border.all(color: ColorConstants.kPrimaryColor2)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: showBorder == true ? Colors.transparent : ColorConstants.kPrimaryColor2, border: Border.all(color: ColorConstants.kPrimaryColor2)),
         margin: context.padding.onlyTopNormal,
         padding: context.padding.normal.copyWith(top: 15, bottom: 15),
         width: homeController.agreeButton.value ? 60.w : Get.size.width,
