@@ -1,4 +1,4 @@
-# stock_managament_admin
+# akbulut_admin
 
 A new Flutter project.
 
