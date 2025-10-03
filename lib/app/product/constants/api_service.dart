@@ -131,7 +131,7 @@ class ApiService {
     String errorMessage = 'anErrorOccurred'.tr;
     switch (statusCode) {
       case 400:
-        errorMessage = 'invalidNumber'.tr;
+        errorMessage = message;
         break;
       case 401:
         errorMessage = '${'unauthorized'.tr}: $message';

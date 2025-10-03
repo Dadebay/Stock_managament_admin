@@ -23,10 +23,11 @@ class Debouncer {
 }
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key, required this.selectableProducts, required this.addCounterWidget, this.whichPage, required this.isAdmin});
+  const SearchView({super.key, required this.selectableProducts, required this.hideAppBar, required this.addCounterWidget, this.whichPage, required this.isAdmin});
   final bool selectableProducts;
   final bool addCounterWidget;
   final bool isAdmin;
+  final bool hideAppBar;
   final String? whichPage;
   @override
   State<SearchView> createState() => _SearchViewState();
@@ -40,7 +41,7 @@ class _SearchViewState extends State<SearchView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: widget.selectableProducts
+      appBar: widget.hideAppBar == false
           ? CustomAppBar(
               backArrow: true,
               centerTitle: true,

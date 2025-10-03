@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/product_profil_view.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -25,7 +26,6 @@ class SearchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(addCounterWidget);
     final SearchViewController seacrhViewController = Get.find<SearchViewController>();
     String url = '';
     if (product.img!.contains(ApiConstants.imageURL)) {
@@ -112,13 +112,18 @@ class SearchCard extends StatelessWidget {
                               }
                             },
                           ),
-                          Container(
-                            width: 30.w,
-                            alignment: Alignment.center,
-                            child: Text(
-                              selectedCount.toString(),
-                              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
-                              maxLines: 1,
+                          GestureDetector(
+                            onTap: () {
+                              _showQuantityDialog(context, seacrhViewController, product, selectedCount);
+                            },
+                            child: Container(
+                              width: 30.w,
+                              alignment: Alignment.center,
+                              child: Text(
+                                selectedCount.toString(),
+                                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                                maxLines: 1,
+                              ),
                             ),
                           ),
                           IconButton(
@@ -139,6 +144,46 @@ class SearchCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showQuantityDialog(BuildContext context, SearchViewController controller, SearchModel product, int currentCount) {
+    final TextEditingController textEditingController = TextEditingController(text: currentCount.toString());
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Quantity'.tr),
+          content: TextField(
+            controller: textEditingController,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'quantity'.tr,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('cancel'.tr),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('ok'.tr),
+              onPressed: () {
+                final newCount = int.tryParse(textEditingController.text) ?? currentCount;
+                if (whcihPage == null && newCount > product.count) {
+                  CustomWidgets.showSnackBar("Error", "Not in stock", Colors.red);
+                } else {
+                  controller.addOrUpdateProduct(product: product, count: newCount);
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -82,7 +82,7 @@ class EnterService {
 
 class LogService {
   Future<List<LogModel>> fetchLogs() async {
-    final uri = Uri.parse("http://216.250.12.49:9000/api/getlog/");
+    final uri = Uri.parse("http://216.250.11.255:9000/api/getlog/");
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
 
     if (data is List) {

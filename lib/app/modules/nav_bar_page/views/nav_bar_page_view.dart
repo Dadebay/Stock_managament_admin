@@ -58,7 +58,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
         ? [
             HomeView(isAdmin: isAdmin),
             OrderView(isAdmin: isAdmin),
-            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin),
+            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin, hideAppBar: true),
             PurchasesView(isAdmin: isAdmin),
             FourInOnePageView(isAdmin: isAdmin),
             ExpencesView(isAdmin: isAdmin),
@@ -70,7 +70,7 @@ class _NavBarPageViewState extends State<NavBarPageView> {
         : [
             HomeView(isAdmin: isAdmin),
             OrderView(isAdmin: isAdmin),
-            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin),
+            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin, hideAppBar: true),
             PurchasesView(isAdmin: isAdmin),
             FourInOnePageView(isAdmin: isAdmin),
             ExpencesView(isAdmin: isAdmin),

@@ -41,7 +41,8 @@ class PurchasesService {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-    final body = json.encode({'title': model.title, 'date': model.date, 'source': model.source, 'cost': double.tryParse(model.cost) ?? 0, 'description': model.description, 'products': model.products});
+    final body =
+        json.encode({'title': model.title, 'date': model.date, 'source': model.source, 'cost': double.tryParse(model.cost) ?? 0, 'description': model.description, 'products': model.products});
     final response = await http.put(url, headers: headers, body: body);
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
@@ -62,7 +63,7 @@ class PurchasesService {
       'title': model.title,
       'date': model.date,
       'source': model.source,
-      'cost': double.parse(model.cost.toString()),
+      'cost': double.parse(double.parse(model.cost).toStringAsFixed(2)),
       'description': model.description,
       "count": int.parse(products.length.toString()),
       'products': products,
@@ -74,6 +75,7 @@ class PurchasesService {
       body: body,
       requiresToken: true,
       handleSuccess: (responseJson) {
+        print(responseJson);
         if (responseJson.isNotEmpty) {
           purchasesController.addClient(PurchasesModel.fromJson(responseJson));
           getPurchases();

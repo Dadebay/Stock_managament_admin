@@ -7,7 +7,6 @@ import 'package:stock_managament_admin/app/product/constants/theme_contants.dart
 import 'package:stock_managament_admin/app/product/init/app_start_init.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/utils.dart';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppStartInit.init();

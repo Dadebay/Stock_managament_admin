@@ -85,35 +85,84 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                     selectableProducts: false,
                     isAdmin: widget.isAdmin,
                     whichPage: 'purhcase',
+                    hideAppBar: false,
                     addCounterWidget: true,
                   )),
               text: 'selectProducts'),
           AgreeButton(
               onTap: () async {
-                double costAll = 0.0;
+                try {
+                  double costAll = 0.0;
 
-                List<Map<String, int>> products = [];
-                _searchController.selectedProductsToOrder.forEach(
-                  (element) {
-                    products.add({'id': element['product'].id, 'count': element['count']});
-                    costAll += double.parse(element['product'].cost.toString()) * int.parse(element['count'].toString());
-                  },
-                );
-                if (textControllers[3].text.isEmpty) {
-                } else {
-                  costAll = double.parse(textControllers[3].text.toString());
+                  List<Map<String, int>> products = [];
+                  print("--- Debugging Purchase Creation ---");
+                  for (var element in _searchController.selectedProductsToOrder) {
+                    final product = element['product'];
+                    final count = element['count'];
+                    
+                    print("Processing product: ${product.name}, ID: ${product.id}");
+                    print("  - Cost from source: '${product.cost}' (type: ${product.cost.runtimeType})");
+                    print("  - Count from source: '$count' (type: ${count.runtimeType})");
+
+                    double cost = 0.0;
+                    int quantity = 0;
+
+                    try {
+                      cost = double.parse(product.cost.toString());
+                    } catch (e) {
+                      print("!!! ERROR: Could not parse cost for product '${product.name}'. Value was '${product.cost}'.");
+                      print("!!! ERROR Details: $e");
+                      // Optionally, show a user-friendly error
+                      CustomWidgets.showSnackBar('Error', "Invalid cost for product: ${product.name}", Colors.red);
+                      return; // Stop the process
+                    }
+
+                    try {
+                      quantity = int.parse(count.toString());
+                    } catch (e) {
+                      print("!!! ERROR: Could not parse count for product '${product.name}'. Value was '$count'.");
+                      print("!!! ERROR Details: $e");
+                      // Optionally, show a user-friendly error
+                      CustomWidgets.showSnackBar('Error', "Invalid quantity for product: ${product.name}", Colors.red);
+                      return; // Stop the process
+                    }
+
+                    products.add({'id': product.id, 'count': quantity});
+                    costAll += cost * quantity;
+                  }
+                  print("Total calculated cost: $costAll");
+
+                  if (textControllers[3].text.isNotEmpty) {
+                     print("Manual cost entered: '${textControllers[3].text}'. Overriding calculated cost.");
+                    try {
+                      costAll = double.parse(textControllers[3].text);
+                    } catch(e) {
+                       print("!!! ERROR: Could not parse manual cost. Value was '${textControllers[3].text}'.");
+                       print("!!! ERROR Details: $e");
+                       CustomWidgets.showSnackBar('Error', "Invalid format for manual cost.", Colors.red);
+                       return;
+                    }
+                  }
+                  
+                  final PurchasesModel model = PurchasesModel(
+                    title: textControllers[1].text,
+                    date: textControllers[0].text.substring(0, 10),
+                    source: textControllers[2].text,
+                    description: textControllers[4].text,
+                    id: 0,
+                    cost: costAll.toString(),
+                    count: _searchController.selectedProductsToOrder.length,
+                    products: [],
+                  );
+                  
+                  print("--- Preparing to send data to server ---");
+
+                  await PurchasesService().addPurchase(model: model, products: products);
+                  print("--- Purchase creation request sent ---");
+
+                } catch (e) {
+                  print('!!! UNCAUGHT ERROR during purchase creation: $e');
                 }
-                final PurchasesModel model = PurchasesModel(
-                  title: textControllers[1].text,
-                  date: textControllers[0].text.substring(0, 10),
-                  source: textControllers[2].text,
-                  description: textControllers[4].text,
-                  id: 0,
-                  cost: costAll.toString(),
-                  count: _searchController.selectedProductsToOrder.length,
-                  products: [],
-                );
-                await PurchasesService().addPurchase(model: model, products: products);
               },
               text: 'agree'),
           SizedBox(

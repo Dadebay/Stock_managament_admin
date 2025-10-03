@@ -134,7 +134,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
           selectedProductsView(),
           AgreeButton(
               onTap: () {
-                Get.to(() => SearchView(selectableProducts: true, addCounterWidget: true, isAdmin: widget.isAdmin));
+                Get.to(() => SearchView(selectableProducts: true, hideAppBar: false, addCounterWidget: true, isAdmin: widget.isAdmin));
               },
               text: 'selectProducts'),
           submitOrder(),
