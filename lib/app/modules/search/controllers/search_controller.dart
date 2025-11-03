@@ -8,6 +8,8 @@ class SearchViewController extends GetxController {
   RxList<SearchModel> productsList = <SearchModel>[].obs;
   RxList<SearchModel> historyList = <SearchModel>[].obs;
   RxBool showInGrid = false.obs;
+  RxString selectedCategory = 'All'.obs;
+  RxList<CategoryModel> categories = <CategoryModel>[].obs;
 
   RxDouble sumSell = 0.0.obs;
   RxDouble sumCost = 0.0.obs;
@@ -15,6 +17,27 @@ class SearchViewController extends GetxController {
   String _currentSearchText = '';
   String _activeFilterType = '';
   String _activeFilterValue = '';
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize categories when the controller is created
+    historyList.listen((products) {
+      final uniqueCategories = <CategoryModel>[];
+      final categoryNames = <String>{};
+      for (var product in products) {
+        if (product.category != null && !categoryNames.contains(product.category!.name)) {
+          uniqueCategories.add(product.category!);
+          categoryNames.add(product.category!.name);
+        }
+      }
+      categories.assignAll(uniqueCategories);
+    });
+  }
+
+  void filterByCategory(String categoryName) {
+    selectedCategory.value = categoryName;
+    onSearchTextChanged(_currentSearchText);
+  }
 
   void _filterAndSearchProducts() {
     List<SearchModel> GeciciListe = productsList.toList();
@@ -137,19 +160,28 @@ class SearchViewController extends GetxController {
   }
 
   void onSearchTextChanged(String word) {
-    searchResult.clear();
-    if (word.isEmpty) {
-      searchResult.assignAll(productsList);
-      update();
-      return;
+    _currentSearchText = word;
+    List<SearchModel> filteredList = historyList.toList(); // Start with the full history list
+
+    // Apply category filter
+    if (selectedCategory.value != 'All') {
+      filteredList = filteredList.where((product) {
+        return product.category?.name == selectedCategory.value;
+      }).toList();
     }
-    List<String> words = word.trim().toLowerCase().split(' ');
-    searchResult.value = productsList.where((product) {
-      final name = product.name.toLowerCase();
-      final price = product.price.toLowerCase().toString();
-      final cost = product.cost.toLowerCase().toString();
-      return words.every((w) => name.contains(w) || price.contains(w.toString()) || cost.contains(w.toString()));
-    }).toList();
+
+    // Apply text search filter
+    if (word.isNotEmpty) {
+      List<String> words = word.trim().toLowerCase().split(' ');
+      filteredList = filteredList.where((product) {
+        final name = product.name.toLowerCase();
+        final price = product.price.toLowerCase().toString();
+        final cost = product.cost.toLowerCase().toString();
+        return words.every((w) => name.contains(w) || price.contains(w.toString()) || cost.contains(w.toString()));
+      }).toList();
+    }
+
+    searchResult.assignAll(filteredList);
     update();
   }
 
@@ -157,12 +189,12 @@ class SearchViewController extends GetxController {
     final indexInProducts = productsList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInProducts != -1) {
       productsList[indexInProducts] = updatedProduct;
-    } else {}
+    }
 
     final indexInSearch = searchResult.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInSearch != -1) {
       searchResult[indexInSearch] = updatedProduct;
-    } else {}
+    }
 
     calculateTotals();
 

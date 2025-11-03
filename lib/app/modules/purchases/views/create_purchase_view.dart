@@ -87,6 +87,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                     whichPage: 'purhcase',
                     hideAppBar: false,
                     addCounterWidget: true,
+                    showCategoryFilter: true,
                   )),
               text: 'selectProducts'),
           AgreeButton(

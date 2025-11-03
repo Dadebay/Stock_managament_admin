@@ -23,12 +23,13 @@ class Debouncer {
 }
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key, required this.selectableProducts, required this.hideAppBar, required this.addCounterWidget, this.whichPage, required this.isAdmin});
+  const SearchView({super.key, required this.selectableProducts, required this.hideAppBar, required this.addCounterWidget, this.whichPage, required this.isAdmin, this.showCategoryFilter = false});
   final bool selectableProducts;
   final bool addCounterWidget;
   final bool isAdmin;
   final bool hideAppBar;
   final String? whichPage;
+  final bool showCategoryFilter;
   @override
   State<SearchView> createState() => _SearchViewState();
 }
@@ -69,12 +70,47 @@ class _SearchViewState extends State<SearchView> {
           return Obx(() {
             final isSearching = searchController.text.isNotEmpty;
             final hasResult = searchViewController.searchResult.isNotEmpty;
-            final displayList = (isSearching) ? (hasResult ? searchViewController.searchResult.toList() : <SearchModel>[]) : searchViewController.productsList.toList();
+            final displayList = searchViewController.searchResult.toList();
             return Stack(
               children: [
                 Column(
                   children: [
                     _searchWidget(),
+                    if (widget.showCategoryFilter)
+                      SizedBox(
+                        height: 50,
+                        child: Obx(() {
+                          Widget _buildCategoryChip(String categoryName) {
+                            final isSelected = searchViewController.selectedCategory.value == categoryName;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: ChoiceChip(
+                                label: Text(categoryName),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    searchViewController.filterByCategory(categoryName);
+                                  }
+                                },
+                                selectedColor: Theme.of(context).primaryColor,
+                                labelStyle: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.black,
+                                ),
+                                backgroundColor: Colors.grey[200],
+                                shape: const StadiumBorder(),
+                              ),
+                            );
+                          }
+
+                          return ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              _buildCategoryChip('All'),
+                              ...searchViewController.categories.map((cat) => _buildCategoryChip(cat.name)).toList(),
+                            ],
+                          );
+                        }),
+                      ),
                     searchViewController.showInGrid.value ? SizedBox.shrink() : _topText(displayList),
                     Expanded(
                         child: displayList.isEmpty && isSearching == false
