@@ -185,7 +185,6 @@ class CustomWidgets {
   static Widget imageWidget(String? url, {bool fit = false, int? cacheWidth, int? cacheHeight}) {
     return CachedNetworkImage(
       imageUrl: url!,
-      // Bellekte yeniden boyutlama için:
       memCacheWidth: cacheWidth ?? 200, // örneğin 200px genişlik
       memCacheHeight: cacheHeight ?? 200, // örneğin 200px yükseklik
       imageBuilder: (context, imageProvider) => Container(

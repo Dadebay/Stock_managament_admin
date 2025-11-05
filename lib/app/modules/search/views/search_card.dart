@@ -33,6 +33,7 @@ class SearchCard extends StatelessWidget {
     } else {
       url = ApiConstants.imageURL2 + product.img!;
     }
+    print(url);
     return GestureDetector(
       onTap: () {
         if (!disableOnTap) {
