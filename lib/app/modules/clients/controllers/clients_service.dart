@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/client_model.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
@@ -52,12 +51,12 @@ class ClientsService {
         'phone': model.phone.contains("+993") ? model.phone : "+993${model.phone}",
       },
       requiresToken: true,
-      handleSuccess: (responseJson) {
+      handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
           clientsController.editClient(ClientModel.fromJson(responseJson));
-          Get.back();
-
           CustomWidgets.showSnackBar('success'.tr, 'Edited succesfully'.tr, Colors.green);
+          await Future.delayed(const Duration(milliseconds: 100));
+          Get.back();
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'Cannot edit please try again'.tr, Colors.red);
         }

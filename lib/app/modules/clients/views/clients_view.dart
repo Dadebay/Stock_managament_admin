@@ -80,21 +80,18 @@ class ClientsView extends StatelessWidget {
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && clientsController.searchResult.isEmpty)
                         ? CustomWidgets.emptyData()
-                        : ListView.separated(
-                            padding: context.padding.onlyBottomHigh,
+                        : ListView.builder(
+                            key: ValueKey(displayList.map((e) => e.id).join('-')),
+                            padding: EdgeInsets.only(top: 10.h, bottom: 100.h),
                             itemCount: displayList.length,
                             itemBuilder: (context, index) {
+                              final calculatedCount = displayList.length - index;
                               return ClientCard(
+                                key: ObjectKey('${displayList[index].id}-$index-$calculatedCount'),
                                 isAdmin: isAdmin,
                                 client: displayList[index],
-                                count: (displayList.length - index),
+                                count: calculatedCount,
                                 topTextColumnSize: StringConstants.clientNames,
-                              );
-                            },
-                            separatorBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 30.w),
-                                child: Divider(thickness: 2, color: ColorConstants.greyColorwithOpacity),
                               );
                             },
                           ),

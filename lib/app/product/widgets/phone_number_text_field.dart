@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, must_be_immutable, use_key_in_widget_constructors
+// ignore_for_file: file_names, must_be_immutable, use_key_in_widget_constructors, deprecated_member_use
 
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';

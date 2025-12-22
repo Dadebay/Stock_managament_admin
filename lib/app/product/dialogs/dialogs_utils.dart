@@ -1,4 +1,4 @@
-// ignore_for_file: inference_failure_on_function_return_type, inference_failure_on_function_invocation, duplicate_ignore, unused_local_variable
+// ignore_for_file: inference_failure_on_function_return_type, inference_failure_on_function_invocation, duplicate_ignore, unused_local_variable, deprecated_member_use
 
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_model.dart';
@@ -45,7 +45,11 @@ class DialogsUtils {
                   onPressed: () {
                     searchViewController.clearFilter();
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: ColorConstants.kPrimaryColor2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConstants.kPrimaryColor2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
                   child: Text(
                     "clearFilter".tr,
                     style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
@@ -100,7 +104,11 @@ class DialogsUtils {
                   onPressed: () {
                     orderViewController.clearFilter();
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: ColorConstants.kPrimaryColor2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConstants.kPrimaryColor2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10)),
                   child: Text(
                     "clearFilter".tr,
                     style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
@@ -229,7 +237,10 @@ class DialogsUtils {
                 Get.back();
                 showDialog(
                   context: context,
-                  builder: (context) => AddEditFourInOneDialog(name: StringConstants.four_in_one_names[index]['countName'].toString(), url: StringConstants.four_in_one_names[index]['url'].toString(), editKey: StringConstants.four_in_one_names[index]['countName'].toString()),
+                  builder: (context) => AddEditFourInOneDialog(
+                      name: StringConstants.four_in_one_names[index]['countName'].toString(),
+                      url: StringConstants.four_in_one_names[index]['url'].toString(),
+                      editKey: StringConstants.four_in_one_names[index]['countName'].toString()),
                 );
               },
               title: Text(

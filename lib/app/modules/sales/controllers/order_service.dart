@@ -31,6 +31,13 @@ class OrderService {
   }
 
   Future<OrderModel?> createOrder({required OrderModel model, required List<Map<String, int>> products}) async {
+    print('\n===== CREATE ORDER REQUEST =====');
+    print('Endpoint: ${ApiConstants.order}');
+
+    // Discount değerini kontrol et
+    final discountValue = double.tryParse(model.discount.toString()) ?? 0.0;
+    print('Discount value: $discountValue');
+
     final body = <String, dynamic>{
       'status': model.status,
       'gaplama': model.gaplama,
@@ -40,12 +47,17 @@ class OrderService {
       'clientName': model.clientDetailModel!.name,
       'clientAddress': model.clientDetailModel!.address,
       'clientPhone': model.clientDetailModel!.phone,
-      'discount': double.tryParse(model.discount.toString()),
+      'discount': discountValue,
       'coupon': model.coupon,
       'description': model.description,
       "count": int.parse(model.count.toString()),
       'products': products,
     };
+
+    print('Request body: $body');
+    print('Products: $products');
+    print('==============================\n');
+
     final responseJson = await ApiService().handleApiRequest(
       endpoint: ApiConstants.order,
       method: 'POST',
@@ -53,9 +65,15 @@ class OrderService {
       requiresToken: true,
     );
 
+    print('\n===== CREATE ORDER RESPONSE =====');
+    print('Response: $responseJson');
+    print('Response type: ${responseJson.runtimeType}');
+    print('=================================\n');
+
     if (responseJson != null && responseJson is Map<String, dynamic>) {
       return OrderModel.fromJson(responseJson);
     } else {
+      print('⚠️ Response is null or not a Map<String, dynamic>');
       return null;
     }
   }

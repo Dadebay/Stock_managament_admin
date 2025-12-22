@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:math';
 
 import 'package:excel/excel.dart' as ex;
@@ -13,7 +15,13 @@ class DataItem {
   double sumCost;
   double expences;
   double profit;
-  DataItem({required this.x, required this.sales, required this.sumCost, required this.purchases, required this.expences, required this.profit});
+  DataItem(
+      {required this.x,
+      required this.sales,
+      required this.sumCost,
+      required this.purchases,
+      required this.expences,
+      required this.profit});
 }
 
 class HomeView extends StatefulWidget {
@@ -27,7 +35,20 @@ class _HomeViewState extends State<HomeView> {
   final HomeService _homeService = HomeService();
   bool _isLoading = false;
 
-  List<String> months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
 
   List<double> expences = List.filled(12, 0.0);
   List<double> sales = List.filled(12, 0.0);
@@ -58,9 +79,12 @@ class _HomeViewState extends State<HomeView> {
     final apiChartData = await _homeService.getChartPageData();
 
     if (apiChartData != null) {
-      void populateCategoryFromApi(String categoryKey, List<double> targetList) {
-        if (apiChartData.containsKey(categoryKey) && apiChartData[categoryKey] is Map) {
-          final Map<String, dynamic> categoryData = apiChartData[categoryKey] as Map<String, dynamic>;
+      void populateCategoryFromApi(
+          String categoryKey, List<double> targetList) {
+        if (apiChartData.containsKey(categoryKey) &&
+            apiChartData[categoryKey] is Map) {
+          final Map<String, dynamic> categoryData =
+              apiChartData[categoryKey] as Map<String, dynamic>;
           categoryData.forEach((yearMonthKey, value) {
             try {
               final parts = yearMonthKey.split('-');
@@ -68,14 +92,19 @@ class _HomeViewState extends State<HomeView> {
                 final year = int.tryParse(parts[0]);
                 final month = int.tryParse(parts[1]);
 
-                if (year != null && month != null && year == dateForYear.year && month >= 1 && month <= 12) {
+                if (year != null &&
+                    month != null &&
+                    year == dateForYear.year &&
+                    month >= 1 &&
+                    month <= 12) {
                   if (value is num) {
                     targetList[month - 1] = value.toDouble();
                   }
                 }
               }
             } catch (e) {
-              debugPrint("Error parsing API chart data for key: $yearMonthKey, value: $value. Error: $e");
+              debugPrint(
+                  "Error parsing API chart data for key: $yearMonthKey, value: $value. Error: $e");
             }
           });
         }
@@ -86,7 +115,8 @@ class _HomeViewState extends State<HomeView> {
       populateCategoryFromApi('purchases', purchases);
       populateCategoryFromApi('expences', expences);
     } else {
-      CustomWidgets.showSnackBar('Error'.tr, 'Failed to load chart data from API.'.tr, Colors.red);
+      CustomWidgets.showSnackBar(
+          'Error'.tr, 'Failed to load chart data from API.'.tr, Colors.red);
     }
 
     await _calculateProfitAndGenerateExcel(forExcelExport, dateForYear);
@@ -98,7 +128,8 @@ class _HomeViewState extends State<HomeView> {
     }
   }
 
-  Future<void> _calculateProfitAndGenerateExcel(bool generateExcel, DateTime dateForReport) async {
+  Future<void> _calculateProfitAndGenerateExcel(
+      bool generateExcel, DateTime dateForReport) async {
     profit = List.filled(12, 0.0);
     for (int i = 0; i < 12; i++) {
       // profit[i] = sales[i] - (purchases[i] + expences[i] + sumCost[i]);
@@ -119,7 +150,8 @@ class _HomeViewState extends State<HomeView> {
       }
 
       excel.save(fileName: "${dateForReport.year}_financial_report.xlsx");
-      CustomWidgets.showSnackBar('Success'.tr, 'Excel report generated for ${dateForReport.year}'.tr, Colors.green);
+      CustomWidgets.showSnackBar('Success'.tr,
+          'Excel report generated for ${dateForReport.year}'.tr, Colors.green);
     }
 
     if (mounted) {
@@ -136,7 +168,14 @@ class _HomeViewState extends State<HomeView> {
 
     double maxElement5 = sumCost.isNotEmpty ? sumCost.reduce(max) : 0.0;
 
-    double positiveMax = [maxElement1, maxElement2, maxElement3, maxElement4, maxElement5, 0.0].reduce(max);
+    double positiveMax = [
+      maxElement1,
+      maxElement2,
+      maxElement3,
+      maxElement4,
+      maxElement5,
+      0.0
+    ].reduce(max);
     maxElement = positiveMax;
   }
 
@@ -167,11 +206,21 @@ class _HomeViewState extends State<HomeView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(child: names(name: "salesChart", color: Colors.red, index: 0)),
-                Expanded(child: names(name: "sumCostChart", color: Colors.purple, index: 3)),
-                Expanded(child: names(name: "purchases", color: Colors.amber, index: 1)),
-                Expanded(child: names(name: "expences", color: Colors.blue, index: 2)),
-                Expanded(child: names(name: "netProfit", color: Colors.green, index: 4)),
+                Expanded(
+                    child:
+                        names(name: "salesChart", color: Colors.red, index: 0)),
+                Expanded(
+                    child: names(
+                        name: "sumCostChart", color: Colors.purple, index: 3)),
+                Expanded(
+                    child: names(
+                        name: "purchases", color: Colors.amber, index: 1)),
+                Expanded(
+                    child:
+                        names(name: "expences", color: Colors.blue, index: 2)),
+                Expanded(
+                    child: names(
+                        name: "netProfit", color: Colors.green, index: 4)),
                 const SizedBox(width: 20),
                 yearPicker(context),
                 const SizedBox(width: 10),
@@ -181,11 +230,17 @@ class _HomeViewState extends State<HomeView> {
                           await exportToExcel(context);
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 16),
+                          decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(10)),
                           child: Text(
                             "Export Excel".tr,
-                            style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.amber,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       )
@@ -198,9 +253,18 @@ class _HomeViewState extends State<HomeView> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: BarChart(
                 BarChartData(
-                    maxY: maxElement == 0 ? 100 : maxElement + (maxElement * 0.1).abs(),
-                    minY: minElement1 - (minElement1 * (minElement1.abs() < 1 ? 1 : (minElement1 < 0 ? 0.2 : 0.1))).abs(),
-                    barTouchData: BarTouchData(touchTooltipData: BarTouchTooltipData(getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    maxY: maxElement == 0
+                        ? 100
+                        : maxElement + (maxElement * 0.1).abs(),
+                    minY: minElement1 -
+                        (minElement1 *
+                                (minElement1.abs() < 1
+                                    ? 1
+                                    : (minElement1 < 0 ? 0.2 : 0.1)))
+                            .abs(),
+                    barTouchData: BarTouchData(touchTooltipData:
+                        BarTouchTooltipData(
+                            getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       String month = months[group.x.toInt() - 1];
                       String rodLabel = '';
                       switch (rodIndex) {
@@ -222,10 +286,14 @@ class _HomeViewState extends State<HomeView> {
                       }
                       return BarTooltipItem(
                         '$month\n',
-                        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14),
                         children: <TextSpan>[
                           TextSpan(
-                            text: "$rodLabel".tr + ': ${rod.toY.toStringAsFixed(2)}',
+                            text: "$rodLabel".tr +
+                                ': ${rod.toY.toStringAsFixed(2)}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -237,20 +305,47 @@ class _HomeViewState extends State<HomeView> {
                     })),
                     barGroups: List.generate(
                             12,
-                            (index) =>
-                                DataItem(x: index + 1, sales: valuesColor[0] ? 0.0 : sales[index], sumCost: valuesColor[3] ? 0.0 : sumCost[index], purchases: valuesColor[1] ? 0.0 : purchases[index], expences: valuesColor[2] ? 0.0 : expences[index], profit: valuesColor[4] ? 0.0 : profit[index]))
+                            (index) => DataItem(
+                                x: index + 1,
+                                sales: valuesColor[0] ? 0.0 : sales[index],
+                                sumCost: valuesColor[3] ? 0.0 : sumCost[index],
+                                purchases:
+                                    valuesColor[1] ? 0.0 : purchases[index],
+                                expences: valuesColor[2] ? 0.0 : expences[index],
+                                profit: valuesColor[4] ? 0.0 : profit[index]))
                         .map((dataItem) => BarChartGroupData(x: dataItem.x, barRods: [
-                              BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.sales, width: 15, color: Colors.red),
-                              BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.sumCost, width: 15, color: Colors.purple),
-                              BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.purchases, width: 15, color: Colors.amber),
-                              BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.expences, width: 15, color: Colors.blue),
-                              BarChartRodData(borderRadius: BorderRadius.zero, toY: dataItem.profit, width: 15, color: Colors.green),
+                              BarChartRodData(
+                                  borderRadius: BorderRadius.zero,
+                                  toY: dataItem.sales,
+                                  width: 15,
+                                  color: Colors.red),
+                              BarChartRodData(
+                                  borderRadius: BorderRadius.zero,
+                                  toY: dataItem.sumCost,
+                                  width: 15,
+                                  color: Colors.purple),
+                              BarChartRodData(
+                                  borderRadius: BorderRadius.zero,
+                                  toY: dataItem.purchases,
+                                  width: 15,
+                                  color: Colors.amber),
+                              BarChartRodData(
+                                  borderRadius: BorderRadius.zero,
+                                  toY: dataItem.expences,
+                                  width: 15,
+                                  color: Colors.blue),
+                              BarChartRodData(
+                                  borderRadius: BorderRadius.zero,
+                                  toY: dataItem.profit,
+                                  width: 15,
+                                  color: Colors.green),
                             ]))
                         .toList(),
                     titlesData: FlTitlesData(
                         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false, interval: 100),
+                          sideTitles:
+                              SideTitles(showTitles: false, interval: 100),
                         ),
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
@@ -259,11 +354,15 @@ class _HomeViewState extends State<HomeView> {
                             getTitlesWidget: (value, meta) {
                               final int monthIndex = value.toInt() - 1;
                               if (monthIndex >= 0 && monthIndex < 12) {
+                                String monthName = months[monthIndex];
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 8.0),
                                   child: Text(
-                                    months[monthIndex].substring(0, 3),
-                                    style: TextStyle(color: Colors.black, fontSize: 14.sp),
+                                    monthName.length >= 3
+                                        ? monthName.substring(0, 3)
+                                        : monthName,
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 14.sp),
                                   ),
                                 );
                               }
@@ -312,24 +411,32 @@ class _HomeViewState extends State<HomeView> {
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(
+              color: Colors.black, borderRadius: BorderRadius.circular(10)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 "${"Year".tr}: ",
-                style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.amber,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 selectedDateTime.year.toString(),
-                style: TextStyle(color: Colors.amber, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.amber,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold),
               ),
             ],
           ),
         ));
   }
 
-  Widget names({required String name, required Color color, required int index}) {
+  Widget names(
+      {required String name, required Color color, required int index}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Row(
@@ -349,10 +456,15 @@ class _HomeViewState extends State<HomeView> {
               margin: EdgeInsets.only(right: 6.w),
               decoration: BoxDecoration(
                 color: valuesColor[index] ? Colors.grey.shade300 : color,
-                border: valuesColor[index] ? Border.all(color: color, width: 2) : Border.all(color: color.withOpacity(0.5)),
+                border: valuesColor[index]
+                    ? Border.all(color: color, width: 2)
+                    : Border.all(color: color.withOpacity(0.5)),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: valuesColor[index] ? Icon(Icons.visibility_off_outlined, size: 14.sp, color: color) : null,
+              child: valuesColor[index]
+                  ? Icon(Icons.visibility_off_outlined,
+                      size: 14.sp, color: color)
+                  : null,
             ),
           ),
           Flexible(
@@ -389,9 +501,12 @@ class _HomeViewState extends State<HomeView> {
                 maxLines: 1,
                 style: TextStyle(
                   color: Colors.black,
-                  decoration: valuesText[index] ? TextDecoration.lineThrough : TextDecoration.none,
+                  decoration: valuesText[index]
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
                   fontSize: 16.sp,
-                  fontWeight: valuesColor[index] ? FontWeight.normal : FontWeight.bold,
+                  fontWeight:
+                      valuesColor[index] ? FontWeight.normal : FontWeight.bold,
                 ),
               ),
             ),

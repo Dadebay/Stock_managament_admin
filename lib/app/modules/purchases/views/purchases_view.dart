@@ -52,10 +52,12 @@ class _PurchasesViewState extends State<PurchasesView> {
                             : displayList.isEmpty
                                 ? CustomWidgets.emptyData()
                                 : ListView.builder(
+                                    key: ValueKey(displayList.map((e) => e.id).join('-')),
                                     itemCount: displayList.length,
                                     padding: context.padding.onlyBottomHigh,
                                     itemBuilder: (context, index) {
                                       return PurchaseCard(
+                                        key: ObjectKey('${displayList[index].id}-$index-${displayList.length - index}'),
                                         purchasesModel: displayList[index],
                                         showInProductProfil: false,
                                         index: displayList.length - index,
@@ -67,7 +69,7 @@ class _PurchasesViewState extends State<PurchasesView> {
                 ),
                 widget.isAdmin
                     ? Positioned(
-                        bottom: 70.0,
+                        bottom: 160.0,
                         right: 20.0,
                         child: FloatingActionButton(
                           backgroundColor: Colors.black,

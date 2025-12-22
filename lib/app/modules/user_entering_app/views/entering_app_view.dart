@@ -77,21 +77,17 @@ class EnteringAppView extends StatelessWidget {
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && clientsController.searchResult.isEmpty)
                         ? CustomWidgets.emptyData()
-                        : ListView.separated(
-                            padding: context.padding.onlyBottomHigh,
+                        : ListView.builder(
+                            key: ValueKey(displayList.map((e) => e.id).join('-')),
+                            padding: EdgeInsets.only(top: 10.h, bottom: 100.h),
                             itemCount: displayList.length,
                             itemBuilder: (context, index) {
                               return EnterCard(
+                                key: ObjectKey('${displayList[index].id}-$index-${displayList.length - index}'),
                                 isAdmin: isAdmin,
                                 client: displayList[index],
-                                count: (clientsController.clients.length - index),
+                                count: (displayList.length - index),
                                 topTextColumnSize: StringConstants.userNames,
-                              );
-                            },
-                            separatorBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 30.w),
-                                child: Divider(thickness: 2, color: ColorConstants.greyColorwithOpacity),
                               );
                             },
                           ),

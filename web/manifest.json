@@ -1,23 +1,29 @@
 {
-    "name": "stock_managament_admin",
-    "short_name": "stock_managament_admin",
-    "start_url": ".",
+    "name": "Kümüş Online Admin Panel",
+    "short_name": "Kümüş Admin",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "description": "Stock Management Admin Panel for Kümüş Online - Manage inventory, orders, products, and customers efficiently",
+    "orientation": "any",
     "prefer_related_applications": false,
+    "lang": "tk",
+    "categories": ["business", "productivity"],
+    "screenshots": [],
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
@@ -30,6 +36,22 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Orders",
+            "short_name": "Orders",
+            "description": "View and manage orders",
+            "url": "/",
+            "icons": [{ "src": "icons/Icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Products",
+            "short_name": "Products",
+            "description": "Manage products inventory",
+            "url": "/",
+            "icons": [{ "src": "icons/Icon-192.png", "sizes": "192x192" }]
         }
     ]
 }

@@ -69,7 +69,6 @@ class _SearchViewState extends State<SearchView> {
 
           return Obx(() {
             final isSearching = searchController.text.isNotEmpty;
-            final hasResult = searchViewController.searchResult.isNotEmpty;
             final displayList = searchViewController.searchResult.toList();
             return Stack(
               children: [
@@ -123,7 +122,7 @@ class _SearchViewState extends State<SearchView> {
                   ],
                 ),
                 Positioned(
-                  bottom: 70.0,
+                  bottom: 150.0,
                   right: 20.0,
                   child: RightSideButtons(isAdmin: widget.isAdmin),
                 ),
@@ -146,20 +145,32 @@ class _SearchViewState extends State<SearchView> {
       names: widget.selectableProducts ? StringConstants.salesTopText : StringConstants.searchViewtopPartNames,
       listToSort: displayList,
       setSortedList: (newList) {
-        if (searchController.text.isNotEmpty && searchViewController.searchResult.isNotEmpty) {
-          searchViewController.searchResult.assignAll(newList);
-        } else {
-          searchViewController.productsList.assignAll(newList);
+        print('===== SORT CALLBACK CALLED =====');
+        print('New list length: ${newList.length}');
+        print('First 3 items after sort:');
+        for (int i = 0; i < (newList.length > 3 ? 3 : newList.length); i++) {
+          print('  $i: ${newList[i].name} - Price: ${newList[i].price} - Cost: ${newList[i].cost}');
         }
+
+        // Update all three lists to maintain sort order
+        searchViewController.historyList.assignAll(newList);
+        searchViewController.searchResult.assignAll(newList);
+        searchViewController.productsList.assignAll(newList);
+
+        print('After assignment - historyList length: ${searchViewController.historyList.length}');
+        print('After assignment - searchResult length: ${searchViewController.searchResult.length}');
+        print('After assignment - productsList length: ${searchViewController.productsList.length}');
       },
       getSortValue: (model, key) {
         switch (key) {
+          case 'name':
+            return model.name;
           case 'count':
-            return model.count ?? 0;
+            return model.count;
           case 'price':
-            return model.price ?? 0;
+            return double.tryParse(model.price) ?? 0.0;
           case 'cost':
-            return model.cost ?? 0;
+            return double.tryParse(model.cost) ?? 0.0;
           case 'brends':
             return model.brend?.name ?? '';
           case 'category':
@@ -199,13 +210,15 @@ class _SearchViewState extends State<SearchView> {
 
   ListView listViewStyle(List<SearchModel> list) {
     return ListView.builder(
+        key: ValueKey(list.map((e) => e.id).join('-')),
         itemCount: list.length,
-        itemExtent: 100.h,
+        itemExtent: 105.h,
         cacheExtent: 500.0,
-        padding: EdgeInsets.only(bottom: 50.h),
+        padding: EdgeInsets.only(bottom: 150.h),
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
           return SearchCard(
+            key: ObjectKey('${list[index].id}-$index-${list.length - index}'),
             disableOnTap: widget.selectableProducts,
             product: list[index],
             addCounterWidget: widget.addCounterWidget,

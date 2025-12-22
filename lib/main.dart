@@ -7,9 +7,16 @@ import 'package:stock_managament_admin/app/product/constants/theme_contants.dart
 import 'package:stock_managament_admin/app/product/init/app_start_init.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/utils.dart';
+
 Future<void> main() async {
+  // Optimize Flutter engine initialization
   WidgetsFlutterBinding.ensureInitialized();
-  await AppStartInit.init();
+
+  // Run app initialization and app simultaneously for faster startup
+  await Future.wait([
+    AppStartInit.init(),
+  ]);
+
   runApp(_MyApp());
 }
 
@@ -52,6 +59,10 @@ class _MyAppState extends State<_MyApp> {
               locale: AppStartInit().getLocale(),
               translations: MyTranslations(),
               defaultTransition: Transition.fadeIn,
+              // Optimize transitions for web
+              transitionDuration: const Duration(milliseconds: 200),
+              // Enable smart management for better memory usage
+              smartManagement: SmartManagement.keepFactory,
               home: isLoginFuture == true ? NavBarPageView() : LoginView());
         });
   }

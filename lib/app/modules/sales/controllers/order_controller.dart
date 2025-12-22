@@ -1,123 +1,4 @@
-// import 'package:get/get.dart';
-// import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
-// import 'package:stock_managament_admin/app/product/init/packages.dart';
 
-// class OrderController extends GetxController {
-//   RxList<OrderModel> allOrders = <OrderModel>[].obs;
-//   RxList<OrderModel> searchResult = <OrderModel>[].obs;
-
-//   RxDouble sumCost = 0.0.obs;
-//   RxDouble sumPrice = 0.0.obs;
-//   RxInt sumProductCount = 0.obs;
-
-//   dynamic filterByStatus(String status) {
-//     List<OrderModel> orderCardList = [];
-//     if (searchResult.isEmpty) {
-//       searchResult.assignAll(allOrders);
-//     }
-//     for (var element in allOrders) {
-//       if (element.status.toString().toLowerCase() == status.toLowerCase()) {
-//         orderCardList.add(element);
-//       }
-//     }
-//     Get.back();
-//     allOrders.assignAll(orderCardList);
-//     update();
-//   }
-
-//   dynamic clearFilter() {
-//     allOrders.assignAll(searchResult);
-//     Get.back();
-//     update();
-//   }
-
-//   void addOrder(OrderModel model) {
-//     allOrders.insert(0, model);
-//     calculateTotals();
-//   }
-
-//   dynamic deleteOrder({required OrderModel model}) async {
-//     allOrders.remove(model);
-//     if (searchResult.isNotEmpty) {
-//       searchResult.remove(model);
-//     }
-//     update();
-//     Get.back();
-//   }
-
-//   void calculateTotals() {
-//     double totalSell = 0;
-//     double totalCost = 0;
-//     int totalCount = 0;
-//     for (var product in allOrders) {
-//       if (product.status == "2") {
-//         final sell = double.tryParse(product.totalsum) ?? 0.0;
-//         final cost = double.tryParse(product.totalchykdajy) ?? 0.0;
-//         final count = product.count ?? 0;
-
-//         totalSell += sell;
-//         totalCost += cost;
-//         totalCount += count;
-//       }
-//     }
-//     sumPrice.value = totalSell;
-//     sumCost.value = totalCost;
-//     sumProductCount.value = totalCount;
-//   }
-
-//   dynamic getProductSortValue(SearchModel model, String key) {
-//     switch (key) {
-//       case 'count':
-//         return model.count;
-//       case 'price':
-//         return model.price;
-//       case 'cost':
-//         return model.cost;
-//       case 'brends':
-//         return model.brend?.name ?? '';
-//       case 'category':
-//         return model.category?.name ?? '';
-//       case 'location':
-//         return model.location?.name ?? '';
-//       default:
-//         return '';
-//     }
-//   }
-
-//   void onSearchTextChanged(String word) {
-//     searchResult.clear();
-//     if (word.isEmpty) {
-//       searchResult.assignAll(allOrders);
-//       return;
-//     }
-//     List<String> searchTerms = word.trim().toLowerCase().split(' ');
-//     searchResult.value = allOrders.where((product) {
-//       final productNameString = (product.name).toLowerCase();
-//       final clientPhoneString = (product.clientDetailModel?.phone?.toString() ?? "").toLowerCase();
-//       final clientNameString = (product.clientDetailModel?.name.toString() ?? "").toLowerCase();
-//       return searchTerms.every((term) {
-//         bool termFoundInProduct = false;
-//         if (productNameString.contains(term)) termFoundInProduct = true;
-//         if (!termFoundInProduct && clientPhoneString.isNotEmpty && clientPhoneString.contains(term)) termFoundInProduct = true;
-//         if (!termFoundInProduct && clientNameString.isNotEmpty && clientNameString.contains(term)) termFoundInProduct = true;
-//         return termFoundInProduct;
-//       });
-//     }).toList();
-//   }
-
-//   void editOrderInList(OrderModel updatedOrder) {
-//     int index = allOrders.indexWhere((o) => o.id.toString() == updatedOrder.id.toString());
-//     if (index != -1) {
-//       allOrders[index] = updatedOrder;
-//     }
-//     int searchIndex = searchResult.indexWhere((o) => o.id == updatedOrder.id);
-//     if (searchIndex != -1) {
-//       searchResult[searchIndex] = updatedOrder;
-//     }
-//     calculateTotals(); // Toplamları yeniden hesapla
-//     update(); // UI'ı güncellemek için
-//   }
-// }
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_service.dart';
@@ -192,8 +73,9 @@ class OrderController extends GetxController {
       print(newOrder);
       if (newOrder != null) {
         addOrder(newOrder); // addOrder metodu _originalOrders ve allOrders'ı günceller
-        Get.back();
         CustomWidgets.showSnackBar('success'.tr, 'Order added successfully'.tr, Colors.green);
+        await Future.delayed(const Duration(milliseconds: 100));
+        Get.back();
       } else {
         CustomWidgets.showSnackBar('error'.tr, 'Order not added'.tr, Colors.red);
       }
@@ -216,10 +98,16 @@ class OrderController extends GetxController {
         }
         calculateTotals();
 
-        // Sayfaları kapat ve başarı mesajı göster.
+        // ÖNEMLİ: Önce snackbar göster, sonra sayfaları kapat
+        // Route kapanmadan önce snackbar gösterilmeli
+        CustomWidgets.showSnackBar('success'.tr, 'Order deleted successfully'.tr, Colors.green);
+
+        // Snackbar'ın göründüğünden emin olmak için kısa bir gecikme
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Sayfaları kapat
         Get.back(); // Onay dialog'unu kapat.
         Get.back(); // OrderProductsView sayfasını kapat.
-        CustomWidgets.showSnackBar('success'.tr, 'Order deleted successfully'.tr, Colors.green);
       } else {
         // API isteği BAŞARISIZ ise kullanıcıya hata mesajı göster.
         CustomWidgets.showSnackBar('error'.tr, 'Failed to delete order. Please try again.'.tr, Colors.red);
@@ -293,12 +181,14 @@ class OrderController extends GetxController {
   // Bu metot OrderProductsView'de kullanıldığı için kalmalı
   dynamic getProductSortValue(SearchModel model, String key) {
     switch (key) {
+      case 'name':
+        return model.name ?? '';
       case 'count':
-        return model.count;
+        return model.count ?? 0;
       case 'price':
-        return model.price;
+        return double.tryParse(model.price) ?? 0.0;
       case 'cost':
-        return model.cost;
+        return double.tryParse(model.cost) ?? 0.0;
       case 'brends':
         return model.brend?.name ?? '';
       case 'category':

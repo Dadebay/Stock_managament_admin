@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
@@ -385,12 +387,13 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
       case 'status':
         return StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status, orElse: () => {'name': 'Unknown'})['name']!;
       case 'date':
-        return order.date.toString().substring(0, 16).replaceAll("T", ' ');
+        String dateStr = order.date.toString();
+        return dateStr.length >= 16 ? dateStr.substring(0, 16).replaceAll("T", ' ') : dateStr.replaceAll("T", ' ');
       case 'clientName':
         return order.clientDetailModel?.name ?? 'N/A';
       case 'phone':
         final phoneNum = order.clientDetailModel?.phone ?? 'N/A';
-        return phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum; // Display without +993
+        return phoneNum.startsWith('+993') && phoneNum.length > 4 ? phoneNum.substring(4) : phoneNum; // Display without +993
       case 'address':
         return order.clientDetailModel?.address ?? 'N/A';
       case 'gaplama':
@@ -428,13 +431,11 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
       case 'gaplama':
         return current.copyWith(gaplama: value);
       case 'discount':
-        return current.copyWith(discount: value); // Modeldeki discount string ise
+        return current.copyWith(discount: value);
       case 'coupon':
         return current.copyWith(coupon: value);
       case 'description':
         return current.copyWith(description: value);
-      case 'discount':
-        return current.copyWith(discount: value);
       case 'count':
         return current.copyWith(count: int.parse(value));
       case 'cost':

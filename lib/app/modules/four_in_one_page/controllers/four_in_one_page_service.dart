@@ -33,13 +33,13 @@ class FourInOnePageService {
               'notes': model.notes,
             },
       requiresToken: true,
-      handleSuccess: (responseJson) {
+      handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
           final model = FourInOneModel.fromJson(responseJson);
           fourInOnePageController.addFourInOne(key, model);
-          Get.back();
-
           CustomWidgets.showSnackBar('success'.tr, 'Added Successfully '.tr, Colors.green);
+          await Future.delayed(const Duration(milliseconds: 100));
+          Get.back();
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'Cannot add please try again '.tr, Colors.red);
         }
@@ -63,13 +63,13 @@ class FourInOnePageService {
               'notes': model.notes,
             },
       requiresToken: true,
-      handleSuccess: (responseJson) {
+      handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
           final model = FourInOneModel.fromJson(responseJson);
           fourInOnePageController.editFourInOne(key, model);
-          Get.back();
-
           CustomWidgets.showSnackBar('success'.tr, 'Edited succesfully'.tr, Colors.green);
+          await Future.delayed(const Duration(milliseconds: 100));
+          Get.back();
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'Cannot edit please try again'.tr, Colors.red);
         }

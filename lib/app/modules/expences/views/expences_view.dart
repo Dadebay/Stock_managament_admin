@@ -85,21 +85,17 @@ class ExpencesView extends StatelessWidget {
                   Expanded(
                     child: (searchEditingController.text.isNotEmpty && expencesController.searchResult.isEmpty)
                         ? CustomWidgets.emptyData()
-                        : ListView.separated(
+                        : ListView.builder(
+                            key: ValueKey(displayList.map((e) => e.id).join('-')),
                             itemCount: displayList.length,
-                            padding: context.padding.onlyBottomHigh,
+                            padding: EdgeInsets.only(top: 10.h, bottom: 100.h),
                             itemBuilder: (context, index) {
                               return ExpencesCard(
+                                key: ObjectKey('${displayList[index].id}-$index-${displayList.length - index}'),
                                 isAdmin: isAdmin,
                                 expencesModel: displayList[index],
                                 count: displayList.length - index,
                                 topTextColumnSize: StringConstants.expencesNames,
-                              );
-                            },
-                            separatorBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 30.w),
-                                child: Divider(thickness: 2, color: ColorConstants.greyColorwithOpacity),
                               );
                             },
                           ),

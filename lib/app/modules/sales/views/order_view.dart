@@ -111,10 +111,11 @@ class _OrderViewState extends State<OrderView> {
 
   ListView listViewStyle(List<OrderModel> list) {
     return ListView.builder(
+        key: ValueKey(list.map((e) => e.id).join('-')),
         itemCount: list.length,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
-          return OrderCardView(order: list[index], isAdmin: widget.isAdmin, index: list.length - index);
+          return OrderCardView(key: ValueKey('order-${list[index].id}-${list.length - index}'), order: list[index], isAdmin: widget.isAdmin, index: list.length - index);
         });
   }
 
@@ -142,12 +143,14 @@ class _OrderViewState extends State<OrderView> {
                 _searchWidget(),
                 _topText(displayList),
                 Expanded(
-                  child: displayList.isEmpty && searchController.text.isNotEmpty ? Center(child: Text("No results found for '${searchController.text}'")) : listViewStyle(displayList.toList()), // Obx listesini normal listeye çevir
+                  child: displayList.isEmpty && searchController.text.isNotEmpty
+                      ? Center(child: Text("No results found for '${searchController.text}'"))
+                      : listViewStyle(displayList.toList()), // Obx listesini normal listeye çevir
                 )
               ],
             ),
             Positioned(
-              bottom: 70.0,
+              bottom: 120.0,
               right: 20.0,
               child: _rightSideButtons(),
             ),

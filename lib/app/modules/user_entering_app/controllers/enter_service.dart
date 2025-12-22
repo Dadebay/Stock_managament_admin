@@ -51,12 +51,12 @@ class EnterService {
         'is_superuser': model.isSuperUser,
       },
       requiresToken: true,
-      handleSuccess: (responseJson) {
+      handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
           clientsController.editClient(EnterModel.fromJson(responseJson));
-          Get.back();
-
           CustomWidgets.showSnackBar('success'.tr, 'Edited succesfully'.tr, Colors.green);
+          await Future.delayed(const Duration(milliseconds: 100));
+          Get.back();
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'Cannot edit please try again'.tr, Colors.red);
         }

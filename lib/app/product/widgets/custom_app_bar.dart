@@ -40,6 +40,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSize {
                   size: 22,
                 ),
                 onPressed: () {
+                  if (Get.isSnackbarOpen == true) {
+                    Get.closeAllSnackbars();
+                  }
                   Get.back();
                 },
               ),

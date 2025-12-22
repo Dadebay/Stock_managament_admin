@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/products_page/views/product_profil_view.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
@@ -33,7 +32,6 @@ class SearchCard extends StatelessWidget {
     } else {
       url = ApiConstants.imageURL2 + product.img!;
     }
-    print(url);
     return GestureDetector(
       onTap: () {
         if (!disableOnTap) {
@@ -44,57 +42,118 @@ class SearchCard extends StatelessWidget {
       },
       child: RepaintBoundary(
         child: Container(
-          color: Colors.white,
-          padding: EdgeInsets.only(top: 15.h, bottom: 15.h, right: 15.w),
+          margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.all(12.w),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CustomWidgets.counter(counter!),
+              // ID Badge
               Container(
-                width: 70,
-                height: 70,
-                margin: EdgeInsets.only(right: 15.w),
+                width: 40.w,
+                height: 40.h,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Colors.grey.shade200,
-                  boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 5, spreadRadius: 5)],
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.grey,
+                    width: 1.5,
+                  ),
                 ),
+                child: Center(
+                  child: Text(
+                    '${counter!}',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              // Image
+              Container(
+                width: 70.w,
+                height: 70.h,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.grey.shade100,
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: CustomWidgets.imageWidget(url),
               ),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       flex: 2,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             product.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 16.sp),
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15.sp,
+                            ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.h),
+                          SizedBox(height: 4.h),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: (externalCount ?? product.count) > 0 ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                             child: Text(
-                              "${"quantity".tr}: ${externalCount ?? product.count}",
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.grey, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                              "Sany: ${externalCount ?? product.count}",
+                              style: TextStyle(
+                                color: (externalCount ?? product.count) > 0 ? Colors.green[700] : Colors.red[700],
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(width: 20.w),
-                    Expanded(child: Text("${product.cost} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14.sp))),
-                    Expanded(child: Text("${product.price} \$", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14.sp))),
-                    Expanded(child: Text("${product.brend?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
-                    Expanded(child: Text("${product.category?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
-                    Expanded(child: Text("${product.location?.name ?? ''}", overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _buildInfoColumn("Alyş", "${product.cost} \$", Colors.orange),
+                    ),
+                    Expanded(
+                      child: _buildInfoColumn("Satış", "${product.price} \$", Colors.green),
+                    ),
+                    Expanded(
+                      child: _buildInfoColumn("Brend", product.brend?.name ?? '-', Colors.blue),
+                    ),
+                    Expanded(
+                      child: _buildInfoColumn("Kategoriýa", product.category?.name ?? '-', Colors.purple),
+                    ),
+                    Expanded(
+                      child: _buildInfoColumn("Ýerleşýän ýeri", product.location?.name ?? '-', Colors.teal),
+                    ),
                   ],
                 ),
               ),
@@ -187,6 +246,35 @@ class SearchCard extends StatelessWidget {
       },
     );
   }
+
+  Widget _buildInfoColumn(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
 }
 
 class SecondProductCard extends StatelessWidget {
@@ -216,15 +304,27 @@ class SecondProductCard extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: context.border.lowBorderRadius,
-            child: Image.network(
-              product.img!,
+            child: CachedNetworkImage(
+              imageUrl: product.img ?? '',
               fit: BoxFit.fill,
-              errorBuilder: (context, error, stackTrace) {
+              // Optimize for list view - smaller cache size
+              memCacheWidth: 300,
+              memCacheHeight: 300,
+              maxWidthDiskCache: 600,
+              maxHeightDiskCache: 600,
+              fadeInDuration: const Duration(milliseconds: 200),
+              placeholder: (context, url) => Container(
+                color: Colors.grey.shade200,
+                child: Center(
+                  child: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+                  ),
+                ),
+              ),
+              errorWidget: (context, error, stackTrace) {
                 return CustomWidgets.noImage();
-              },
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                if (loadingProgress == null) return child;
-                return CustomWidgets.spinKit();
               },
             ),
           )),

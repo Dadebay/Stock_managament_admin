@@ -183,10 +183,22 @@ class CustomWidgets {
   }
 
   static Widget imageWidget(String? url, {bool fit = false, int? cacheWidth, int? cacheHeight}) {
+    // Null check and empty URL handling
+    if (url == null || url.isEmpty) {
+      return noImage();
+    }
+
     return CachedNetworkImage(
-      imageUrl: url!,
-      memCacheWidth: cacheWidth ?? 200, // örneğin 200px genişlik
-      memCacheHeight: cacheHeight ?? 200, // örneğin 200px yükseklik
+      imageUrl: url,
+      // Optimize memory cache - use actual display size
+      memCacheWidth: cacheWidth ?? 400,
+      memCacheHeight: cacheHeight ?? 400,
+      // Optimize max cache size
+      maxWidthDiskCache: 1000,
+      maxHeightDiskCache: 1000,
+      // Use fade in animation for better UX
+      fadeInDuration: const Duration(milliseconds: 300),
+      fadeOutDuration: const Duration(milliseconds: 100),
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -196,13 +208,28 @@ class CustomWidgets {
           ),
         ),
       ),
-      placeholder: (context, url) => Center(
+      placeholder: (context, url) => Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(
           child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      )),
-      errorWidget: (context, url, error) => Icon(IconlyLight.infoSquare),
+            width: 30,
+            height: 30,
+            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+          ),
+        ),
+      ),
+      errorWidget: (context, url, error) => Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(
+          child: Icon(IconlyLight.infoSquare, color: Colors.grey),
+        ),
+      ),
     );
   }
 }

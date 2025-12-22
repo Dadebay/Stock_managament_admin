@@ -9,7 +9,8 @@ import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dar
 class PurchasesProductsView extends StatefulWidget {
   final PurchasesModel purchasesModel;
   final bool isAdmin;
-  const PurchasesProductsView({required this.purchasesModel, required this.isAdmin});
+  const PurchasesProductsView(
+      {required this.purchasesModel, required this.isAdmin});
   @override
   State<PurchasesProductsView> createState() => _PurchasesProductsViewState();
 }
@@ -114,7 +115,12 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
       {'text1': 'Date', "text2": _localModel.date},
       {'text1': 'Source', "text2": _localModel.source},
       {'text1': 'Cost', "text2": _localModel.cost},
-      {'text1': 'Products Count', "text2": _localModel.count.toString() == '0' ? widget.purchasesModel.products.length.toString() : _localModel.count.toString()},
+      {
+        'text1': 'Products Count',
+        "text2": _localModel.count.toString() == '0'
+            ? widget.purchasesModel.products.length.toString()
+            : _localModel.count.toString()
+      },
       {'text1': 'Description', "text2": _localModel.description},
     ];
     return Wrap(
@@ -128,7 +134,8 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
     );
   }
 
-  Widget textWidgetOrderedPage({required String labelName, required String value}) {
+  Widget textWidgetOrderedPage(
+      {required String labelName, required String value}) {
     FocusNode focusNode = FocusNode();
     final TextEditingController textEditingController = TextEditingController();
     textEditingController.text = value;
@@ -138,7 +145,10 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
         if (widget.isAdmin) {
           Get.defaultDialog(
             title: labelName,
-            titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
+            titleStyle: TextStyle(
+                color: Colors.black,
+                fontSize: 28.sp,
+                fontWeight: FontWeight.bold),
             titlePadding: EdgeInsets.only(top: 20),
             content: Container(
               width: Get.size.width / 3,
@@ -151,11 +161,15 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                       if (labelName == 'Date') {
                         DateTime? selectedDateTime;
                         showDateTimePicker(BuildContext context) async {
-                          final result = await CustomWidgets.showDateTimePickerWidget(context: context);
+                          final result =
+                              await CustomWidgets.showDateTimePickerWidget(
+                                  context: context);
                           if (result != null) {
                             setState(() {
                               selectedDateTime = result;
-                              textEditingController.text = DateFormat('yyyy-MM-dd , HH:mm').format(selectedDateTime!);
+                              textEditingController.text =
+                                  DateFormat('yyyy-MM-dd , HH:mm')
+                                      .format(selectedDateTime!);
                             });
                           }
                         }
@@ -170,18 +184,35 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                   ),
                   AgreeButton(
                     onTap: () async {
+                      // Safe substring for date
+                      String dateValue = _localModel.date;
+                      if (labelName == 'Date') {
+                        dateValue = textEditingController.text.length >= 10
+                            ? textEditingController.text.substring(0, 10)
+                            : textEditingController.text;
+                      }
+
                       final updatedModel = PurchasesModel(
                         id: _localModel.id,
-                        title: labelName == 'Title' ? textEditingController.text : _localModel.title,
-                        date: labelName == 'Date' ? textEditingController.text.substring(0, 10) : _localModel.date,
-                        source: labelName == 'Source' ? textEditingController.text : _localModel.source,
-                        cost: labelName == 'Cost' ? textEditingController.text : _localModel.cost,
-                        description: labelName == 'Description' ? textEditingController.text : _localModel.description,
+                        title: labelName == 'Title'
+                            ? textEditingController.text
+                            : _localModel.title,
+                        date: dateValue,
+                        source: labelName == 'Source'
+                            ? textEditingController.text
+                            : _localModel.source,
+                        cost: labelName == 'Cost'
+                            ? textEditingController.text
+                            : _localModel.cost,
+                        description: labelName == 'Description'
+                            ? textEditingController.text
+                            : _localModel.description,
                         count: _localModel.count,
                         products: _localModel.products,
                       );
 
-                      final result = await PurchasesService().editOrderManually(model: updatedModel);
+                      final result = await PurchasesService()
+                          .editOrderManually(model: updatedModel);
                       if (result != null) {
                         setState(() {
                           _localModel = result;
@@ -214,12 +245,18 @@ class _PurchasesProductsViewState extends State<PurchasesProductsView> {
                 Text(
                   labelName.tr,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold),
                 ),
                 Text(
                   labelName == 'Cost' ? "$value \$" : value,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold),
                 )
               ],
             ),

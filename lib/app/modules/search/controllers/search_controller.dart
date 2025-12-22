@@ -25,7 +25,8 @@ class SearchViewController extends GetxController {
       final uniqueCategories = <CategoryModel>[];
       final categoryNames = <String>{};
       for (var product in products) {
-        if (product.category != null && !categoryNames.contains(product.category!.name)) {
+        if (product.category != null &&
+            !categoryNames.contains(product.category!.name)) {
           uniqueCategories.add(product.category!);
           categoryNames.add(product.category!.name);
         }
@@ -34,7 +35,14 @@ class SearchViewController extends GetxController {
     });
   }
 
-  void filterByCategory(String categoryName) {
+/*************  ✨ Windsurf Command ⭐  *************/
+  /// Filter the products by the given category name
+  /// and update the UI accordingly by calling
+  /// [onSearchTextChanged] with the current search text.
+  ///
+
+/*******  29e92759-1f69-4682-84fe-0c698289ded1  *******/ void filterByCategory(
+      String categoryName) {
     selectedCategory.value = categoryName;
     onSearchTextChanged(_currentSearchText);
   }
@@ -45,13 +53,17 @@ class SearchViewController extends GetxController {
       GeciciListe = GeciciListe.where((product) {
         switch (_activeFilterType) {
           case 'category':
-            return product.category?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.category?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           case 'brends':
-            return product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.brend?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           case 'location':
-            return product.location?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.location?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           case 'material':
-            return product.material?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.material?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           default:
             return true;
         }
@@ -91,7 +103,8 @@ class SearchViewController extends GetxController {
     selectedImageFileName.value = null;
   }
 
-  RxList<Map<String, dynamic>> selectedProductsToOrder = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> selectedProductsToOrder =
+      <Map<String, dynamic>>[].obs;
 
   void addOrUpdateProduct({required SearchModel product, required int count}) {
     final index = selectedProductsToOrder.indexWhere(
@@ -139,20 +152,25 @@ class SearchViewController extends GetxController {
       final HomeController homeController = Get.find();
       homeController.agreeButton.value = true;
 
-      final SearchModel? newProduct = await SearchService().createProductWithImage(
+      final SearchModel? newProduct =
+          await SearchService().createProductWithImage(
         fields: productData,
         imageBytes: selectedImageBytes, // Controller'daki byte'ları kullan
-        imageFileName: selectedImageFileName, // Controller'daki dosya adını kullan
+        imageFileName:
+            selectedImageFileName, // Controller'daki dosya adını kullan
       );
       homeController.agreeButton.value = false;
 
       if (newProduct != null) {
         productsList.add(newProduct);
         clearSelectedImage(); // Seçilen resmi ve dosya adını temizle
+        CustomWidgets.showSnackBar(
+            "Başarılı", "Ürün başarıyla eklendi", Colors.green);
+        await Future.delayed(const Duration(milliseconds: 100));
         Get.back();
-        CustomWidgets.showSnackBar("Başarılı", "Ürün başarıyla eklendi", Colors.green);
       } else {
-        CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
+        CustomWidgets.showSnackBar(
+            "Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
       }
     } catch (e) {
       CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi: $e", Colors.red);
@@ -161,7 +179,8 @@ class SearchViewController extends GetxController {
 
   void onSearchTextChanged(String word) {
     _currentSearchText = word;
-    List<SearchModel> filteredList = historyList.toList(); // Start with the full history list
+    List<SearchModel> filteredList =
+        historyList.toList(); // Start with the full history list
 
     // Apply category filter
     if (selectedCategory.value != 'All') {
@@ -177,7 +196,10 @@ class SearchViewController extends GetxController {
         final name = product.name.toLowerCase();
         final price = product.price.toLowerCase().toString();
         final cost = product.cost.toLowerCase().toString();
-        return words.every((w) => name.contains(w) || price.contains(w.toString()) || cost.contains(w.toString()));
+        return words.every((w) =>
+            name.contains(w) ||
+            price.contains(w.toString()) ||
+            cost.contains(w.toString()));
       }).toList();
     }
 
@@ -186,12 +208,14 @@ class SearchViewController extends GetxController {
   }
 
   void updateProductLocally(SearchModel updatedProduct) {
-    final indexInProducts = productsList.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInProducts =
+        productsList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInProducts != -1) {
       productsList[indexInProducts] = updatedProduct;
     }
 
-    final indexInSearch = searchResult.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInSearch =
+        searchResult.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInSearch != -1) {
       searchResult[indexInSearch] = updatedProduct;
     }
@@ -228,13 +252,18 @@ class SearchViewController extends GetxController {
   Future<void> pickImage() async {
     try {
       var fileInfo = await ImagePickerWeb.getImageInfo; // Bu MediaInfo döndürür
-      if (fileInfo != null && fileInfo.data != null && fileInfo.fileName != null) {
+      if (fileInfo != null &&
+          fileInfo.data != null &&
+          fileInfo.fileName != null) {
         selectedImageBytes.value = fileInfo.data;
-        selectedImageFileName.value = fileInfo.fileName; // Yeni: Dosya adını sakla
-        CustomWidgets.showSnackBar("Success", "Image selected: ${fileInfo.fileName}", Colors.green);
+        selectedImageFileName.value =
+            fileInfo.fileName; // Yeni: Dosya adını sakla
+        CustomWidgets.showSnackBar(
+            "Success", "Image selected: ${fileInfo.fileName}", Colors.green);
       }
     } catch (e) {
-      CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);
+      CustomWidgets.showSnackBar(
+          "Error", "Could not pick image: $e", Colors.red);
     }
   }
 

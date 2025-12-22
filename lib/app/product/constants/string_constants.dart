@@ -89,7 +89,7 @@ class StringConstants {
     {'name': 'Materials', 'searchName': 'material'}
   ];
   static List<Map<String, String>> searchViewtopPartNames = [
-    {'name': 'productName', 'sortName': "count", 'size': ColumnSize.medium.toString()},
+    {'name': 'productName', 'sortName': "name", 'size': ColumnSize.medium.toString()},
     {'name': 'costPrice', 'sortName': "cost", 'size': ColumnSize.small.toString()},
     {'name': 'sellPrice', 'sortName': "price", 'size': ColumnSize.small.toString()},
     {'name': 'brand', 'sortName': "brends", 'size': ColumnSize.small.toString()},
@@ -98,7 +98,7 @@ class StringConstants {
   ];
 
   static List<Map<String, String>> salesTopText = [
-    {'name': 'productName', 'sortName': "count", 'size': ColumnSize.large.toString()},
+    {'name': 'productName', 'sortName': "name", 'size': ColumnSize.large.toString()},
     {'name': 'costPrice', 'sortName': "cost", 'size': ColumnSize.small.toString()},
     {'name': 'sellPrice', 'sortName': "price", 'size': ColumnSize.small.toString()},
     {'name': 'brand', 'sortName': "brends", 'size': ColumnSize.small.toString()},

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:get/utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 

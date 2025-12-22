@@ -29,12 +29,13 @@ class ExpencesService {
         'notes': model.note,
       },
       requiresToken: true,
-      handleSuccess: (responseJson) {
+      handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
-          Navigator.of(context).pop();
           final model = ExpencesModel.fromJson(responseJson);
           expencesController.addExpences(model);
           CustomWidgets.showSnackBar('success'.tr, 'Expences added'.tr, Colors.green);
+          await Future.delayed(const Duration(milliseconds: 100));
+          Navigator.of(context).pop();
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'Cannot add expence please try again '.tr, Colors.red);
         }
@@ -55,13 +56,14 @@ class ExpencesService {
         'notes': model.note,
       },
       requiresToken: true,
-      handleSuccess: (responseJson) {
+      handleSuccess: (responseJson) async {
         (responseJson);
         if (responseJson.isNotEmpty) {
-          Navigator.of(context).pop();
           final model = ExpencesModel.fromJson(responseJson);
           expencesController.editExpences(model);
           CustomWidgets.showSnackBar('success'.tr, 'Expences added'.tr, Colors.green);
+          await Future.delayed(const Duration(milliseconds: 100));
+          Navigator.of(context).pop();
         } else {
           CustomWidgets.showSnackBar('error'.tr, 'Cannot add expence please try again '.tr, Colors.red);
         }
@@ -76,11 +78,12 @@ class ExpencesService {
       requiresToken: true,
       handleSuccess: (responseJson) async {
         expencesController.deleteExpences(model);
-        if (responseJson.isNotEmpty) {
-          CustomWidgets.showSnackBar("deleted", "${model.name} " + "Expence deleted".tr, ColorConstants.redColor);
-        } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot delete item please try again '.tr, Colors.red);
-        }
+        await Future.delayed(const Duration(milliseconds: 100));
+        CustomWidgets.showSnackBar(
+          "deleted".tr,
+          "${model.name} ${'Expence deleted'.tr}",
+          Colors.red,
+        );
       },
     );
   }

@@ -5,7 +5,7 @@ import 'package:stock_managament_admin/app/modules/search/controllers/search_ser
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/dialogs/dialogs_utils.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
-import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
+import 'package:stock_managament_admin/app/product/widgets/confirm_dialog.dart';
 
 class ProductProfilView extends StatefulWidget {
   const ProductProfilView({super.key, required this.product, required this.disableUpdate, required this.isAdmin});
@@ -48,7 +48,11 @@ class _ProductProfilViewState extends State<ProductProfilView> {
   void _populateTextFields() {
     textControllers[0].text = widget.product.name;
     textControllers[1].text = widget.product.price;
-    textControllers[2].text = widget.product.createdAT.toString().replaceAll("T", " ").substring(0, 15);
+
+    // Safe substring handling for createdAT
+    String dateString = widget.product.createdAT.toString().replaceAll("T", " ");
+    textControllers[2].text = dateString.length >= 15 ? dateString.substring(0, 15) : dateString;
+
     textControllers[3].text = widget.product.category?.name ?? '';
     textControllers[4].text = widget.product.brend?.name ?? '';
     textControllers[5].text = widget.product.location?.name ?? '';
@@ -115,27 +119,18 @@ class _ProductProfilViewState extends State<ProductProfilView> {
   }
 
   Future<void> _handleDeleteRequest() async {
-    await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Are you sure?'),
-        content: const Text('This action will permanently delete this PRODUCT'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              await SearchService().deleteProduct(id: widget.product.id);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    final confirmed = await ConfirmDialog.show(
+      title: 'Haryt pozmak',
+      message: 'Bu haryt hemişelik pozular. Dowam etmek isleýärsiňizmi?',
     );
+
+    if (confirmed == true) {
+      Navigator.pop(context);
+      await SearchService().deleteProduct(id: widget.product.id);
+      Future.delayed(const Duration(milliseconds: 100), () {
+        CustomWidgets.showSnackBar("Üstünlik", "Haryt pozuldy", Colors.green);
+      });
+    }
   }
 
   @override
@@ -159,20 +154,55 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                 Expanded(
                   child: ListView.builder(
                     itemCount: purchList.length,
-                    shrinkWrap: true,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                     itemBuilder: (BuildContext context, int index) {
-                      return Row(
-                        children: [
-                          CustomWidgets.counter(purchList.length - index),
-                          _textPart(index, purchList[index].purchaseName!),
-                          _textPart(index, purchList[index].datePurhcase!),
-                          _textPart(index, purchList[index].priceOfSale!),
-                          _textPart(index, purchList[index].count!),
-                        ],
+                      final item = purchList[index];
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 10.h),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.shade200, width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.shade100.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 36.w,
+                              height: 36.h,
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade600,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${purchList.length - index}',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            _buildInfoColumn2(item.purchaseName ?? '-'),
+                            _buildInfoColumn2(item.datePurhcase ?? '-'),
+                            _buildInfoColumn2('${item.priceOfSale} TMT'),
+                            _buildInfoColumn2('${item.count} sany'),
+                          ],
+                        ),
                       );
                     },
                   ),
-                )
+                ),
+                _buildTotalSummary(purchList),
               ],
             ),
           )
@@ -181,30 +211,177 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     );
   }
 
-  Expanded _textPart(int index, String title) => Expanded(child: Text(title, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.black, fontSize: 20)));
+  Widget _buildInfoColumn2(String value) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.w),
+        child: Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
 
   Widget _topText(List<PurchaseModelInsideProduct> displayList) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 14),
-      child: ListviewTopText<PurchaseModelInsideProduct>(
-        names: StringConstants.productInsidePurchase,
-        listToSort: displayList,
-        setSortedList: (newList) {},
-        getSortValue: (model, key) {
-          switch (key) {
-            case 'title':
-              return model.purchaseName ?? 0;
-            case 'date':
-              return model.datePurhcase.toString();
-            case 'cost':
-              return model.priceOfSale.toString();
-            case 'count':
-              return model.count.toString();
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200, width: 2),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 40.w,
+            child: Text(
+              '№',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade800,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              'Haryt ady',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade800,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              'Sene',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade800,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              'Bahasy',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade800,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              'Sany',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            default:
-              return '';
-          }
-        },
+  Widget _buildTotalSummary(List<PurchaseModelInsideProduct> purchList) {
+    double totalPrice = 0.0;
+    int totalCount = 0;
+
+    for (var item in purchList) {
+      try {
+        final price = double.tryParse(item.priceOfSale ?? '0') ?? 0.0;
+        final count = int.tryParse(item.count ?? '0') ?? 0;
+        totalPrice += price * count;
+        totalCount += count;
+      } catch (e) {
+        // Skip items with invalid data
+      }
+    }
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.green.shade700, Colors.green.shade500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.shade300.withOpacity(0.5),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Jemi sany',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                '$totalCount sany',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            height: 50.h,
+            width: 1,
+            color: Colors.white.withOpacity(0.3),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Jemi bahasy',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                '${totalPrice.toStringAsFixed(2)} TMT',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
