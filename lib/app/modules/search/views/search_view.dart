@@ -37,6 +37,11 @@ class SearchView extends StatefulWidget {
 class _SearchViewState extends State<SearchView> {
   final SearchViewController searchViewController = Get.find<SearchViewController>();
   final TextEditingController searchController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    searchViewController.loadProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,93 +55,80 @@ class _SearchViewState extends State<SearchView> {
               name: 'Select products to add'.tr,
             )
           : null,
-      body: FutureBuilder<List<SearchModel>>(
-        future: SearchService().getProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CustomWidgets.spinKit();
-          } else if (snapshot.hasError) {
-            return CustomWidgets.errorData();
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return CustomWidgets.emptyData();
-          }
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            searchViewController.historyList.assignAll(snapshot.data!.toList());
-            searchViewController.productsList.assignAll(snapshot.data!.toList());
-            searchViewController.searchResult.assignAll(snapshot.data!.toList());
-            searchViewController.calculateTotals();
-          });
+      body: Obx(() {
+        if (searchViewController.isLoading.value) {
+          return CustomWidgets.spinKit();
+        } else if (searchViewController.historyList.isEmpty) {
+          return CustomWidgets.emptyData();
+        }
 
-          return Obx(() {
-            final isSearching = searchController.text.isNotEmpty;
-            final displayList = searchViewController.searchResult.toList();
-            return Stack(
+        final isSearching = searchController.text.isNotEmpty;
+        final displayList = searchViewController.searchResult.toList();
+        return Stack(
+          children: [
+            Column(
               children: [
-                Column(
-                  children: [
-                    _searchWidget(),
-                    if (widget.showCategoryFilter)
-                      SizedBox(
-                        height: 50,
-                        child: Obx(() {
-                          Widget _buildCategoryChip(String categoryName) {
-                            final isSelected = searchViewController.selectedCategory.value == categoryName;
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: ChoiceChip(
-                                label: Text(categoryName),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    searchViewController.filterByCategory(categoryName);
-                                  }
-                                },
-                                selectedColor: Theme.of(context).primaryColor,
-                                labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.black,
-                                ),
-                                backgroundColor: Colors.grey[200],
-                                shape: const StadiumBorder(),
-                              ),
-                            );
-                          }
+                _searchWidget(),
+                if (widget.showCategoryFilter)
+                  SizedBox(
+                    height: 50,
+                    child: Obx(() {
+                      Widget _buildCategoryChip(String categoryName) {
+                        final isSelected = searchViewController.selectedCategory.value == categoryName;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: ChoiceChip(
+                            label: Text(categoryName),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              if (selected) {
+                                searchViewController.filterByCategory(categoryName);
+                              }
+                            },
+                            selectedColor: Theme.of(context).primaryColor,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                            ),
+                            backgroundColor: Colors.grey[200],
+                            shape: const StadiumBorder(),
+                          ),
+                        );
+                      }
 
-                          return ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              _buildCategoryChip('All'),
-                              ...searchViewController.categories.map((cat) => _buildCategoryChip(cat.name)).toList(),
-                            ],
-                          );
-                        }),
-                      ),
-                    searchViewController.showInGrid.value ? SizedBox.shrink() : _topText(displayList),
-                    Expanded(
-                        child: displayList.isEmpty && isSearching == false
-                            ? CustomWidgets.spinKit()
-                            : displayList.isEmpty && isSearching
-                                ? Center(child: Text("No results found for '${searchController.text}'"))
-                                : displayList.isEmpty
-                                    ? CustomWidgets.emptyData()
-                                    : (searchViewController.showInGrid.value ? gridViewStyle(displayList) : listViewStyle(displayList)))
-                  ],
-                ),
-                Positioned(
-                  bottom: 150.0,
-                  right: 20.0,
-                  child: RightSideButtons(isAdmin: widget.isAdmin),
-                ),
-                Positioned(
-                  bottom: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                  child: BottomPriceSheet(),
-                )
+                      return ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _buildCategoryChip('All'),
+                          ...searchViewController.categories.map((cat) => _buildCategoryChip(cat.name)).toList(),
+                        ],
+                      );
+                    }),
+                  ),
+                searchViewController.showInGrid.value ? SizedBox.shrink() : _topText(displayList),
+                Expanded(
+                    child: displayList.isEmpty && isSearching == false
+                        ? CustomWidgets.spinKit()
+                        : displayList.isEmpty && isSearching
+                            ? Center(child: Text("No results found for '${searchController.text}'"))
+                            : displayList.isEmpty
+                                ? CustomWidgets.emptyData()
+                                : (searchViewController.showInGrid.value ? gridViewStyle(displayList) : listViewStyle(displayList)))
               ],
-            );
-          });
-        },
-      ),
+            ),
+            Positioned(
+              bottom: 150.0,
+              right: 20.0,
+              child: RightSideButtons(isAdmin: widget.isAdmin),
+            ),
+            Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: BottomPriceSheet(),
+            )
+          ],
+        );
+      }),
     );
   }
 

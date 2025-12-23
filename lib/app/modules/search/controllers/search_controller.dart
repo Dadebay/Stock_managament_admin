@@ -10,6 +10,7 @@ class SearchViewController extends GetxController {
   RxBool showInGrid = false.obs;
   RxString selectedCategory = 'All'.obs;
   RxList<CategoryModel> categories = <CategoryModel>[].obs;
+  RxBool isLoading = true.obs;
 
   RxDouble sumSell = 0.0.obs;
   RxDouble sumCost = 0.0.obs;
@@ -17,6 +18,7 @@ class SearchViewController extends GetxController {
   String _currentSearchText = '';
   String _activeFilterType = '';
   String _activeFilterValue = '';
+
   @override
   void onInit() {
     super.onInit();
@@ -25,8 +27,7 @@ class SearchViewController extends GetxController {
       final uniqueCategories = <CategoryModel>[];
       final categoryNames = <String>{};
       for (var product in products) {
-        if (product.category != null &&
-            !categoryNames.contains(product.category!.name)) {
+        if (product.category != null && !categoryNames.contains(product.category!.name)) {
           uniqueCategories.add(product.category!);
           categoryNames.add(product.category!.name);
         }
@@ -35,14 +36,31 @@ class SearchViewController extends GetxController {
     });
   }
 
+  Future<void> loadProducts() async {
+    try {
+      print('===== LOAD PRODUCTS: Ürünler yüklenmeye başladı =====');
+      isLoading.value = true;
+      final products = await SearchService().getProducts();
+      print('===== LOAD PRODUCTS: ${products.length} ürün yüklendi =====');
+      historyList.assignAll(products);
+      productsList.assignAll(products);
+      searchResult.assignAll(products);
+      calculateTotals();
+      isLoading.value = false;
+      print('===== LOAD PRODUCTS: Tamamlandı =====');
+    } catch (e) {
+      print('===== LOAD PRODUCTS HATASI: $e =====');
+      isLoading.value = false;
+    }
+  }
+
 /*************  ✨ Windsurf Command ⭐  *************/
   /// Filter the products by the given category name
   /// and update the UI accordingly by calling
   /// [onSearchTextChanged] with the current search text.
   ///
 
-/*******  29e92759-1f69-4682-84fe-0c698289ded1  *******/ void filterByCategory(
-      String categoryName) {
+/*******  29e92759-1f69-4682-84fe-0c698289ded1  *******/ void filterByCategory(String categoryName) {
     selectedCategory.value = categoryName;
     onSearchTextChanged(_currentSearchText);
   }
@@ -53,17 +71,13 @@ class SearchViewController extends GetxController {
       GeciciListe = GeciciListe.where((product) {
         switch (_activeFilterType) {
           case 'category':
-            return product.category?.name.toLowerCase() ==
-                _activeFilterValue.toLowerCase();
+            return product.category?.name.toLowerCase() == _activeFilterValue.toLowerCase();
           case 'brends':
-            return product.brend?.name.toLowerCase() ==
-                _activeFilterValue.toLowerCase();
+            return product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase();
           case 'location':
-            return product.location?.name.toLowerCase() ==
-                _activeFilterValue.toLowerCase();
+            return product.location?.name.toLowerCase() == _activeFilterValue.toLowerCase();
           case 'material':
-            return product.material?.name.toLowerCase() ==
-                _activeFilterValue.toLowerCase();
+            return product.material?.name.toLowerCase() == _activeFilterValue.toLowerCase();
           default:
             return true;
         }
@@ -103,8 +117,7 @@ class SearchViewController extends GetxController {
     selectedImageFileName.value = null;
   }
 
-  RxList<Map<String, dynamic>> selectedProductsToOrder =
-      <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> selectedProductsToOrder = <Map<String, dynamic>>[].obs;
 
   void addOrUpdateProduct({required SearchModel product, required int count}) {
     final index = selectedProductsToOrder.indexWhere(
@@ -149,38 +162,68 @@ class SearchViewController extends GetxController {
     required String? selectedImageFileName,
   }) async {
     try {
+      print('===== ADD NEW PRODUCT BAŞLADI =====');
       final HomeController homeController = Get.find();
       homeController.agreeButton.value = true;
 
-      final SearchModel? newProduct =
-          await SearchService().createProductWithImage(
+      final SearchModel? newProduct = await SearchService().createProductWithImage(
         fields: productData,
         imageBytes: selectedImageBytes, // Controller'daki byte'ları kullan
-        imageFileName:
-            selectedImageFileName, // Controller'daki dosya adını kullan
+        imageFileName: selectedImageFileName, // Controller'daki dosya adını kullan
       );
       homeController.agreeButton.value = false;
 
       if (newProduct != null) {
-        productsList.add(newProduct);
-        clearSelectedImage(); // Seçilen resmi ve dosya adını temizle
-        CustomWidgets.showSnackBar(
-            "Başarılı", "Ürün başarıyla eklendi", Colors.green);
-        await Future.delayed(const Duration(milliseconds: 100));
+        print('===== ÜRÜN BAŞARIYLA EKLENDİ, ID: ${newProduct.id} =====');
+
+        // Yeni ürünü mevcut listelere ekle
+        historyList.insert(0, newProduct);
+        productsList.insert(0, newProduct);
+        searchResult.insert(0, newProduct);
+        calculateTotals();
+
+        clearSelectedImage();
         Get.back();
+
+        CustomWidgets.showSnackBar("Başarılı", "Ürün başarıyla eklendi", Colors.green);
+
+        print('===== NAVBAR SAYFASINA GERİ DÖNÜLÜYOR =====');
+        print('===== LİSTEDE ŞİMDİ ${historyList.length} ÜRÜN VAR =====');
       } else {
-        CustomWidgets.showSnackBar(
-            "Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
+        print('===== ÜRÜN EKLENEMEDİ: newProduct null =====');
+        CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
       }
     } catch (e) {
+      print('===== ÜRÜN EKLEME HATASI: $e =====');
       CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi: $e", Colors.red);
+    }
+  }
+
+  Future<void> refreshProducts() async {
+    try {
+      print('===== REFRESH PRODUCTS: Ürünler çekiliyor... =====');
+      final products = await SearchService().getProducts();
+      print('===== REFRESH PRODUCTS: ${products.length} ürün çekildi =====');
+      print('===== ÖNCEKİ historyList: ${historyList.length} =====');
+      print('===== ÖNCEKİ productsList: ${productsList.length} =====');
+      print('===== ÖNCEKİ searchResult: ${searchResult.length} =====');
+
+      historyList.assignAll(products);
+      productsList.assignAll(products);
+      searchResult.assignAll(products);
+      calculateTotals();
+
+      print('===== SONRAKİ historyList: ${historyList.length} =====');
+      print('===== SONRAKİ productsList: ${productsList.length} =====');
+      print('===== SONRAKİ searchResult: ${searchResult.length} =====');
+    } catch (e) {
+      print('===== REFRESH PRODUCTS HATASI: $e =====');
     }
   }
 
   void onSearchTextChanged(String word) {
     _currentSearchText = word;
-    List<SearchModel> filteredList =
-        historyList.toList(); // Start with the full history list
+    List<SearchModel> filteredList = historyList.toList(); // Start with the full history list
 
     // Apply category filter
     if (selectedCategory.value != 'All') {
@@ -196,10 +239,7 @@ class SearchViewController extends GetxController {
         final name = product.name.toLowerCase();
         final price = product.price.toLowerCase().toString();
         final cost = product.cost.toLowerCase().toString();
-        return words.every((w) =>
-            name.contains(w) ||
-            price.contains(w.toString()) ||
-            cost.contains(w.toString()));
+        return words.every((w) => name.contains(w) || price.contains(w.toString()) || cost.contains(w.toString()));
       }).toList();
     }
 
@@ -208,14 +248,12 @@ class SearchViewController extends GetxController {
   }
 
   void updateProductLocally(SearchModel updatedProduct) {
-    final indexInProducts =
-        productsList.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInProducts = productsList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInProducts != -1) {
       productsList[indexInProducts] = updatedProduct;
     }
 
-    final indexInSearch =
-        searchResult.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInSearch = searchResult.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInSearch != -1) {
       searchResult[indexInSearch] = updatedProduct;
     }
@@ -252,18 +290,13 @@ class SearchViewController extends GetxController {
   Future<void> pickImage() async {
     try {
       var fileInfo = await ImagePickerWeb.getImageInfo; // Bu MediaInfo döndürür
-      if (fileInfo != null &&
-          fileInfo.data != null &&
-          fileInfo.fileName != null) {
+      if (fileInfo != null && fileInfo.data != null && fileInfo.fileName != null) {
         selectedImageBytes.value = fileInfo.data;
-        selectedImageFileName.value =
-            fileInfo.fileName; // Yeni: Dosya adını sakla
-        CustomWidgets.showSnackBar(
-            "Success", "Image selected: ${fileInfo.fileName}", Colors.green);
+        selectedImageFileName.value = fileInfo.fileName; // Yeni: Dosya adını sakla
+        CustomWidgets.showSnackBar("Success", "Image selected: ${fileInfo.fileName}", Colors.green);
       }
     } catch (e) {
-      CustomWidgets.showSnackBar(
-          "Error", "Could not pick image: $e", Colors.red);
+      CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);
     }
   }
 
