@@ -34,7 +34,18 @@ class _PurchasesViewState extends State<PurchasesView> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return CustomWidgets.emptyData();
           }
-          purchasesController.purchasesMainList.assignAll(snapshot.data!.toList());
+          // Tarihe göre sırala (en yeni en üstte)
+          final sortedPurchases = snapshot.data!.toList();
+          sortedPurchases.sort((a, b) {
+            try {
+              DateTime dateA = DateTime.parse(a.date);
+              DateTime dateB = DateTime.parse(b.date);
+              return dateB.compareTo(dateA); // Yeni tarih üstte
+            } catch (e) {
+              return 0;
+            }
+          });
+          purchasesController.purchasesMainList.assignAll(sortedPurchases);
           purchasesController.calculateTotals();
           return Obx(() {
             final isSearching = searchController.text.isNotEmpty;
@@ -69,7 +80,7 @@ class _PurchasesViewState extends State<PurchasesView> {
                 ),
                 widget.isAdmin
                     ? Positioned(
-                        bottom: 160.0,
+                        bottom: 120.0,
                         right: 20.0,
                         child: FloatingActionButton(
                           backgroundColor: Colors.black,

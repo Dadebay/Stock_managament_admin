@@ -36,7 +36,18 @@ class ExpencesView extends StatelessWidget {
             return Obx(() {
               if (expencesController.expencesList.isEmpty) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  expencesController.expencesList.addAll(expences);
+                  // Tarihe göre sırala (en yeni en üstte)
+                  final sortedExpences = expences.toList();
+                  sortedExpences.sort((a, b) {
+                    try {
+                      DateTime dateA = DateTime.parse(a.date!);
+                      DateTime dateB = DateTime.parse(b.date!);
+                      return dateB.compareTo(dateA); // Yeni tarih üstte
+                    } catch (e) {
+                      return 0;
+                    }
+                  });
+                  expencesController.expencesList.addAll(sortedExpences);
                   double sum = 0.0;
                   for (var expense in expences) {
                     sum += double.tryParse(expense.cost.toString()) ?? 0.0;

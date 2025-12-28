@@ -7,6 +7,7 @@ class PurchasesController extends GetxController {
   RxList<PurchasesModel> purchasesMainList = <PurchasesModel>[].obs;
   RxList<PurchasesModel> searchResult = <PurchasesModel>[].obs;
   RxDouble sumCost = 0.0.obs;
+  RxBool isCreatingPurchase = false.obs;
   void onSearchTextChanged(String word) {
     searchResult.clear();
     if (word.isEmpty) {

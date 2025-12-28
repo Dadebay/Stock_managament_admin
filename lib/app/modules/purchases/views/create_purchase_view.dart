@@ -15,6 +15,7 @@ class CreatePurchasesView extends StatefulWidget {
 class _CreatePurchasesViewState extends State<CreatePurchasesView> {
   List<FocusNode> focusNodes = List.generate(5, (_) => FocusNode());
   final SearchViewController _searchController = Get.find<SearchViewController>();
+  final PurchasesController _purchasesController = Get.put(PurchasesController());
   List<TextEditingController> textControllers = List.generate(5, (_) => TextEditingController());
   @override
   void initState() {
@@ -91,7 +92,9 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   )),
               text: 'selectProducts'),
           AgreeButton(
+              isLoading: _purchasesController.isCreatingPurchase,
               onTap: () async {
+                _purchasesController.isCreatingPurchase.value = true;
                 try {
                   double costAll = 0.0;
 
@@ -100,7 +103,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   for (var element in _searchController.selectedProductsToOrder) {
                     final product = element['product'];
                     final count = element['count'];
-                    
+
                     print("Processing product: ${product.name}, ID: ${product.id}");
                     print("  - Cost from source: '${product.cost}' (type: ${product.cost.runtimeType})");
                     print("  - Count from source: '$count' (type: ${count.runtimeType})");
@@ -115,6 +118,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                       print("!!! ERROR Details: $e");
                       // Optionally, show a user-friendly error
                       CustomWidgets.showSnackBar('Error', "Invalid cost for product: ${product.name}", Colors.red);
+                      _purchasesController.isCreatingPurchase.value = false;
                       return; // Stop the process
                     }
 
@@ -125,6 +129,7 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                       print("!!! ERROR Details: $e");
                       // Optionally, show a user-friendly error
                       CustomWidgets.showSnackBar('Error', "Invalid quantity for product: ${product.name}", Colors.red);
+                      _purchasesController.isCreatingPurchase.value = false;
                       return; // Stop the process
                     }
 
@@ -134,17 +139,18 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                   print("Total calculated cost: $costAll");
 
                   if (textControllers[3].text.isNotEmpty) {
-                     print("Manual cost entered: '${textControllers[3].text}'. Overriding calculated cost.");
+                    print("Manual cost entered: '${textControllers[3].text}'. Overriding calculated cost.");
                     try {
                       costAll = double.parse(textControllers[3].text);
-                    } catch(e) {
-                       print("!!! ERROR: Could not parse manual cost. Value was '${textControllers[3].text}'.");
-                       print("!!! ERROR Details: $e");
-                       CustomWidgets.showSnackBar('Error', "Invalid format for manual cost.", Colors.red);
-                       return;
+                    } catch (e) {
+                      print("!!! ERROR: Could not parse manual cost. Value was '${textControllers[3].text}'.");
+                      print("!!! ERROR Details: $e");
+                      CustomWidgets.showSnackBar('Error', "Invalid format for manual cost.", Colors.red);
+                      _purchasesController.isCreatingPurchase.value = false;
+                      return;
                     }
                   }
-                  
+
                   final PurchasesModel model = PurchasesModel(
                     title: textControllers[1].text,
                     date: textControllers[0].text.substring(0, 10),
@@ -155,14 +161,15 @@ class _CreatePurchasesViewState extends State<CreatePurchasesView> {
                     count: _searchController.selectedProductsToOrder.length,
                     products: [],
                   );
-                  
+
                   print("--- Preparing to send data to server ---");
 
                   await PurchasesService().addPurchase(model: model, products: products);
                   print("--- Purchase creation request sent ---");
-
+                  _purchasesController.isCreatingPurchase.value = false;
                 } catch (e) {
                   print('!!! UNCAUGHT ERROR during purchase creation: $e');
+                  _purchasesController.isCreatingPurchase.value = false;
                 }
               },
               text: 'agree'),

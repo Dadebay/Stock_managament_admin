@@ -42,9 +42,43 @@ class SearchViewController extends GetxController {
       isLoading.value = true;
       final products = await SearchService().getProducts();
       print('===== LOAD PRODUCTS: ${products.length} ürün yüklendi =====');
-      historyList.assignAll(products);
-      productsList.assignAll(products);
-      searchResult.assignAll(products);
+
+      // İlk ürünün tarih bilgisini kontrol et
+      if (products.isNotEmpty) {
+        print('===== İLK ÜRÜN TARİH BİLGİSİ: createdAT = ${products[0].createdAT} =====');
+      }
+
+      // Tarihe göre sırala (en yeni en üstte, tarih olmayanlar en altta)
+      final sortedProducts = products.toList();
+      sortedProducts.sort((a, b) {
+        try {
+          // Her iki ürünün tarih bilgisini kontrol et
+          final bool aHasDate = a.createdAT.isNotEmpty;
+          final bool bHasDate = b.createdAT.isNotEmpty;
+
+          // İkisinde de tarih yoksa, sıralama değiştirme
+          if (!aHasDate && !bHasDate) return 0;
+
+          // Sadece a'da tarih yoksa, a'yı alta gönder
+          if (!aHasDate) return 1;
+
+          // Sadece b'de tarih yoksa, b'yi alta gönder
+          if (!bHasDate) return -1;
+
+          // Her ikisinde de tarih varsa, tarihe göre sırala (en yeni üstte)
+          DateTime dateA = DateTime.parse(a.createdAT);
+          DateTime dateB = DateTime.parse(b.createdAT);
+          return dateB.compareTo(dateA);
+        } catch (e) {
+          // Tarih parse hatası varsa, bu ürünü alta gönder
+          print('===== TARİH PARSE HATASI: ${e.toString()} =====');
+          return 1;
+        }
+      });
+
+      historyList.assignAll(sortedProducts);
+      productsList.assignAll(sortedProducts);
+      searchResult.assignAll(sortedProducts);
       calculateTotals();
       isLoading.value = false;
       print('===== LOAD PRODUCTS: Tamamlandı =====');

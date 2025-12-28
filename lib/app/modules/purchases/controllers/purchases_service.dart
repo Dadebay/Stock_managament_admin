@@ -11,12 +11,9 @@ class PurchasesService {
   final PurchasesController purchasesController = Get.find();
 
   Future<List<PurchasesModel>> getPurchases() async {
-    final data = await ApiService()
-        .getRequest(ApiConstants.purchases, requiresToken: true);
+    final data = await ApiService().getRequest(ApiConstants.purchases, requiresToken: true);
     if (data is Map && data['data'] != null) {
-      return (data['data'] as List)
-          .map((item) => PurchasesModel.fromJson(item))
-          .toList();
+      return (data['data'] as List).map((item) => PurchasesModel.fromJson(item)).toList();
     } else if (data is List) {
       return (data).map((item) => PurchasesModel.fromJson(item)).toList();
     } else {
@@ -25,23 +22,17 @@ class PurchasesService {
   }
 
   Future<List<ProductModelPurchases>> getPurchasesByID(int id) async {
-    final data = await ApiService()
-        .getRequest(ApiConstants.getPurchasesID + "$id/", requiresToken: true);
+    final data = await ApiService().getRequest(ApiConstants.getPurchasesID + "$id/", requiresToken: true);
     if (data is Map) {
-      return (data as List)
-          .map((item) => ProductModelPurchases.fromJson(item))
-          .toList();
+      return (data as List).map((item) => ProductModelPurchases.fromJson(item)).toList();
     } else if (data is List) {
-      return (data)
-          .map((item) => ProductModelPurchases.fromJson(item))
-          .toList();
+      return (data).map((item) => ProductModelPurchases.fromJson(item)).toList();
     } else {
       return [];
     }
   }
 
-  Future<PurchasesModel?> editOrderManually(
-      {required PurchasesModel model}) async {
+  Future<PurchasesModel?> editOrderManually({required PurchasesModel model}) async {
     final AuthStorage _auth = AuthStorage();
 
     final token = await _auth.getToken();
@@ -50,21 +41,14 @@ class PurchasesService {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-    final body = json.encode({
-      'title': model.title,
-      'date': model.date,
-      'source': model.source,
-      'cost': double.tryParse(model.cost) ?? 0,
-      'description': model.description,
-      'products': model.products
-    });
+    final body =
+        json.encode({'title': model.title, 'date': model.date, 'source': model.source, 'cost': double.tryParse(model.cost) ?? 0, 'description': model.description, 'products': model.products});
     final response = await http.put(url, headers: headers, body: body);
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       final updatedOrder = PurchasesModel.fromJson(jsonResponse);
       purchasesController.editClient(updatedOrder);
-      CustomWidgets.showSnackBar(
-          "Success", "Purchase updated successfully", Colors.green);
+      CustomWidgets.showSnackBar("Success", "Purchase updated successfully", Colors.green);
       await Future.delayed(const Duration(milliseconds: 100));
       Get.back();
 
@@ -74,9 +58,7 @@ class PurchasesService {
     }
   }
 
-  Future addPurchase(
-      {required PurchasesModel model,
-      required List<Map<String, dynamic>> products}) async {
+  Future addPurchase({required PurchasesModel model, required List<Map<String, dynamic>> products}) async {
     final body = <String, dynamic>{
       'title': model.title,
       'date': model.date,
@@ -97,14 +79,10 @@ class PurchasesService {
         if (responseJson.isNotEmpty) {
           purchasesController.addClient(PurchasesModel.fromJson(responseJson));
           getPurchases();
-
-          CustomWidgets.showSnackBar(
-              'success'.tr, 'Purchases added successfully'.tr, Colors.green);
-          await Future.delayed(const Duration(milliseconds: 100));
           Get.back();
+          CustomWidgets.showSnackBar('success'.tr, 'Purchases added successfully'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar(
-              'error'.tr, 'Purchases not added'.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr, 'Purchases not added'.tr, Colors.red);
         }
       },
     );
@@ -119,11 +97,9 @@ class PurchasesService {
         if (responseJson.isNotEmpty) {
           purchasesController.deleteProduct(id);
 
-          CustomWidgets.showSnackBar(
-              'success'.tr, 'Product Deleted'.tr, Colors.green);
+          CustomWidgets.showSnackBar('success'.tr, 'Product Deleted'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar(
-              'error'.tr, 'Product Not Deleted'.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr, 'Product Not Deleted'.tr, Colors.red);
         }
       },
     );
