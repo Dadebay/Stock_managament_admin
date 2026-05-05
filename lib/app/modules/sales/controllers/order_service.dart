@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_service.dart';
 import 'package:stock_managament_admin/app/modules/sales/controllers/order_model.dart';
@@ -8,6 +7,42 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class OrderService {
+  void _printSection(String title) {
+    print('\n========== $title ==========');
+  }
+
+  void _printMap(String title, Map<String, dynamic> map) {
+    print('$title:');
+    map.forEach((key, value) {
+      print('  - $key: $value');
+    });
+  }
+
+  String? _normalizeClientPhone(String? phone) {
+    if (phone == null) return null;
+    final normalized = phone.trim();
+    if (normalized.isEmpty || normalized == '+993') return null;
+    return normalized;
+  }
+
+  String? _normalizeOptionalText(String? value) {
+    if (value == null) return null;
+    final normalized = value.trim();
+    return normalized.isEmpty ? null : normalized;
+  }
+
+  String _extractHtmlErrorSummary(String html) {
+    final titleMatch = RegExp(r'<title>(.*?)</title>', dotAll: true).firstMatch(html);
+    final exceptionTypeMatch = RegExp(r'Exception Type:</th>\\s*<td>(.*?)</td>', dotAll: true).firstMatch(html);
+    final exceptionValueMatch = RegExp(r'Exception Value:</th>\\s*<td><pre>(.*?)</pre>', dotAll: true).firstMatch(html);
+
+    final title = titleMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
+    final exceptionType = exceptionTypeMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
+    final exceptionValue = exceptionValueMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
+
+    return 'title=$title | exceptionType=$exceptionType | exceptionValue=$exceptionValue';
+  }
+
   // final OrderController orderController = Get.find();
   Future<List<OrderModel>> getOrders() async {
     final data = await ApiService().getRequest(ApiConstants.order, requiresToken: true);
@@ -87,31 +122,90 @@ class OrderService {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-    final body = json.encode({
+    final normalizedClientName = _normalizeOptionalText(model.clientDetailModel?.name);
+    final normalizedClientAddress = _normalizeOptionalText(model.clientDetailModel?.address);
+    final normalizedClientPhone = _normalizeClientPhone(model.clientDetailModel?.phone);
+
+    final rawBody = {
       'status': int.parse(model.status),
       'gaplama': model.gaplama,
       'date': model.date,
       'datetime': model.date,
       'name': model.name,
-      'clientName': model.clientDetailModel?.name,
-      'clientAddress': model.clientDetailModel?.address,
-      'clientPhone': model.clientDetailModel?.phone,
+      'client': model.clientID,
+      'clientName': normalizedClientName,
+      'clientAddress': normalizedClientAddress,
+      'clientPhone': normalizedClientPhone,
       'discount': double.tryParse(model.discount),
       'coupon': model.coupon,
       'description': model.description,
       "count": model.count,
       "totalsum": model.totalsum,
       "totalchykdajy": model.totalchykdajy,
-    });
-    final response = await http.put(url, headers: headers, body: body);
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final jsonResponse = json.decode(response.body);
-      final updatedOrder = OrderModel.fromJson(jsonResponse);
-      Get.back();
+    };
+    final body = json.encode(rawBody);
 
-      return updatedOrder;
-    } else {
+    _printSection('EDIT ORDER REQUEST START');
+    print('Request method: PUT');
+    print('Request URL: $url');
+    print('Order ID: ${model.id}');
+    print('Token exists: ${token != null && token.isNotEmpty}');
+    print('Token length: ${token?.length ?? 0}');
+    _printMap('Request headers', headers);
+    _printMap('Request body (raw map)', rawBody);
+    print('Request body (json): $body');
+
+    try {
+      final response = await http.put(url, headers: headers, body: body);
+
+      _printSection('EDIT ORDER RESPONSE RECEIVED');
+      print('Status code: ${response.statusCode}');
+      print('Reason phrase: ${response.reasonPhrase}');
+      print('Response headers: ${response.headers}');
+      if (response.body.length > 3000) {
+        print('Response body length: ${response.body.length}');
+        print('Response body preview (first 3000 chars): ${response.body.substring(0, 3000)}');
+      } else {
+        print('Response body (raw): ${response.body}');
+      }
+
+      final contentType = response.headers['content-type'] ?? '';
+      if (response.statusCode >= 500 && contentType.contains('text/html')) {
+        print('Server returned HTML error page. Parsed summary: ${_extractHtmlErrorSummary(response.body)}');
+      }
+
+      dynamic decoded;
+      try {
+        decoded = json.decode(response.body);
+        print('Response body type (decoded): ${decoded.runtimeType}');
+        print('Response body (decoded): $decoded');
+      } catch (decodeError, decodeStack) {
+        print('Response decode error: $decodeError');
+        print('Response decode stack: $decodeStack');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (decoded is Map<String, dynamic>) {
+          final updatedOrder = OrderModel.fromJson(decoded);
+          _printSection('EDIT ORDER SUCCESS');
+          print('Updated order id from response: ${updatedOrder.id}');
+          return updatedOrder;
+        }
+
+        print('Edit success status but response JSON is not Map<String, dynamic>.');
+        return null;
+      }
+
+      _printSection('EDIT ORDER FAILED');
+      print('Non-success response. UI should not treat this as saved.');
       return null;
+    } catch (error, stackTrace) {
+      _printSection('EDIT ORDER EXCEPTION');
+      print('Error: $error');
+      print('StackTrace: $stackTrace');
+      return null;
+    } finally {
+      _printSection('EDIT ORDER REQUEST END');
     }
   }
 

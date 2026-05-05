@@ -218,8 +218,22 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                   initialValue: _displayedValue, // Dialog için başlangıç değeri
                   currentOrder: widget.currentOrder,
                   onSave: (locallyUpdatedOrder) async {
-                    await OrderService().editOrderManually(model: locallyUpdatedOrder);
-                    widget.onUpdate(locallyUpdatedOrder);
+                    print('\n========== ORDER FIELD SAVE START ==========');
+                    print('Field: ${widget.label}');
+                    print('Order ID: ${locallyUpdatedOrder.id}');
+                    print('Local value prepared for save: ${_getValue(widget.label, locallyUpdatedOrder)}');
+
+                    final updatedOrderFromBackend = await OrderService().editOrderManually(model: locallyUpdatedOrder);
+
+                    if (updatedOrderFromBackend != null) {
+                      print('Backend update success. Applying backend response to UI.');
+                      print('Backend value after save: ${_getValue(widget.label, updatedOrderFromBackend)}');
+                      widget.onUpdate(updatedOrderFromBackend);
+                    } else {
+                      print('Backend update failed or returned null. UI will not be updated from local draft.');
+                    }
+
+                    print('========== ORDER FIELD SAVE END ==========\n');
                   },
                 );
             },
