@@ -54,6 +54,7 @@ class _MyAppState extends State<_MyApp> {
           return GetMaterialApp(
               debugShowCheckedModeBanner: false,
               title: StringConstants.appName,
+              scaffoldMessengerKey: CustomWidgets.snackBarKey,
               theme: AppThemes.lightTheme,
               fallbackLocale: const Locale('tm'),
               locale: AppStartInit().getLocale(),

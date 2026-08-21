@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/clients_controller.dart';
 import 'package:stock_managament_admin/app/modules/clients/views/clients_view.dart';
@@ -29,10 +27,13 @@ class NavBarPageView extends StatefulWidget {
 
 class _NavBarPageViewState extends State<NavBarPageView> {
   int selecedIndex = 0;
-  final SearchViewController seacrhViewController = Get.put(SearchViewController());
+  final SearchViewController seacrhViewController =
+      Get.put(SearchViewController());
   final ClientsController clientsController = Get.put(ClientsController());
-  final FourInOnePageController fourInOnePageController = Get.put(FourInOnePageController());
-  final PurchasesController purchasesController = Get.put(PurchasesController());
+  final FourInOnePageController fourInOnePageController =
+      Get.put(FourInOnePageController());
+  final PurchasesController purchasesController =
+      Get.put(PurchasesController());
   final ExpencesController expencesController = Get.put(ExpencesController());
   final OrderController orderController = Get.put(OrderController());
   final HomeController homeController = Get.put(HomeController());
@@ -60,7 +61,11 @@ class _NavBarPageViewState extends State<NavBarPageView> {
         ? [
             HomeView(isAdmin: isAdmin),
             OrderView(isAdmin: isAdmin),
-            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin, hideAppBar: true),
+            SearchView(
+                selectableProducts: false,
+                addCounterWidget: false,
+                isAdmin: isAdmin,
+                hideAppBar: true),
             PurchasesView(isAdmin: isAdmin),
             FourInOnePageView(isAdmin: isAdmin),
             ExpencesView(isAdmin: isAdmin),
@@ -72,7 +77,11 @@ class _NavBarPageViewState extends State<NavBarPageView> {
         : [
             HomeView(isAdmin: isAdmin),
             OrderView(isAdmin: isAdmin),
-            SearchView(selectableProducts: false, addCounterWidget: false, isAdmin: isAdmin, hideAppBar: true),
+            SearchView(
+                selectableProducts: false,
+                addCounterWidget: false,
+                isAdmin: isAdmin,
+                hideAppBar: true),
             PurchasesView(isAdmin: isAdmin),
             FourInOnePageView(isAdmin: isAdmin),
             ExpencesView(isAdmin: isAdmin),
@@ -81,16 +90,30 @@ class _NavBarPageViewState extends State<NavBarPageView> {
           ];
 
     double width = MediaQuery.of(context).size.width;
+    final bool compactNavigation = width < 1100;
+    final String pageTitle = isAdmin == false
+        ? StringConstants.adminTitles[selecedIndex]
+        : StringConstants.titles[selecedIndex];
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFFF8FAFC),
       body: Row(
         children: [
-          drawer(width, pages, context),
+          drawer(compactNavigation, pages, context),
           Expanded(
-            flex: 6,
             child: Container(
               color: Colors.white,
-              child: pages[selecedIndex],
+              child: Column(
+                children: [
+                  if (selecedIndex != _homePageIndex &&
+                      selecedIndex != _expencesPageIndex &&
+                      selecedIndex != _purchasesPageIndex &&
+                      selecedIndex != _searchPageIndex &&
+                      selecedIndex != _salesPageIndex &&
+                      selecedIndex != _clientsPageIndex)
+                    contentAppBar(pageTitle),
+                  Expanded(child: pages[selecedIndex]),
+                ],
+              ),
             ),
           ),
         ],
@@ -98,62 +121,187 @@ class _NavBarPageViewState extends State<NavBarPageView> {
     );
   }
 
-  Expanded drawer(double width, List pages, BuildContext context) {
-    return Expanded(
-        flex: 1,
-        child: Column(
-          children: [
-            header(),
-            Padding(
-              padding: context.padding.low,
-              child: Divider(color: Colors.amber.withOpacity(0.2), thickness: 2),
-            ),
-            Expanded(
-              flex: 17,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: List.generate(pages.length, (index) {
-                    String title = isAdmin == false ? StringConstants.adminTitles[index] : StringConstants.titles[index];
-                    IconData selectedIcon = isAdmin == false ? StringConstants.selectedAdminIcons[index] : StringConstants.selectedIcons[index];
-                    IconData icon = isAdmin == false ? StringConstants.adminIcons[index] : StringConstants.icons[index];
-
-                    return DrawerButtonMine(
-                      onTap: () async {
-                        setState(() {
-                          selecedIndex = index;
-                        });
-                        int logOutIndex = isAdmin == false ? 7 : 9;
-                        if (selecedIndex == logOutIndex) {
-                          await SignInService().logOut(context);
-                        }
-                      },
-                      index: index,
-                      selectedIndex: selecedIndex,
-                      showIconOnly: width > 1000.0 ? false : true,
-                      icon: selecedIndex == index ? selectedIcon : icon,
-                      title: title,
-                    );
-                  }),
-                ),
-              ),
-            ),
-            LanguageButton(),
-          ],
-        ));
-  }
-
-  Widget header() {
-    return const Expanded(
-      flex: 2,
-      child: Center(
-        child: Text(
-          StringConstants.appName,
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 28),
+  Widget contentAppBar(String pageTitle) {
+    return Container(
+      height: 60,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Text(
+        pageTitle.tr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: const Color(0xFF0F172A),
+          fontSize: 17.sp,
+          fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+
+  /// Index where the admin-only entries ('users', 'logs') begin; everything
+  /// before it is the shared main menu, everything after is the log out row.
+  static const int _adminSectionStart = 7;
+
+  /// These pages render their own page bar (years + title + search), so the
+  /// generic [contentAppBar] is skipped for them to avoid a duplicated bar.
+  static const int _homePageIndex = 0;
+  static const int _purchasesPageIndex = 3;
+  static const int _expencesPageIndex = 5;
+  static const int _searchPageIndex = 2;
+  static const int _salesPageIndex = 1;
+  static const int _clientsPageIndex = 6;
+
+  List<Widget> buildNavItems(int start, int end, bool compactNavigation) {
+    return List.generate(end - start, (offset) {
+      final int index = start + offset;
+      return DrawerButtonMine(
+        onTap: () => setState(() {
+          selecedIndex = index;
+        }),
+        index: index,
+        selectedIndex: selecedIndex,
+        showIconOnly: compactNavigation,
+        icon: selecedIndex == index
+            ? (isAdmin == false
+                ? StringConstants.selectedAdminIcons[index]
+                : StringConstants.selectedIcons[index])
+            : (isAdmin == false
+                ? StringConstants.adminIcons[index]
+                : StringConstants.icons[index]),
+        title: isAdmin == false
+            ? StringConstants.adminTitles[index]
+            : StringConstants.titles[index],
+      );
+    });
+  }
+
+  Widget drawer(bool compactNavigation, List pages, BuildContext context) {
+    final int logOutIndex = pages.length - 1;
+    return AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        width: compactNavigation ? 84 : 280,
+        decoration: const BoxDecoration(
+          color: Color(0xFF111827),
+          border: Border(right: BorderSide(color: Color(0xFF1F2937))),
+        ),
+        child: SafeArea(
+            right: false,
+            child: Column(
+              children: [
+                header(compactNavigation),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Divider(
+                      color: Colors.white.withValues(alpha: 0.08), height: 1),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        NavSectionLabel(
+                            title: 'navMain', showIconOnly: compactNavigation),
+                        ...buildNavItems(
+                            0, _adminSectionStart, compactNavigation),
+                        if (logOutIndex > _adminSectionStart) ...[
+                          NavSectionLabel(
+                              title: 'navAdmin',
+                              showIconOnly: compactNavigation),
+                          ...buildNavItems(_adminSectionStart, logOutIndex,
+                              compactNavigation),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Divider(
+                      color: Colors.white.withValues(alpha: 0.08), height: 1),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+                  child: DrawerButtonMine(
+                    onTap: () async => SignInService().logOut(context),
+                    index: logOutIndex,
+                    selectedIndex: selecedIndex,
+                    showIconOnly: compactNavigation,
+                    icon: isAdmin == false
+                        ? StringConstants.adminIcons[logOutIndex]
+                        : StringConstants.icons[logOutIndex],
+                    title: isAdmin == false
+                        ? StringConstants.adminTitles[logOutIndex]
+                        : StringConstants.titles[logOutIndex],
+                    isDanger: true,
+                  ),
+                ),
+                LanguageButton(showIconOnly: compactNavigation),
+              ],
+            )));
+  }
+
+  Widget header(bool compactNavigation) {
+    final Widget mark = Container(
+      width: 40,
+      height: 40,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: DrawerButtonMine.accent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Text(
+        'K',
+        style: TextStyle(
+            color: Color(0xFF111827),
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            height: 1),
+      ),
+    );
+
+    return Container(
+      height: 84,
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.symmetric(horizontal: compactNavigation ? 22 : 18),
+      child: compactNavigation
+          ? mark
+          : Row(
+              children: [
+                mark,
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kümüş',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            height: 1.1),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'ONLINE PLATFORMA',
+                        style: TextStyle(
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 9,
+                            letterSpacing: 1.2),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

@@ -25,7 +25,8 @@ class SearchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SearchViewController seacrhViewController = Get.find<SearchViewController>();
+    final SearchViewController seacrhViewController =
+        Get.find<SearchViewController>();
     String url = '';
     if (product.img!.contains(ApiConstants.imageURL)) {
       url = product.img!;
@@ -35,70 +36,76 @@ class SearchCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (!disableOnTap) {
-          Get.to(() => ProductProfilView(product: product, disableUpdate: addCounterWidget, isAdmin: isAdmin));
+          Get.to(() => ProductProfilView(
+              product: product,
+              disableUpdate: addCounterWidget,
+              isAdmin: isAdmin));
         } else {
-          CustomWidgets.showSnackBar('Error', 'Cannot show this product because it is SOLD', ColorConstants.redColor);
+          CustomWidgets.showSnackBar(
+              'Error',
+              'Cannot show this product because it is SOLD',
+              ColorConstants.redColor);
         }
       },
       child: RepaintBoundary(
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
+          margin: EdgeInsets.symmetric(horizontal: 0.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          padding: EdgeInsets.all(12.w),
+          padding: EdgeInsets.all(8.w),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // ID Badge
-              Container(
-                width: 40.w,
-                height: 40.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.grey,
-                    width: 1.5,
-                  ),
-                ),
+              SizedBox(
+                width: 34.w,
+                height: 34.h,
                 child: Center(
                   child: Text(
                     '${counter!}',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF2563EB),
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 10.w),
               // Image
               Container(
-                width: 70.w,
-                height: 70.h,
+                width: 54.w,
+                height: 54.h,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                   color: Colors.grey.shade100,
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: CustomWidgets.imageWidget(url),
+                child: CachedNetworkImage(
+                  imageUrl: url,
+                  fit: BoxFit.cover,
+                  memCacheWidth: 160,
+                  memCacheHeight: 160,
+                  errorWidget: (_, __, ___) => const Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Color(0xFF94A3B8)),
+                ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -115,23 +122,28 @@ class SearchCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.black87,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
                             ),
                           ),
                           SizedBox(height: 4.h),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.w, vertical: 2.h),
                             decoration: BoxDecoration(
-                              color: (externalCount ?? product.count) > 0 ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                              color: (externalCount ?? product.count) > 0
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               "Sany: ${externalCount ?? product.count}",
                               style: TextStyle(
-                                color: (externalCount ?? product.count) > 0 ? Colors.green[700] : Colors.red[700],
+                                color: (externalCount ?? product.count) > 0
+                                    ? Colors.green[700]
+                                    : Colors.red[700],
                                 fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -140,59 +152,70 @@ class SearchCard extends StatelessWidget {
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
-                      child: _buildInfoColumn("Alyş", "${product.cost} \$", Colors.orange),
+                      child: _buildInfoColumn("${product.cost} \$"),
                     ),
                     Expanded(
-                      child: _buildInfoColumn("Satış", "${product.price} \$", Colors.green),
+                      child: _buildInfoColumn("${product.price} \$"),
                     ),
                     Expanded(
-                      child: _buildInfoColumn("Brend", product.brend?.name ?? '-', Colors.blue),
+                      child: _buildInfoColumn(product.brend?.name ?? '-'),
                     ),
                     Expanded(
-                      child: _buildInfoColumn("Kategoriýa", product.category?.name ?? '-', Colors.purple),
+                      child: _buildInfoColumn(product.category?.name ?? '-'),
                     ),
                     Expanded(
-                      child: _buildInfoColumn("Ýerleşýän ýeri", product.location?.name ?? '-', Colors.teal),
+                      child: _buildInfoColumn(product.location?.name ?? '-'),
                     ),
                   ],
                 ),
               ),
               addCounterWidget
                   ? Obx(() {
-                      final selectedCount = seacrhViewController.getProductCount(product.id.toString());
+                      final selectedCount = seacrhViewController
+                          .getProductCount(product.id.toString());
 
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(CupertinoIcons.minus_circle, color: Colors.black),
+                            icon: const Icon(CupertinoIcons.minus_circle,
+                                color: Colors.black),
                             onPressed: () {
                               if (selectedCount > 0) {
-                                seacrhViewController.decreaseCount(product.id.toString(), selectedCount - 1);
+                                seacrhViewController.decreaseCount(
+                                    product.id.toString(), selectedCount - 1);
                               }
                             },
                           ),
                           GestureDetector(
                             onTap: () {
-                              _showQuantityDialog(context, seacrhViewController, product, selectedCount);
+                              _showQuantityDialog(context, seacrhViewController,
+                                  product, selectedCount);
                             },
                             child: Container(
                               width: 30.w,
                               alignment: Alignment.center,
                               child: Text(
                                 selectedCount.toString(),
-                                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18.sp),
                                 maxLines: 1,
                               ),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(CupertinoIcons.add_circled, color: Colors.black),
+                            icon: const Icon(CupertinoIcons.add_circled,
+                                color: Colors.black),
                             onPressed: () {
-                              if (whcihPage == null && selectedCount >= product.count) {
-                                CustomWidgets.showSnackBar("Error", "Not in stock", Colors.red);
+                              if (whcihPage == null &&
+                                  selectedCount >= product.count) {
+                                CustomWidgets.showSnackBar(
+                                    "Error", "Not in stock", Colors.red);
                               } else {
-                                seacrhViewController.addOrUpdateProduct(product: product, count: selectedCount + 1);
+                                seacrhViewController.addOrUpdateProduct(
+                                    product: product, count: selectedCount + 1);
                               }
                             },
                           ),
@@ -207,8 +230,10 @@ class SearchCard extends StatelessWidget {
     );
   }
 
-  void _showQuantityDialog(BuildContext context, SearchViewController controller, SearchModel product, int currentCount) {
-    final TextEditingController textEditingController = TextEditingController(text: currentCount.toString());
+  void _showQuantityDialog(BuildContext context,
+      SearchViewController controller, SearchModel product, int currentCount) {
+    final TextEditingController textEditingController =
+        TextEditingController(text: currentCount.toString());
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -232,11 +257,14 @@ class SearchCard extends StatelessWidget {
             TextButton(
               child: Text('ok'.tr),
               onPressed: () {
-                final newCount = int.tryParse(textEditingController.text) ?? currentCount;
+                final newCount =
+                    int.tryParse(textEditingController.text) ?? currentCount;
                 if (whcihPage == null && newCount > product.count) {
-                  CustomWidgets.showSnackBar("Error", "Not in stock", Colors.red);
+                  CustomWidgets.showSnackBar(
+                      "Error", "Not in stock", Colors.red);
                 } else {
-                  controller.addOrUpdateProduct(product: product, count: newCount);
+                  controller.addOrUpdateProduct(
+                      product: product, count: newCount);
                 }
                 Navigator.of(context).pop();
               },
@@ -247,32 +275,19 @@ class SearchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoColumn(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+  Widget _buildInfoColumn(String value) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        value,
+        style: TextStyle(
+          fontSize: 13.sp,
+          color: const Color(0xFF334155),
+          fontWeight: FontWeight.w500,
         ),
-        SizedBox(height: 4.h),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
@@ -288,25 +303,25 @@ class SecondProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(() => ProductProfilView(product: product, disableUpdate: false, isAdmin: isAdmin)),
+      onTap: () => Get.to(() => ProductProfilView(
+          product: product, disableUpdate: false, isAdmin: isAdmin)),
       child: Container(
-          margin: EdgeInsets.only(right: 15.w),
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: const Color(0xFFF8FAFC),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.shade200,
-                blurRadius: 5,
-                spreadRadius: 5,
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
-            borderRadius: context.border.lowBorderRadius,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: ClipRRect(
-            borderRadius: context.border.lowBorderRadius,
+            borderRadius: BorderRadius.circular(10),
             child: CachedNetworkImage(
               imageUrl: product.img ?? '',
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               // Optimize for list view - smaller cache size
               memCacheWidth: 300,
               memCacheHeight: 300,
@@ -319,7 +334,8 @@ class SecondProductCard extends StatelessWidget {
                   child: SizedBox(
                     width: 30,
                     height: 30,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.grey),
                   ),
                 ),
               ),

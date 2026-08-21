@@ -176,3 +176,38 @@ class OrderModel {
     );
   }
 }
+
+class OrdersPage {
+  final List<OrderModel> orders;
+  final int page;
+  final int totalPages;
+  final int count;
+  final OrderStats stats;
+
+  OrdersPage({
+    required this.orders,
+    required this.page,
+    required this.totalPages,
+    required this.count,
+    required this.stats,
+  });
+}
+
+/// Totals across *every* shipped ("Eltildi", status=2) order, not just the
+/// current page — computed server-side so pagination doesn't distort it.
+class OrderStats {
+  final double totalSum;
+  final double totalCost;
+  final int count;
+
+  OrderStats({required this.totalSum, required this.totalCost, required this.count});
+
+  factory OrderStats.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return OrderStats(totalSum: 0, totalCost: 0, count: 0);
+    return OrderStats(
+      totalSum: double.tryParse('${json['totalsum'] ?? 0}') ?? 0,
+      totalCost: double.tryParse('${json['totalchykdajy'] ?? 0}') ?? 0,
+      count: int.tryParse('${json['count'] ?? 0}') ?? 0,
+    );
+  }
+}

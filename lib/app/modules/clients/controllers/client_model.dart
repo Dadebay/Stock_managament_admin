@@ -38,3 +38,17 @@ class ClientModel {
     };
   }
 }
+
+class ClientsPage {
+  final List<ClientModel> clients;
+  final int page;
+  final int totalPages;
+  final int count;
+
+  ClientsPage({
+    required this.clients,
+    required this.page,
+    required this.totalPages,
+    required this.count,
+  });
+}

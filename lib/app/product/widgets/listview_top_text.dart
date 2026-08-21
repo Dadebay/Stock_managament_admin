@@ -8,6 +8,7 @@ class ListviewTopText<T> extends StatefulWidget {
   final List<T> listToSort;
   final void Function(List<T> newList) setSortedList;
   final dynamic Function(T item, String sortKey) getSortValue;
+  final void Function(bool ascending)? onSortChanged;
 
   const ListviewTopText({
     super.key,
@@ -15,6 +16,7 @@ class ListviewTopText<T> extends StatefulWidget {
     required this.listToSort,
     required this.setSortedList,
     required this.getSortValue,
+    this.onSortChanged,
     this.hideLastColumn = false,
   });
 
@@ -45,6 +47,7 @@ class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
       sortStates[index] = ascending;
       _currentSortIndex = index;
     });
+    widget.onSortChanged?.call(ascending);
 
     List<T> sortedList = List<T>.from(widget.listToSort);
     // sortedList.sort((a, b) {
@@ -91,17 +94,14 @@ class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
     return null;
   }
 
-  bool _isNumericString(dynamic value) {
-    return double.tryParse(value.toString().replaceAll(',', '.')) != null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1.5)),
+        border:
+            Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1.5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,7 +109,8 @@ class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
           for (int i = 0; i < widget.names.length; i++)
             if (!(widget.hideLastColumn && i == widget.names.length - 1))
               Expanded(
-                flex: CustomWidgets().getFlexForSize(widget.names[i]['size'] ?? ColumnSize.medium.toString()),
+                flex: CustomWidgets().getFlexForSize(
+                    widget.names[i]['size'] ?? ColumnSize.medium.toString()),
                 child: GestureDetector(
                   onTap: () => _handleSortTap(i, widget.names[i]['sortName']!),
                   child: Row(
@@ -118,19 +119,30 @@ class _ListviewTopTextState<T> extends State<ListviewTopText<T>> {
                       Flexible(
                         child: Text(
                           "${widget.names[i]['name']!}".tr,
-                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
+                          style: TextStyle(
+                            fontSize: 12.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: _currentSortIndex == i
+                                ? const Color(0xFF4F46E5)
+                                : const Color(0xFF64748B),
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (_currentSortIndex == i)
-                        Padding(
-                          padding: EdgeInsets.only(left: 4.w),
-                          child: Icon(
-                            sortStates[i] ? Icons.arrow_upward : Icons.arrow_downward,
-                            size: 16.sp,
-                            color: Colors.black54,
-                          ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 4.w),
+                        child: Icon(
+                          _currentSortIndex == i
+                              ? (sortStates[i]
+                                  ? Icons.arrow_upward_rounded
+                                  : Icons.arrow_downward_rounded)
+                              : Icons.unfold_more_rounded,
+                          size: 15.sp,
+                          color: _currentSortIndex == i
+                              ? const Color(0xFF4F46E5)
+                              : const Color(0xFF94A3B8),
                         ),
+                      ),
                     ],
                   ),
                 ),

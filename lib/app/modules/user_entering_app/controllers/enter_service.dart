@@ -81,14 +81,26 @@ class EnterService {
 }
 
 class LogService {
-  Future<List<LogModel>> fetchLogs() async {
-    final uri = Uri.parse("http://216.250.11.255:9000/api/getlog/");
+  static const int pageSize = 30;
+
+  Future<LogsPage> fetchLogs({int page = 1}) async {
+    final uri = Uri.parse(ApiConstants.logs).replace(queryParameters: {
+      'page': '$page',
+      'page_size': '$pageSize',
+    });
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
 
-    if (data is List) {
-      return data.map((e) => LogModel.fromJson(e)).toList();
+    if (data is Map && data['results'] != null) {
+      return LogsPage(
+        logs: (data['results'] as List).map((e) => LogModel.fromJson(e)).toList(),
+        page: data['page'] ?? page,
+        totalPages: data['total_pages'] ?? 1,
+        count: data['count'] ?? (data['results'] as List).length,
+      );
+    } else if (data is List) {
+      return LogsPage(logs: data.map((e) => LogModel.fromJson(e)).toList(), page: 1, totalPages: 1, count: data.length);
     } else {
-      return [];
+      return LogsPage(logs: [], page: 1, totalPages: 1, count: 0);
     }
   }
 }

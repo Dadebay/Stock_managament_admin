@@ -5,20 +5,31 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class FourInOnePageService {
-  final FourInOnePageController fourInOnePageController = Get.find<FourInOnePageController>();
+  final FourInOnePageController fourInOnePageController =
+      Get.find<FourInOnePageController>();
 
   Future<List<FourInOneModel>> getData({required String url}) async {
     final data = await ApiService().getRequest(url, requiresToken: true);
     if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => FourInOneModel.fromJson(item)).toList().toList();
+      return (data['results'] as List)
+          .map((item) => FourInOneModel.fromJson(item))
+          .toList()
+          .toList();
     } else if (data is List) {
-      return (data).map((item) => FourInOneModel.fromJson(item)).toList().toList();
+      return (data)
+          .map((item) => FourInOneModel.fromJson(item))
+          .toList()
+          .toList();
     } else {
       return [];
     }
   }
 
-  Future addFourInOne({required FourInOneModel model, String? location, required String url, required String key}) async {
+  Future addFourInOne(
+      {required FourInOneModel model,
+      String? location,
+      required String url,
+      required String key}) async {
     return ApiService().handleApiRequest(
       endpoint: url,
       method: 'POST',
@@ -37,18 +48,23 @@ class FourInOnePageService {
         if (responseJson.isNotEmpty) {
           final model = FourInOneModel.fromJson(responseJson);
           fourInOnePageController.addFourInOne(key, model);
-          CustomWidgets.showSnackBar('success'.tr, 'Added Successfully '.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Added Successfully '.tr, Colors.green);
           await Future.delayed(const Duration(milliseconds: 100));
           Get.back();
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot add please try again '.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'Cannot add please try again '.tr, Colors.red);
         }
-        Get.back();
       },
     );
   }
 
-  Future editFourInOne({required FourInOneModel model, String? location, required String key, required String url}) async {
+  Future editFourInOne(
+      {required FourInOneModel model,
+      String? location,
+      required String key,
+      required String url}) async {
     return ApiService().handleApiRequest(
       endpoint: url + "${model.id}/",
       method: 'PUT',
@@ -67,17 +83,22 @@ class FourInOnePageService {
         if (responseJson.isNotEmpty) {
           final model = FourInOneModel.fromJson(responseJson);
           fourInOnePageController.editFourInOne(key, model);
-          CustomWidgets.showSnackBar('success'.tr, 'Edited succesfully'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Edited succesfully'.tr, Colors.green);
           await Future.delayed(const Duration(milliseconds: 100));
           Get.back();
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot edit please try again'.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'Cannot edit please try again'.tr, Colors.red);
         }
       },
     );
   }
 
-  Future deleteFourInOne({required FourInOneModel model, required String url, required String key}) async {
+  Future deleteFourInOne(
+      {required FourInOneModel model,
+      required String url,
+      required String key}) async {
     return ApiService().handleApiRequest(
       endpoint: url + "${model.id}/",
       method: 'DELETE',
@@ -85,9 +106,11 @@ class FourInOnePageService {
       handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
           fourInOnePageController.deleteFourInOne(key, model.id!);
-          CustomWidgets.showSnackBar('success'.tr, 'Deleted Successfully'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Deleted Successfully'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot delete please try again'.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'Cannot delete please try again'.tr, Colors.red);
         }
       },
     );

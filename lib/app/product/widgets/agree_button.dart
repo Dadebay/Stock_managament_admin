@@ -8,8 +8,9 @@ class AgreeButton extends StatelessWidget {
   final String text;
   final bool? showBorder;
   final RxBool? isLoading;
+  final bool compact;
 
-  AgreeButton({required this.onTap, required this.text, this.showBorder, this.isLoading});
+  AgreeButton({required this.onTap, required this.text, this.showBorder, this.isLoading, this.compact = false});
   HomeController? homeController;
 
   @override
@@ -33,10 +34,12 @@ class AgreeButton extends StatelessWidget {
     return Obx(() {
       return AnimatedContainer(
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20), color: showBorder == true ? Colors.transparent : ColorConstants.kPrimaryColor2, border: Border.all(color: ColorConstants.kPrimaryColor2)),
-        margin: context.padding.onlyTopNormal,
-        padding: context.padding.normal.copyWith(top: 15, bottom: 15),
-        width: loadingValue.value ? 60.w : Get.size.width,
+            borderRadius: BorderRadius.circular(compact ? 14 : 20),
+            color: showBorder == true ? Colors.transparent : ColorConstants.kPrimaryColor2,
+            border: Border.all(color: ColorConstants.kPrimaryColor2)),
+        margin: compact ? EdgeInsets.zero : context.padding.onlyTopNormal,
+        padding: compact ? const EdgeInsets.symmetric(vertical: 12) : context.padding.normal.copyWith(top: 15, bottom: 15),
+        width: loadingValue.value ? 60.w : (compact ? null : Get.size.width),
         duration: const Duration(milliseconds: 800),
         alignment: Alignment.center,
         child: loadingValue.value
@@ -52,7 +55,10 @@ class AgreeButton extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.general.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold, fontSize: 20.sp, color: showBorder == true ? ColorConstants.kPrimaryColor2 : Colors.white),
+                style: context.general.textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: compact ? 15.sp : 20.sp,
+                    color: showBorder == true ? ColorConstants.kPrimaryColor2 : Colors.white),
               ),
       );
     });

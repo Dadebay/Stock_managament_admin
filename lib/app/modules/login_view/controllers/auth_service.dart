@@ -5,7 +5,7 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class AuthStorage {
-  final storage = GetStorage();
+  final storage = AppStorage();
 
   Future<bool> logout() async {
     await storage.remove('AccessToken');

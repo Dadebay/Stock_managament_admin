@@ -7,6 +7,20 @@ class ExpencesController extends GetxController {
   RxList<ExpencesModel> searchResult = <ExpencesModel>[].obs;
   RxDouble totalPrice = 0.0.obs;
 
+  /// Total cost grouped by year, sorted from oldest to newest.
+  /// Recomputed from [expencesList] so a new year (e.g. 2027) shows up automatically.
+  Map<int, double> get totalByYear {
+    final Map<int, double> map = {};
+    for (final expence in expencesList) {
+      final date = DateTime.tryParse(expence.date ?? '');
+      if (date == null) continue;
+      final cost = double.tryParse(expence.cost.toString()) ?? 0.0;
+      map[date.year] = (map[date.year] ?? 0) + cost;
+    }
+    final sortedEntries = map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    return Map.fromEntries(sortedEntries);
+  }
+
   onSearchTextChanged(String word) {
     searchResult.clear();
     if (word.isEmpty) {

@@ -7,202 +7,125 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/confirm_dialog.dart';
 
 class ClientCard extends StatelessWidget {
-  ClientCard({
-    required this.client,
-    required this.count,
-    required this.isAdmin,
-    required this.topTextColumnSize,
-    super.key,
-  });
-
+  const ClientCard(
+      {super.key,
+      required this.client,
+      required this.count,
+      required this.isAdmin,
+      required this.onChanged});
   final ClientModel client;
   final int count;
   final bool isAdmin;
-  final List<Map<String, dynamic>> topTextColumnSize;
-  final ClientsController clientsController = Get.find();
+  final VoidCallback onChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      decoration: BoxDecoration(
+  Widget build(BuildContext context) => Material(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.blue.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Row(
-          children: [
-            // ID Badge
-            Container(
-              width: 48.w,
-              height: 48.h,
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.blue,
-                  width: 1.5,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 16.w),
-            // Content
-            Expanded(
-              child: Row(
-                children: [
-                  ..._buildDynamicTextWidgets(),
-                ],
-              ),
-            ),
-            // Action buttons
-            if (isAdmin) _buildActionButtons(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildDynamicTextWidgets() {
-    return topTextColumnSize.map<Widget>((column) {
-      final flex = CustomWidgets().getFlexForSize(column['size'].toString());
-      final value = _getClientFieldBySortName(column['sortName']);
-      final columnName = column['name'] ?? '';
-
-      return Expanded(
-        flex: flex,
-        child: Container(
-          margin: EdgeInsets.only(right: 12.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                columnName.toString().tr,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                value ?? '',
-                maxLines: 2,
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          hoverColor: const Color(0xFFF8FAFC),
+          onTap: () => showDialog(
+                  context: context, builder: (_) => ClientAddButton(model: client))
+              .then((_) => onChanged()),
+          child: Container(
+            height: 68,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFDCEBFF))),
+            child: Row(children: [
+              Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Text('$count',
+                      style: TextStyle(
+                          color: const Color(0xFF2563EB),
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700))),
+              const SizedBox(width: 14),
+              _cell(client.name.isEmpty ? '—' : client.name,
+                  flex: 3, emphasis: true),
+              _cell(client.address.isEmpty ? '—' : client.address,
+                  flex: 3, muted: true),
+              _cell(client.phone, flex: 2),
+              _cell((client.orderCount ?? 0).toString(),
+                  flex: 1, alignment: TextAlign.right),
+              _cell('${client.sumPrice ?? '0'} \$',
+                  flex: 2, emphasis: true, alignment: TextAlign.right),
+              if (isAdmin) _actions(context),
+            ]),
           ),
         ),
       );
-    }).toList();
-  }
 
-  String? _getClientFieldBySortName(String key) {
-    switch (key) {
-      case 'name':
-        return client.name;
-      case 'address':
-        return client.address;
-      case 'number':
-        return client.phone;
-      case 'order_count':
-        return client.orderCount.toString();
-      case 'sum_price':
-        return client.sumPrice;
-      default:
-        return '';
-    }
-  }
+  Widget _cell(String text,
+          {required int flex,
+          bool emphasis = false,
+          bool muted = false,
+          TextAlign alignment = TextAlign.left}) =>
+      Expanded(
+          flex: flex,
+          child: Text(text,
+              textAlign: alignment,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  color:
+                      muted ? const Color(0xFF64748B) : const Color(0xFF0F172A),
+                  fontSize: (emphasis ? 14.5 : 13.5).sp,
+                  fontWeight: emphasis ? FontWeight.w700 : FontWeight.w500)));
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: IconButton(
-            onPressed: () async {
-              final confirm = await Get.defaultDialog<bool>(
-                title: 'delete'.tr,
-                middleText: '${'confirmDelete'.tr} ${client.name}?',
-                textConfirm: 'yes'.tr,
-                textCancel: 'no'.tr,
-                confirmTextColor: Colors.white,
-                onConfirm: () => Get.back(result: true),
-                onCancel: () => Get.back(result: false),
-              );
-
-              if (confirm == true) {
+  Widget _actions(BuildContext context) => SizedBox(
+      width: 92,
+      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+        _button(
+            icon: IconlyLight.delete,
+            color: const Color(0xFFDC2626),
+            background: const Color(0xFFFEF2F2),
+            onTap: () async {
+              final russian = Get.locale?.languageCode == 'ru';
+              final confirmed = await ConfirmDialog.show(
+                  title: russian ? 'Удалить клиента' : 'Müşderini pozmak',
+                  message: russian
+                      ? 'Подтвердите удаление этого клиента.'
+                      : 'Soňkyra dowam etmek isleseňiz, bu müşderini pozuň.');
+              if (confirmed == true) {
                 await ClientsService().deleteClient(id: client.id!);
-                clientsController.deleteClient(client.id!);
-                CustomWidgets.showSnackBar(
-                  "deleted".tr,
-                  "${client.name} ${"clientDeleted".tr}",
-                  Colors.red,
-                );
+                Get.find<ClientsController>().deleteClient(client.id!);
+                CustomWidgets.showSnackBar('deleted'.tr,
+                    '${client.name} ${'clientDeleted'.tr}', Colors.red);
+                onChanged();
               }
-            },
-            icon: const Icon(
-              IconlyLight.delete,
-              color: Colors.red,
-            ),
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: IconButton(
-            icon: const Icon(
-              IconlyLight.editSquare,
-              color: Colors.black87,
-            ),
-            onPressed: () {
-              showDialog(
-                context: Get.context!,
-                builder: (context) {
-                  return ClientAddButton(
-                    model: client,
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+            }),
+        const SizedBox(width: 8),
+        _button(
+            icon: IconlyLight.editSquare,
+            color: const Color(0xFF475569),
+            background: const Color(0xFFF1F5F9),
+            onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => ClientAddButton(model: client))
+                .then((_) => onChanged())),
+      ]));
+
+  Widget _button(
+          {required IconData icon,
+          required Color color,
+          required Color background,
+          required VoidCallback onTap}) =>
+      SizedBox(
+          width: 34,
+          height: 34,
+          child: Material(
+              color: background,
+              borderRadius: BorderRadius.circular(9),
+              child: InkWell(
+                  onTap: onTap,
+                  borderRadius: BorderRadius.circular(9),
+                  child: Icon(icon, color: color, size: 18))));
 }

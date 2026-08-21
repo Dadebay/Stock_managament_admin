@@ -59,3 +59,17 @@ class LogModel {
     );
   }
 }
+
+class LogsPage {
+  final List<LogModel> logs;
+  final int page;
+  final int totalPages;
+  final int count;
+
+  LogsPage({
+    required this.logs,
+    required this.page,
+    required this.totalPages,
+    required this.count,
+  });
+}

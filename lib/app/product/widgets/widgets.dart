@@ -3,8 +3,17 @@ import 'package:stock_managament_admin/app/product/constants/string_constants.da
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class CustomWidgets {
+  static final GlobalKey<ScaffoldMessengerState> snackBarKey =
+      GlobalKey<ScaffoldMessengerState>();
   static Center spinKit() {
-    return Center(child: Lottie.asset(IconConstants.loading, width: 150, height: 150, animate: true));
+    return const Center(
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: CircularProgressIndicator(
+            strokeWidth: 3.5, color: ColorConstants.kPrimaryColor2),
+      ),
+    );
   }
 
   static Center errorData() {
@@ -33,7 +42,8 @@ class CustomWidgets {
     return Center(
         child: Text(
       "noProduct".tr,
-      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 20.sp),
+      style: TextStyle(
+          color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 20.sp),
     ));
   }
 
@@ -85,7 +95,10 @@ class CustomWidgets {
               maxLines: 1,
               textAlign: TextAlign.end,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18.sp),
+              style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp),
             ),
           ),
           SizedBox(width: 5.w),
@@ -95,7 +108,10 @@ class CustomWidgets {
               text2,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18.sp),
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp),
             ),
           ),
         ],
@@ -103,30 +119,30 @@ class CustomWidgets {
     );
   }
 
-  static SnackbarController showSnackBar(String title, String subtitle, Color color) {
-    if (SnackbarController.isSnackbarBeingShown) {
-      SnackbarController.cancelAllSnackbars();
-    }
-    return Get.snackbar(
-      title,
-      subtitle,
-      snackStyle: SnackStyle.FLOATING,
-      titleText: title == ''
-          ? const SizedBox.shrink()
-          : Text(
-              title.tr,
-              style: const TextStyle(fontSize: 18, color: Colors.white),
-            ),
-      messageText: Text(
-        subtitle.tr,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
-      ),
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: color,
-      borderRadius: 20.0,
-      duration: const Duration(milliseconds: 1000),
-      margin: const EdgeInsets.all(8),
-    );
+  static void showSnackBar(String title, String subtitle, Color color) {
+    // Get.snackbar uses GetX's overlay queue. A route transition can leave
+    // that queue without an Overlay on web, so use the app-level messenger.
+    final messenger = snackBarKey.currentState;
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: color,
+        margin: const EdgeInsets.all(12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(milliseconds: 1400),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title.isNotEmpty)
+                Text(title.tr,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, color: Colors.white)),
+              Text(subtitle.tr, style: const TextStyle(color: Colors.white)),
+            ]),
+      ));
   }
 
   static Text filterTextWidget(String name) {
@@ -148,14 +164,18 @@ class CustomWidgets {
       padding: context.padding.normal,
       child: Column(
         children: [
-          Lottie.asset(IconConstants.noData, width: WidgetSizes.size256.value, height: WidgetSizes.size256.value, animate: true),
+          Lottie.asset(IconConstants.noData,
+              width: WidgetSizes.size256.value,
+              height: WidgetSizes.size256.value,
+              animate: true),
           Padding(
             padding: context.padding.verticalNormal,
             child: Text(
               "Data not found",
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.general.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+              style: context.general.textTheme.titleLarge!
+                  .copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Text(
@@ -163,7 +183,10 @@ class CustomWidgets {
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: context.general.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w500, fontSize: 20, color: ColorConstants.greyColor),
+            style: context.general.textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
+                color: ColorConstants.greyColor),
           ),
         ],
       ),
@@ -171,18 +194,25 @@ class CustomWidgets {
   }
 
   static Widget counter(int index) {
-    return Container(
-      width: 40.w,
-      padding: EdgeInsets.only(right: 10.w),
-      alignment: Alignment.center,
-      child: Text(
-        index.toString(),
-        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.sp),
+    return SizedBox(
+      width: 48.w,
+      child: Center(
+        child: Text(
+          index.toString(),
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.clip,
+          style: TextStyle(
+              color: const Color(0xFF2563EB),
+              fontWeight: FontWeight.w600,
+              fontSize: 14.sp),
+        ),
       ),
     );
   }
 
-  static Widget imageWidget(String? url, {bool fit = false, int? cacheWidth, int? cacheHeight}) {
+  static Widget imageWidget(String? url,
+      {bool fit = false, int? cacheWidth, int? cacheHeight}) {
     // Null check and empty URL handling
     if (url == null || url.isEmpty) {
       return noImage();
@@ -217,7 +247,8 @@ class CustomWidgets {
           child: SizedBox(
             width: 30,
             height: 30,
-            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+            child:
+                CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
           ),
         ),
       ),

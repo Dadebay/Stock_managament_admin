@@ -17,6 +17,8 @@ class ApiConstants {
   static const String users = '${baseUrl}users/';
   static const String getOrderProducts = '${baseUrl}getOrder/';
 
+  static const String logs = '${baseUrl}getlog/';
+
   static const String logOut = '${baseUrl}logout/';
   static const String register = '${baseUrl}register/';
 }

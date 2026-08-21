@@ -8,17 +8,49 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class SearchService {
+  static const int pageSize = 30;
+
   final SearchViewController searchViewController = Get.find();
 
-  Future<List<SearchModel>> getProducts() async {
-    final data = await ApiService().getRequest(ApiConstants.products, requiresToken: true);
+  Future<ProductsPage> getProducts({int page = 1, int size = pageSize, String? search}) async {
+    final uri = Uri.parse(ApiConstants.products).replace(queryParameters: {
+      'page': '$page',
+      'page_size': '$size',
+      if (search != null && search.isNotEmpty) 'search': search,
+    });
+    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+
     if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList();
+      final results = (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList();
+      final count = data['count'] ?? results.length;
+      return ProductsPage(
+        products: results,
+        page: page,
+        totalPages: count == 0 ? 1 : (count / size).ceil(),
+        count: count,
+      );
     } else if (data is List) {
-      return (data).map((item) => SearchModel.fromJson(item)).toList();
+      final results = data.map((item) => SearchModel.fromJson(item)).toList();
+      return ProductsPage(products: results, page: 1, totalPages: 1, count: results.length);
     } else {
-      return [];
+      return ProductsPage(products: [], page: 1, totalPages: 1, count: 0);
     }
+  }
+
+  /// Pulls the entire catalog in as few requests as possible. Used only where the
+  /// full product list is genuinely needed: the order/purchase product pickers and
+  /// the brand/category/location/material filters.
+  Future<List<SearchModel>> getAllProducts() async {
+    const fullCatalogPageSize = 1000;
+    final List<SearchModel> all = [];
+    int page = 1;
+    while (true) {
+      final result = await getProducts(page: page, size: fullCatalogPageSize);
+      all.addAll(result.products);
+      if (page >= result.totalPages || result.products.isEmpty) break;
+      page++;
+    }
+    return all;
   }
 
   Future<SearchModel?> getProductByID(String id) async {

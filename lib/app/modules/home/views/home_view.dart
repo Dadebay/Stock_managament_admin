@@ -56,6 +56,10 @@ class _HomeViewState extends State<HomeView> {
   List<double> profit = List.filled(12, 0.0);
   List<double> sumCost = List.filled(12, 0.0);
 
+  /// Total sales per year, aggregated from the same API payload that feeds
+  /// the monthly chart. Used to show a total under each year in the picker.
+  Map<int, double> yearlySales = {};
+
   DateTime selectedDateTime = DateTime.now();
 
   @override
@@ -114,6 +118,19 @@ class _HomeViewState extends State<HomeView> {
       populateCategoryFromApi('sum_cost', sumCost);
       populateCategoryFromApi('purchases', purchases);
       populateCategoryFromApi('expences', expences);
+
+      final salesByYearMonth = apiChartData['sales'];
+      if (salesByYearMonth is Map) {
+        final Map<int, double> totals = {};
+        salesByYearMonth.forEach((yearMonthKey, value) {
+          final parts = yearMonthKey.toString().split('-');
+          final year = parts.length == 2 ? int.tryParse(parts[0]) : null;
+          if (year != null && value is num) {
+            totals[year] = (totals[year] ?? 0) + value.toDouble();
+          }
+        });
+        yearlySales = totals;
+      }
     } else {
       CustomWidgets.showSnackBar(
           'Error'.tr, 'Failed to load chart data from API.'.tr, Colors.red);
@@ -193,183 +210,195 @@ class _HomeViewState extends State<HomeView> {
   List<bool> valuesColor = [false, false, false, false, false];
   List<bool> valuesText = [false, false, false, false, false];
 
+  static const Color _accent = Color(0xFF4F46E5);
+  static const Color _border = Color(0xFFE2E8F0);
+  static const Color _ink = Color(0xFF0F172A);
+  static const Color _muted = Color(0xFF64748B);
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                    child:
-                        names(name: "salesChart", color: Colors.red, index: 0)),
-                Expanded(
-                    child: names(
-                        name: "sumCostChart", color: Colors.purple, index: 3)),
-                Expanded(
-                    child: names(
-                        name: "purchases", color: Colors.amber, index: 1)),
-                Expanded(
-                    child:
-                        names(name: "expences", color: Colors.blue, index: 2)),
-                Expanded(
-                    child: names(
-                        name: "netProfit", color: Colors.green, index: 4)),
-                const SizedBox(width: 20),
-                yearPicker(context),
-                const SizedBox(width: 10),
-                widget.isAdmin
-                    ? GestureDetector(
-                        onTap: () async {
-                          await exportToExcel(context);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 16),
-                          decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Text(
-                            "Export Excel".tr,
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      )
-                    : SizedBox()
-              ],
-            ),
-          ),
+          _pageBar(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-              child: BarChart(
-                BarChartData(
-                    maxY: maxElement == 0
-                        ? 100
-                        : maxElement + (maxElement * 0.1).abs(),
-                    minY: minElement1 -
-                        (minElement1 *
-                                (minElement1.abs() < 1
-                                    ? 1
-                                    : (minElement1 < 0 ? 0.2 : 0.1)))
-                            .abs(),
-                    barTouchData: BarTouchData(touchTooltipData:
-                        BarTouchTooltipData(
-                            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      String month = months[group.x.toInt() - 1];
-                      String rodLabel = '';
-                      switch (rodIndex) {
-                        case 0:
-                          rodLabel = 'salesChart';
-                          break;
-                        case 1:
-                          rodLabel = 'sumCostChart';
-                          break;
-                        case 2:
-                          rodLabel = 'purchases';
-                          break;
-                        case 3:
-                          rodLabel = 'expences';
-                          break;
-                        case 4:
-                          rodLabel = 'netProfit';
-                          break;
-                      }
-                      return BarTooltipItem(
-                        '$month\n',
-                        const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: "$rodLabel".tr +
-                                ': ${rod.toY.toStringAsFixed(2)}',
-                            style: TextStyle(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(8, 24, 24, 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: _border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: BarChart(
+                  BarChartData(
+                      maxY: maxElement == 0
+                          ? 100
+                          : maxElement + (maxElement * 0.1).abs(),
+                      minY: minElement1 -
+                          (minElement1 *
+                                  (minElement1.abs() < 1
+                                      ? 1
+                                      : (minElement1 < 0 ? 0.2 : 0.1)))
+                              .abs(),
+                      gridData: FlGridData(
+                        drawVerticalLine: false,
+                        horizontalInterval: (maxElement == 0
+                                ? 100
+                                : maxElement + (maxElement * 0.1).abs()) /
+                            8,
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: _border,
+                          strokeWidth: 1,
+                          dashArray: [4, 4],
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      barTouchData: BarTouchData(touchTooltipData:
+                          BarTouchTooltipData(
+                              getTooltipColor: (_) => _ink,
+                              tooltipRoundedRadius: 10,
+                              getTooltipItem:
+                                  (group, groupIndex, rod, rodIndex) {
+                        String month = months[group.x.toInt() - 1];
+                        String rodLabel = '';
+                        switch (rodIndex) {
+                          case 0:
+                            rodLabel = 'salesChart';
+                            break;
+                          case 1:
+                            rodLabel = 'sumCostChart';
+                            break;
+                          case 2:
+                            rodLabel = 'purchases';
+                            break;
+                          case 3:
+                            rodLabel = 'expences';
+                            break;
+                          case 4:
+                            rodLabel = 'netProfit';
+                            break;
+                        }
+                        return BarTooltipItem(
+                          '$month\n',
+                          const TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
                               fontWeight: FontWeight.bold,
+                              fontSize: 13),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: "$rodLabel".tr +
+                                  ': ${rod.toY.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        );
+                      })),
+                      barGroups: List.generate(
+                              12,
+                              (index) => DataItem(
+                                  x: index + 1,
+                                  sales: valuesColor[0] ? 0.0 : sales[index],
+                                  sumCost: valuesColor[3] ? 0.0 : sumCost[index],
+                                  purchases:
+                                      valuesColor[1] ? 0.0 : purchases[index],
+                                  expences:
+                                      valuesColor[2] ? 0.0 : expences[index],
+                                  profit: valuesColor[4] ? 0.0 : profit[index]))
+                          .map((dataItem) => BarChartGroupData(x: dataItem.x, barRods: [
+                                BarChartRodData(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4)),
+                                    toY: dataItem.sales,
+                                    width: 12,
+                                    color: Colors.red),
+                                BarChartRodData(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4)),
+                                    toY: dataItem.sumCost,
+                                    width: 12,
+                                    color: Colors.purple),
+                                BarChartRodData(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4)),
+                                    toY: dataItem.purchases,
+                                    width: 12,
+                                    color: Colors.amber),
+                                BarChartRodData(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4)),
+                                    toY: dataItem.expences,
+                                    width: 12,
+                                    color: Colors.blue),
+                                BarChartRodData(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4)),
+                                    toY: dataItem.profit,
+                                    width: 12,
+                                    color: Colors.green),
+                              ]))
+                          .toList(),
+                      titlesData: FlTitlesData(
+                          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: const AxisTitles(
+                            sideTitles:
+                                SideTitles(showTitles: false, interval: 100),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 52,
+                              getTitlesWidget: (value, meta) => Text(
+                                value.abs() >= 1000
+                                    ? '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K'
+                                    : value.toStringAsFixed(0),
+                                style: TextStyle(color: _muted, fontSize: 11.sp),
+                              ),
                             ),
                           ),
-                        ],
-                      );
-                    })),
-                    barGroups: List.generate(
-                            12,
-                            (index) => DataItem(
-                                x: index + 1,
-                                sales: valuesColor[0] ? 0.0 : sales[index],
-                                sumCost: valuesColor[3] ? 0.0 : sumCost[index],
-                                purchases:
-                                    valuesColor[1] ? 0.0 : purchases[index],
-                                expences: valuesColor[2] ? 0.0 : expences[index],
-                                profit: valuesColor[4] ? 0.0 : profit[index]))
-                        .map((dataItem) => BarChartGroupData(x: dataItem.x, barRods: [
-                              BarChartRodData(
-                                  borderRadius: BorderRadius.zero,
-                                  toY: dataItem.sales,
-                                  width: 15,
-                                  color: Colors.red),
-                              BarChartRodData(
-                                  borderRadius: BorderRadius.zero,
-                                  toY: dataItem.sumCost,
-                                  width: 15,
-                                  color: Colors.purple),
-                              BarChartRodData(
-                                  borderRadius: BorderRadius.zero,
-                                  toY: dataItem.purchases,
-                                  width: 15,
-                                  color: Colors.amber),
-                              BarChartRodData(
-                                  borderRadius: BorderRadius.zero,
-                                  toY: dataItem.expences,
-                                  width: 15,
-                                  color: Colors.blue),
-                              BarChartRodData(
-                                  borderRadius: BorderRadius.zero,
-                                  toY: dataItem.profit,
-                                  width: 15,
-                                  color: Colors.green),
-                            ]))
-                        .toList(),
-                    titlesData: FlTitlesData(
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(
-                          sideTitles:
-                              SideTitles(showTitles: false, interval: 100),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 30,
-                            getTitlesWidget: (value, meta) {
-                              final int monthIndex = value.toInt() - 1;
-                              if (monthIndex >= 0 && monthIndex < 12) {
-                                String monthName = months[monthIndex];
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    monthName.length >= 3
-                                        ? monthName.substring(0, 3)
-                                        : monthName,
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 14.sp),
-                                  ),
-                                );
-                              }
-                              return const Text('');
-                            },
-                          ),
-                        ))),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 30,
+                              getTitlesWidget: (value, meta) {
+                                final int monthIndex = value.toInt() - 1;
+                                if (monthIndex >= 0 && monthIndex < 12) {
+                                  String monthName = months[monthIndex];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      monthName.length >= 3
+                                          ? monthName.substring(0, 3)
+                                          : monthName,
+                                      style: TextStyle(
+                                          color: _muted,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  );
+                                }
+                                return const Text('');
+                              },
+                            ),
+                          ))),
+                ),
               ),
             ),
           ),
@@ -378,31 +407,194 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  Widget _pageBar() {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: _border)),
+      ),
+      child: Row(children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: [
+                names(name: "salesChart", color: Colors.red, index: 0),
+                const SizedBox(width: 4),
+                names(name: "sumCostChart", color: Colors.purple, index: 3),
+                const SizedBox(width: 4),
+                names(
+                    name: "purchases", color: Colors.amber.shade700, index: 1),
+                const SizedBox(width: 4),
+                names(name: "expences", color: Colors.blue, index: 2),
+                const SizedBox(width: 4),
+                names(name: "netProfit", color: Colors.green, index: 4),
+              ]),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              yearPicker(context),
+              if (widget.isAdmin) ...[
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () async => exportToExcel(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 9, horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: _accent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(IconlyLight.download,
+                            color: Colors.white, size: 15),
+                        const SizedBox(width: 7),
+                        Text(
+                          "Export Excel".tr,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.5.sp,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ]),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  static const int _firstPickerYear = 2024;
+
+  String _formatCompact(double value) {
+    final abs = value.abs();
+    if (abs >= 1000) {
+      return '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K';
+    }
+    return value.toStringAsFixed(0);
+  }
+
   GestureDetector yearPicker(BuildContext context) {
     return GestureDetector(
         onTap: () {
+          final int lastYear = max(DateTime.now().year + 3, _firstPickerYear);
+          final years = [
+            for (int y = _firstPickerYear; y <= lastYear; y++) y
+          ];
           showDialog(
             context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text("Select Year".tr),
-                content: SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: YearPicker(
-                    firstDate: DateTime(DateTime.now().year - 10, 1),
-                    lastDate: DateTime(DateTime.now().year + 10, 1),
-                    initialDate: selectedDateTime,
-                    selectedDate: selectedDateTime,
-                    onChanged: (DateTime dateTime) {
-                      if (mounted) {
-                        setState(() {
-                          selectedDateTime = dateTime;
-                        });
-                      }
-                      getData(dateTime, false);
-                      Navigator.pop(context);
-                    },
+            builder: (BuildContext dialogContext) {
+              return Dialog(
+                shape:
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                backgroundColor: Colors.white,
+                child: SizedBox(
+                  width: 340,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text('Select Year'.tr,
+                                  style: TextStyle(
+                                      color: _ink,
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              splashRadius: 18,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(Icons.close_rounded,
+                                  color: _muted, size: 20),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, color: _border),
+                        const SizedBox(height: 16),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 320),
+                          child: SingleChildScrollView(
+                            child: Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              children: years.map((year) {
+                                final selected = selectedDateTime.year == year;
+                                final total = yearlySales[year];
+                                return GestureDetector(
+                                  onTap: () {
+                                    final newDate = DateTime(year, 1);
+                                    if (mounted) {
+                                      setState(() {
+                                        selectedDateTime = newDate;
+                                      });
+                                    }
+                                    getData(newDate, false);
+                                    Navigator.pop(dialogContext);
+                                  },
+                                  child: Container(
+                                    width: 92,
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? _accent
+                                          : const Color(0xFFF8FAFC),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: selected ? _accent : _border),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(year.toString(),
+                                            style: TextStyle(
+                                                color: selected
+                                                    ? Colors.white
+                                                    : _ink,
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w700)),
+                                        if (total != null && total > 0) ...[
+                                          const SizedBox(height: 2),
+                                          Text(_formatCompact(total),
+                                              style: TextStyle(
+                                                  color: selected
+                                                      ? Colors.white
+                                                          .withOpacity(.85)
+                                                      : Colors.red,
+                                                  fontSize: 10.sp,
+                                                  fontWeight: FontWeight.w600)),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -410,26 +602,24 @@ class _HomeViewState extends State<HomeView> {
           );
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
           decoration: BoxDecoration(
-              color: Colors.black, borderRadius: BorderRadius.circular(10)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: _border),
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "${"Year".tr}: ",
-                style: TextStyle(
-                    color: Colors.amber,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold),
-              ),
+              const Icon(IconlyLight.calendar, color: _accent, size: 16),
+              const SizedBox(width: 8),
               Text(
                 selectedDateTime.year.toString(),
                 style: TextStyle(
-                    color: Colors.amber,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold),
+                    color: _ink, fontSize: 13.5.sp, fontWeight: FontWeight.w700),
               ),
+              const SizedBox(width: 4),
+              const Icon(Icons.unfold_more_rounded, color: _muted, size: 15),
             ],
           ),
         ));
@@ -437,8 +627,14 @@ class _HomeViewState extends State<HomeView> {
 
   Widget names(
       {required String name, required Color color, required int index}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+    final bool hidden = valuesColor[index];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: hidden ? const Color(0xFFF8FAFC) : color.withOpacity(.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: hidden ? _border : color.withOpacity(.3)),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -451,19 +647,17 @@ class _HomeViewState extends State<HomeView> {
               }
             },
             child: Container(
-              width: 20.w,
-              height: 20.h,
-              margin: EdgeInsets.only(right: 6.w),
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.only(right: 4),
               decoration: BoxDecoration(
-                color: valuesColor[index] ? Colors.grey.shade300 : color,
-                border: valuesColor[index]
-                    ? Border.all(color: color, width: 2)
-                    : Border.all(color: color.withOpacity(0.5)),
-                borderRadius: BorderRadius.circular(4),
+                color: hidden ? Colors.transparent : color,
+                border: Border.all(color: hidden ? _muted : color, width: 1.2),
+                borderRadius: BorderRadius.circular(3),
               ),
-              child: valuesColor[index]
+              child: hidden
                   ? Icon(Icons.visibility_off_outlined,
-                      size: 14.sp, color: color)
+                      size: 6, color: _muted)
                   : null,
             ),
           ),
@@ -500,13 +694,12 @@ class _HomeViewState extends State<HomeView> {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: TextStyle(
-                  color: Colors.black,
+                  color: hidden ? _muted : _ink,
                   decoration: valuesText[index]
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
-                  fontSize: 16.sp,
-                  fontWeight:
-                      valuesColor[index] ? FontWeight.normal : FontWeight.bold,
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),

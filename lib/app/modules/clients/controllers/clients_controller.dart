@@ -21,11 +21,11 @@ class ClientsController extends GetxController {
     }).toList();
   }
 
-  Future<void> exportToExcel() async {
+  Future<void> exportToExcel(List<ClientModel> clientsToExport) async {
     var excel = Excel.createExcel();
     var sheet = excel['Clients'];
     sheet.appendRow(['Name', 'Number', 'Address', 'Order Count', 'Sum Price']);
-    for (var client in clients) {
+    for (var client in clientsToExport) {
       sheet.appendRow([client.name.toString(), client.phone.toString(), client.address.toString(), client.orderCount.toString(), client.sumPrice.toString()]);
     }
     excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");

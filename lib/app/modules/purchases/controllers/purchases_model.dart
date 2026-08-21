@@ -48,6 +48,24 @@ class PurchasesModel {
   }
 }
 
+class PurchasesPage {
+  final List<PurchasesModel> purchases;
+  final int page;
+  final int totalPages;
+  final int count;
+  final double summ;
+  final int totalProductCount;
+
+  PurchasesPage({
+    required this.purchases,
+    required this.page,
+    required this.totalPages,
+    required this.count,
+    required this.summ,
+    required this.totalProductCount,
+  });
+}
+
 class ProductModelPurchases {
   final int id;
   final int count;

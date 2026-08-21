@@ -9,6 +9,8 @@ class CustomTextField extends StatefulWidget {
   final FocusNode focusNode;
   final FocusNode requestfocusNode;
   final IconData? prefixIcon;
+  final double? prefixIconSize;
+  final Widget? prefixIconWidget;
   final int? maxLine;
   final bool? enabled;
   final Function()? onTap;
@@ -16,6 +18,7 @@ class CustomTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final bool readOnly;
+  final bool obscureText;
   const CustomTextField({
     required this.labelName,
     required this.controller,
@@ -25,11 +28,14 @@ class CustomTextField extends StatefulWidget {
     this.isNumberOnly = false,
     this.readOnly = false,
     this.prefixIcon,
+    this.prefixIconSize,
+    this.prefixIconWidget,
     this.enabled,
     this.onTap,
     Key? key,
     this.textInputAction,
     this.onSubmitted,
+    this.obscureText = false,
   }) : super(key: key);
 
   @override
@@ -37,6 +43,8 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _obscure = widget.obscureText;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -55,24 +63,41 @@ class _CustomTextFieldState extends State<CustomTextField> {
         textInputAction: widget.textInputAction,
         onFieldSubmitted: widget.onSubmitted,
         onEditingComplete: () => widget.requestfocusNode.requestFocus(),
-        maxLines: widget.maxLine ?? 1,
+        maxLines: widget.obscureText ? 1 : (widget.maxLine ?? 1),
+        obscureText: _obscure,
         keyboardType: widget.isNumberOnly ? TextInputType.number : TextInputType.text,
         inputFormatters: widget.isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
         focusNode: widget.focusNode,
         enableSuggestions: false,
         autocorrect: false,
         decoration: InputDecoration(
-          prefixIconConstraints: BoxConstraints(minWidth: widget.prefixIcon == null ? 20 : 10, minHeight: 0),
-          prefixIcon: widget.prefixIcon == null
-              ? const SizedBox.shrink()
-              : Padding(
+          prefixIconConstraints: BoxConstraints(minWidth: (widget.prefixIcon == null && widget.prefixIconWidget == null) ? 20 : 10, minHeight: 0),
+          prefixIcon: widget.prefixIconWidget != null
+              ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Icon(
-                    widget.prefixIcon,
+                  child: widget.prefixIconWidget,
+                )
+              : widget.prefixIcon == null
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Icon(
+                        widget.prefixIcon,
+                        color: ColorConstants.greyColor,
+                        size: widget.prefixIconSize ?? WidgetSizes.size32.value,
+                      ),
+                    ),
+          suffixIcon: widget.obscureText
+              ? IconButton(
+                  splashRadius: 20,
+                  icon: Icon(
+                    _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                     color: ColorConstants.greyColor,
-                    size: WidgetSizes.size32.value,
+                    size: 22,
                   ),
-                ),
+                  onPressed: () => setState(() => _obscure = !_obscure),
+                )
+              : null,
           labelText: widget.labelName.tr,
           labelStyle: context.general.textTheme.bodyLarge!.copyWith(color: ColorConstants.greyColor, fontSize: 16.sp, fontWeight: FontWeight.w500),
           floatingLabelAlignment: FloatingLabelAlignment.start,

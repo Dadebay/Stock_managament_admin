@@ -9,7 +9,7 @@ class HttpOverridesCustom extends HttpOverrides {
 
 @immutable
 class AppStartInit {
-  final storage = GetStorage();
+  final storage = AppStorage();
 
   Locale getLocale() {
     final String? langCode = storage.read('langCode');
@@ -24,6 +24,6 @@ class AppStartInit {
     WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     HttpOverrides.global = HttpOverridesCustom();
-    await GetStorage.init();
+    await AppStorage.init();
   }
 }

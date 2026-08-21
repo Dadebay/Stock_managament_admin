@@ -12,22 +12,23 @@ dependencies:
 
   # STATE MANAGEMENT & UTILITIES
   get: ^4.6.6                      # GetX for state management, routing, and DI
-  kartal: ^3.5.0                 # Handy extension methods and utilities
+  kartal: ^5.0.0                 # Handy extension methods and utilities
   intl: ^0.19.0                   # Internationalization: date, currency, etc.
 
   # STORAGE & FILE OPERATIONS
-  get_storage:                   # Simple key-value local storage (compatible with GetX)
+  shared_preferences: ^2.3.2     # Key-value local storage (wasm-compatible; replaced get_storage)
   path_provider: ^2.0.2          # Accessing commonly used locations on filesystem
   path:                          # Path manipulation utilities
   file_saver:                    # Save files to disk (also for web)
   excel: ^2.0.5                  # Read/write Excel files
 
   # WEB SUPPORT
-  image_picker_web: ^3.1.1       # Image picking functionality for Flutter Web
+  image_picker: ^1.2.3           # Image picking (web impl is wasm-compatible; replaced image_picker_web)
   universal_html: ^2.0.3         # Web-compatible HTML API for Flutter
 
   # UI COMPONENTS & ANIMATIONS
   flutter_iconly:                # Lightweight icon pack (iOS/Android)
+  hugeicons: ^1.1.7               # Hugeicons stroke-rounded icon set
   lottie: ^3.1.0                 # Render animations from Lottie JSON files
   fl_chart: ^0.68.0              # Draw line, bar, pie, and other charts
   scroll_to_hide: ^2.1.0         # Hide widgets on scroll (e.g., bottom navigation)
@@ -64,5 +65,15 @@ flutter:
           weight: 500
         - asset: assets/fonts/Gilroy-Regular.ttf
           weight: 400
+    - family: NormsPro
+      fonts:
+        - asset: assets/fonts/NormsProBold.otf
+          weight: 700
+        - asset: assets/fonts/NormsProMedium.otf
+          weight: 500
+        - asset: assets/fonts/NormsProRegular.otf
+          weight: 400
+        - asset: assets/fonts/NormsProLight.otf
+          weight: 300
   uses-material-design: true
   generate: true

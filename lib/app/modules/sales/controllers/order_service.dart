@@ -32,40 +32,71 @@ class OrderService {
   }
 
   String _extractHtmlErrorSummary(String html) {
-    final titleMatch = RegExp(r'<title>(.*?)</title>', dotAll: true).firstMatch(html);
-    final exceptionTypeMatch = RegExp(r'Exception Type:</th>\\s*<td>(.*?)</td>', dotAll: true).firstMatch(html);
-    final exceptionValueMatch = RegExp(r'Exception Value:</th>\\s*<td><pre>(.*?)</pre>', dotAll: true).firstMatch(html);
+    final titleMatch =
+        RegExp(r'<title>(.*?)</title>', dotAll: true).firstMatch(html);
+    final exceptionTypeMatch =
+        RegExp(r'Exception Type:</th>\\s*<td>(.*?)</td>', dotAll: true)
+            .firstMatch(html);
+    final exceptionValueMatch =
+        RegExp(r'Exception Value:</th>\\s*<td><pre>(.*?)</pre>', dotAll: true)
+            .firstMatch(html);
 
     final title = titleMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
-    final exceptionType = exceptionTypeMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
-    final exceptionValue = exceptionValueMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
+    final exceptionType =
+        exceptionTypeMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
+    final exceptionValue =
+        exceptionValueMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
 
     return 'title=$title | exceptionType=$exceptionType | exceptionValue=$exceptionValue';
   }
 
-  // final OrderController orderController = Get.find();
-  Future<List<OrderModel>> getOrders() async {
-    final data = await ApiService().getRequest(ApiConstants.order, requiresToken: true);
+  static const int pageSize = 30;
+
+  Future<OrdersPage> getOrders({int page = 1, String? search, String? status}) async {
+    final uri = Uri.parse(ApiConstants.order).replace(queryParameters: {
+      'page': '$page',
+      'page_size': '$pageSize',
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (status != null && status.isNotEmpty) 'status': status,
+    });
+    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
 
     if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => OrderModel.fromJson(item)).toList();
+      final results = (data['results'] as List).map((item) => OrderModel.fromJson(item)).toList();
+      final count = data['count'] ?? results.length;
+      return OrdersPage(
+        orders: results,
+        page: page,
+        totalPages: count == 0 ? 1 : (count / pageSize).ceil(),
+        count: count,
+        stats: OrderStats.fromJson(data['stats'] as Map<String, dynamic>?),
+      );
     } else if (data is List) {
-      return (data).map((item) => OrderModel.fromJson(item)).toList();
+      final results = data.map((item) => OrderModel.fromJson(item)).toList();
+      return OrdersPage(orders: results, page: 1, totalPages: 1, count: results.length, stats: OrderStats.fromJson(null));
     } else {
-      return [];
+      return OrdersPage(orders: [], page: 1, totalPages: 1, count: 0, stats: OrderStats.fromJson(null));
     }
   }
 
   Future<List<ProductModel>> getOrderProduct(int id) async {
-    final data = await ApiService().getRequest("${ApiConstants.getOrderProducts}$id/", requiresToken: true);
+    final data = await ApiService().getRequest(
+        "${ApiConstants.getOrderProducts}$id/",
+        requiresToken: true);
     if (data is List) {
-      return (data).map((item) => ProductModel.fromJson(item)).toList();
+      return data
+          .whereType<Map>()
+          .map((item) => ProductModel.fromJson(Map<String, dynamic>.from(item)))
+          .where((item) => item.product != null)
+          .toList();
     } else {
       return [];
     }
   }
 
-  Future<OrderModel?> createOrder({required OrderModel model, required List<Map<String, int>> products}) async {
+  Future<OrderModel?> createOrder(
+      {required OrderModel model,
+      required List<Map<String, int>> products}) async {
     print('\n===== CREATE ORDER REQUEST =====');
     print('Endpoint: ${ApiConstants.order}');
 
@@ -122,9 +153,12 @@ class OrderService {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token',
     };
-    final normalizedClientName = _normalizeOptionalText(model.clientDetailModel?.name);
-    final normalizedClientAddress = _normalizeOptionalText(model.clientDetailModel?.address);
-    final normalizedClientPhone = _normalizeClientPhone(model.clientDetailModel?.phone);
+    final normalizedClientName =
+        _normalizeOptionalText(model.clientDetailModel?.name);
+    final normalizedClientAddress =
+        _normalizeOptionalText(model.clientDetailModel?.address);
+    final normalizedClientPhone =
+        _normalizeClientPhone(model.clientDetailModel?.phone);
 
     final rawBody = {
       'status': int.parse(model.status),
@@ -164,14 +198,16 @@ class OrderService {
       print('Response headers: ${response.headers}');
       if (response.body.length > 3000) {
         print('Response body length: ${response.body.length}');
-        print('Response body preview (first 3000 chars): ${response.body.substring(0, 3000)}');
+        print(
+            'Response body preview (first 3000 chars): ${response.body.substring(0, 3000)}');
       } else {
         print('Response body (raw): ${response.body}');
       }
 
       final contentType = response.headers['content-type'] ?? '';
       if (response.statusCode >= 500 && contentType.contains('text/html')) {
-        print('Server returned HTML error page. Parsed summary: ${_extractHtmlErrorSummary(response.body)}');
+        print(
+            'Server returned HTML error page. Parsed summary: ${_extractHtmlErrorSummary(response.body)}');
       }
 
       dynamic decoded;
@@ -192,7 +228,8 @@ class OrderService {
           return updatedOrder;
         }
 
-        print('Edit success status but response JSON is not Map<String, dynamic>.');
+        print(
+            'Edit success status but response JSON is not Map<String, dynamic>.');
         return null;
       }
 

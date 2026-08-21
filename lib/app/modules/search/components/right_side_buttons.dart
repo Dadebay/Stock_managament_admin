@@ -14,42 +14,42 @@ class RightSideButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         isAdmin
-            ? FloatingActionButton(
-                backgroundColor: Colors.black,
-                heroTag: "add_product",
-                onPressed: () => Get.to(() => const WebAddProductPage()),
-                child: const Icon(
-                  IconlyLight.plus,
-                  color: Colors.amber,
-                ),
+            ? _action(
+                icon: IconlyLight.plus,
+                onTap: () => Get.to(() => const WebAddProductPage()),
               )
-            : SizedBox(),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 20.w),
-          child: FloatingActionButton(
-            backgroundColor: Colors.black,
-            heroTag: "filter",
-            onPressed: () => DialogsUtils.filterDialogSearchView(),
-            child: const Icon(
-              IconlyLight.filter2,
-              color: Colors.amber,
-            ),
-          ),
+            : const SizedBox.shrink(),
+        if (isAdmin) const SizedBox(height: 10),
+        _action(
+          icon: IconlyLight.filter2,
+          onTap: DialogsUtils.filterDialogSearchView,
         ),
-        FloatingActionButton(
-          heroTag: "viewChange",
-          backgroundColor: Colors.black,
-          onPressed: () {
-            searchViewController.showInGrid.value = !searchViewController.showInGrid.value;
-          },
-          child: Obx(() {
-            return Icon(
-              searchViewController.showInGrid.value ? IconlyLight.paper : IconlyLight.category,
-              color: Colors.amber,
-            );
-          }),
-        ),
+        const SizedBox(height: 10),
+        Obx(() => _action(
+              icon: searchViewController.showInGrid.value
+                  ? IconlyLight.paper
+                  : IconlyLight.category,
+              onTap: () => searchViewController.showInGrid.value =
+                  !searchViewController.showInGrid.value,
+            )),
       ],
     );
   }
+
+  Widget _action({required IconData icon, required VoidCallback onTap}) =>
+      SizedBox(
+        width: 42,
+        height: 42,
+        child: Material(
+          color: const Color(0xFF0F172A),
+          borderRadius: BorderRadius.circular(12),
+          elevation: 3,
+          shadowColor: const Color(0xFF0F172A).withValues(alpha: .22),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Icon(icon, color: const Color(0xFFFACC15), size: 20),
+          ),
+        ),
+      );
 }

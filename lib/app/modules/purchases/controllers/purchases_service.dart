@@ -8,16 +8,51 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class PurchasesService {
+  static const int pageSize = 30;
+
   final PurchasesController purchasesController = Get.find();
 
-  Future<List<PurchasesModel>> getPurchases() async {
-    final data = await ApiService().getRequest(ApiConstants.purchases, requiresToken: true);
-    if (data is Map && data['data'] != null) {
-      return (data['data'] as List).map((item) => PurchasesModel.fromJson(item)).toList();
+  Future<PurchasesPage> getPurchases({int page = 1, String? search}) async {
+    final uri = Uri.parse(ApiConstants.purchases).replace(queryParameters: {
+      'page': '$page',
+      'page_size': '$pageSize',
+      if (search != null && search.isNotEmpty) 'search': search,
+    });
+    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+
+    if (data is Map && data['results'] != null) {
+      final results = (data['results'] as List).map((item) => PurchasesModel.fromJson(item)).toList();
+      final count = data['count'] ?? results.length;
+      return PurchasesPage(
+        purchases: results,
+        page: page,
+        totalPages: count == 0 ? 1 : (count / pageSize).ceil(),
+        count: count,
+        summ: double.tryParse('${data['summ'] ?? 0}') ?? 0.0,
+        totalProductCount: int.tryParse('${data['total_product_count'] ?? 0}') ?? 0,
+      );
+    } else if (data is Map && data['data'] != null) {
+      final results = (data['data'] as List).map((item) => PurchasesModel.fromJson(item)).toList();
+      return PurchasesPage(
+        purchases: results,
+        page: 1,
+        totalPages: 1,
+        count: results.length,
+        summ: double.tryParse('${data['summ'] ?? 0}') ?? 0.0,
+        totalProductCount: int.tryParse('${data['total_product_count'] ?? 0}') ?? PurchasesController.totalCountOf(results),
+      );
     } else if (data is List) {
-      return (data).map((item) => PurchasesModel.fromJson(item)).toList();
+      final results = data.map((item) => PurchasesModel.fromJson(item)).toList();
+      return PurchasesPage(
+        purchases: results,
+        page: 1,
+        totalPages: 1,
+        count: results.length,
+        summ: PurchasesController.totalCostOf(results),
+        totalProductCount: PurchasesController.totalCountOf(results),
+      );
     } else {
-      return [];
+      return PurchasesPage(purchases: [], page: 1, totalPages: 1, count: 0, summ: 0, totalProductCount: 0);
     }
   }
 

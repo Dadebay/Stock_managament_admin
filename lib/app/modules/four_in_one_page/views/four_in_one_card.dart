@@ -1,4 +1,4 @@
-import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_model.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_service.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/views/four_in_one_add.dart';
@@ -29,12 +29,12 @@ class FourInOneCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.purple.withOpacity(0.2),
+          color: Colors.purple.withValues(alpha: 0.2),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -49,7 +49,7 @@ class FourInOneCard extends StatelessWidget {
               width: 48.w,
               height: 48.h,
               decoration: BoxDecoration(
-                color: Colors.purple.withOpacity(0.1),
+                color: Colors.purple.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: Colors.purple,
@@ -83,7 +83,7 @@ class FourInOneCard extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    "${fourInOneModel.name} - ${fourInOneModel.quantity ?? 0} count",
+                    "${fourInOneModel.name} - ${fourInOneModel.quantity} count",
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -136,19 +136,42 @@ class FourInOneCard extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: IconButton(
             icon: const Icon(IconlyLight.delete, color: Colors.red),
             onPressed: () async {
+              final isRussian = Get.locale?.languageCode == 'ru';
+              final isCategory = dataKey.contains('category');
+              final isBrand = dataKey.contains('brend');
+              final isLocation = dataKey.contains('location');
+              final entityTm = isCategory
+                  ? 'kategoriýany'
+                  : isBrand
+                      ? 'brendi'
+                      : isLocation
+                          ? 'salgyny'
+                          : 'materialy';
+              final entityRu = isCategory
+                  ? 'категорию'
+                  : isBrand
+                      ? 'бренд'
+                      : isLocation
+                          ? 'адрес'
+                          : 'материал';
               final confirm = await ConfirmDialog.show(
-                title: 'delete'.tr,
-                message: '${'confirmDelete'.tr} ${fourInOneModel.name}?',
+                title: isRussian
+                    ? 'Удалить $entityRu'
+                    : '${entityTm[0].toUpperCase()}${entityTm.substring(1)} pozmak',
+                message: isRussian
+                    ? 'Продолжить и удалить $entityRu «${fourInOneModel.name}»?'
+                    : 'Soňkyra dowam etmek isleseňiz, «${fourInOneModel.name}» $entityTm pozuň.',
               );
 
               if (confirm == true) {
-                await FourInOnePageService().deleteFourInOne(model: fourInOneModel, url: url, key: dataKey);
+                await FourInOnePageService().deleteFourInOne(
+                    model: fourInOneModel, url: url, key: dataKey);
               }
             },
           ),
@@ -156,7 +179,7 @@ class FourInOneCard extends StatelessWidget {
         SizedBox(width: 8.w),
         Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
           ),
           child: IconButton(

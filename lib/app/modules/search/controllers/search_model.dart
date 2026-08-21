@@ -40,16 +40,26 @@ class SearchModel {
     List<PurchaseModelInsideProduct> purchList = [];
     if (json['purch'] != null && json['purch'] is List) {
       // JSON'daki listeyi alıp her bir elemanını PurchaseModelInsideProduct'a dönüştürüyoruz.
-      purchList = (json['purch'] as List).map((item) => PurchaseModelInsideProduct.fromJson(item)).toList();
+      purchList = (json['purch'] as List)
+          .map((item) => PurchaseModelInsideProduct.fromJson(item))
+          .toList();
     }
 
     return SearchModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
-      category: json['category_detail'] != null ? CategoryModel.fromJson(json['category_detail']) : null,
-      brend: json['brends_detail'] != null ? BrendModel.fromJson(json['brends_detail']) : null,
-      material: json['materials_detail'] != null ? MaterialModel.fromJson(json['materials_detail']) : null,
-      location: json['location_detail'] != null ? LocationModel.fromJson(json['location_detail']) : null,
+      category: json['category_detail'] != null
+          ? CategoryModel.fromJson(json['category_detail'])
+          : null,
+      brend: json['brends_detail'] != null
+          ? BrendModel.fromJson(json['brends_detail'])
+          : null,
+      material: json['materials_detail'] != null
+          ? MaterialModel.fromJson(json['materials_detail'])
+          : null,
+      location: json['location_detail'] != null
+          ? LocationModel.fromJson(json['location_detail'])
+          : null,
       // Ayrıştırılan listeyi burada kullanıyoruz. Eğer 'purch' boş veya null ise boş bir liste atanır.
       purch: purchList,
       price: json['price'] ?? '',
@@ -248,7 +258,9 @@ class ProductModel {
     return ProductModel(
       id: json['id'] ?? 0,
       count: json['count'] ?? 0,
-      product: SearchModel.fromJson(json['product']),
+      product: json['product'] is Map<String, dynamic>
+          ? SearchModel.fromJson(json['product'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -260,4 +272,18 @@ class ProductModel {
       'product': product,
     };
   }
+}
+
+class ProductsPage {
+  final List<SearchModel> products;
+  final int page;
+  final int totalPages;
+  final int count;
+
+  ProductsPage({
+    required this.products,
+    required this.page,
+    required this.totalPages,
+    required this.count,
+  });
 }

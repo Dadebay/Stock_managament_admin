@@ -1,140 +1,167 @@
-// ignore_for_file: must_be_immutable
-
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/components/enter_add_button.dart';
+import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_controller.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_model.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_service.dart';
-import 'package:stock_managament_admin/app/modules/user_entering_app/views/enter_Card.dart';
-import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
+import 'package:stock_managament_admin/app/modules/user_entering_app/views/enter_card.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
-import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
 import 'package:stock_managament_admin/app/product/widgets/search_widget.dart';
 
-import '../controllers/enter_controller.dart';
-
-class EnteringAppView extends StatelessWidget {
+class EnteringAppView extends StatefulWidget {
+  const EnteringAppView({super.key, required this.isAdmin});
   final bool isAdmin;
-  final EnterController clientsController = Get.find<EnterController>();
-
-  TextEditingController searchEditingController = TextEditingController();
-
-  EnteringAppView({super.key, required this.isAdmin});
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        FutureBuilder<List<EnterModel>>(
-          future: EnterService().getClients(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CustomWidgets.spinKit();
-            } else if (snapshot.hasError) {
-              return CustomWidgets.errorData();
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return CustomWidgets.emptyData();
-            }
-            final clients = snapshot.data!;
-            clientsController.clients.assignAll(clients);
-            return Obx(() {
-              final isSearching = searchEditingController.text.isNotEmpty;
-              final hasResult = clientsController.searchResult.isNotEmpty;
-              final displayList = (isSearching && hasResult) ? clientsController.searchResult.toList() : clientsController.clients.toList();
+  State<EnteringAppView> createState() => _EnteringAppViewState();
+}
 
-              return Column(
-                children: [
-                  SearchWidget(
-                    controller: searchEditingController,
-                    onChanged: (value) => clientsController.onSearchTextChanged(value),
-                    onClear: () {
-                      searchEditingController.clear();
-                      clientsController.searchResult.clear();
-                    },
-                  ),
-                  ListviewTopText<EnterModel>(
-                    names: StringConstants.userNames,
-                    listToSort: displayList,
-                    setSortedList: (newList) {
-                      if (isSearching) {
-                        clientsController.searchResult.assignAll(newList);
-                      } else {
-                        clientsController.clients.assignAll(newList);
-                      }
-                    },
-                    getSortValue: (item, key) {
-                      switch (key) {
-                        case 'username':
-                          return item.username;
-                        case 'password':
-                          return item.password;
-                        case 'isSuperUser':
-                          return item.isSuperUser;
-                        default:
-                          return '';
-                      }
-                    },
-                  ),
-                  Expanded(
-                    child: (searchEditingController.text.isNotEmpty && clientsController.searchResult.isEmpty)
-                        ? CustomWidgets.emptyData()
-                        : ListView.builder(
-                            key: ValueKey(displayList.map((e) => e.id).join('-')),
-                            padding: EdgeInsets.only(top: 10.h, bottom: 100.h),
-                            itemCount: displayList.length,
-                            itemBuilder: (context, index) {
-                              return EnterCard(
-                                key: ObjectKey('${displayList[index].id}-$index-${displayList.length - index}'),
-                                isAdmin: isAdmin,
-                                client: displayList[index],
-                                count: (displayList.length - index),
-                                topTextColumnSize: StringConstants.userNames,
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            });
-          },
-        ),
-        isAdmin ? bottomButtons() : SizedBox.shrink(),
-      ],
-    );
+class _EnteringAppViewState extends State<EnteringAppView> {
+  final controller = Get.find<EnterController>();
+  final searchController = TextEditingController();
+  late final Future<List<EnterModel>> _future;
+  String _sortKey = 'name';
+  bool _ascending = true;
+  @override
+  void initState() {
+    super.initState();
+    _future = EnterService().getClients();
   }
 
-  Positioned bottomButtons() {
-    return Positioned(
-      right: 15.0,
-      bottom: 15.0,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              clientsController.exportToExcel();
-            },
-            backgroundColor: Colors.black,
-            child: const Icon(
-              IconlyLight.document,
-              color: Colors.amber,
-            ),
-          ),
-          SizedBox(width: 30.w),
-          FloatingActionButton(
-            backgroundColor: Colors.black,
-            onPressed: () {
-              showDialog(
-                context: Get.context!,
-                builder: (context) {
-                  return EnterAddButton();
-                },
-              );
-            },
-            child: const Icon(CupertinoIcons.add, color: Colors.amber),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Stack(children: [
+        FutureBuilder<List<EnterModel>>(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return CustomWidgets.spinKit();
+              if (snapshot.hasError) return CustomWidgets.errorData();
+              if (!snapshot.hasData || snapshot.data!.isEmpty)
+                return CustomWidgets.emptyData();
+              if (controller.clients.isEmpty)
+                WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => controller.clients.assignAll(snapshot.data!));
+              return Obx(() {
+                final searching = searchController.text.isNotEmpty;
+                final source = searching
+                    ? controller.searchResult.toList()
+                    : controller.clients.toList();
+                final list = List<EnterModel>.from(source)..sort(_compare);
+                return Column(children: [
+                  SearchWidget(
+                      controller: searchController,
+                      onChanged: controller.onSearchTextChanged,
+                      onClear: () {
+                        searchController.clear();
+                        controller.searchResult.clear();
+                      }),
+                  _header(),
+                  Expanded(
+                      child: list.isEmpty
+                          ? CustomWidgets.emptyData()
+                          : ListView.separated(
+                              itemCount: list.length,
+                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 6),
+                              itemBuilder: (_, index) => EnterCard(
+                                  client: list[index],
+                                  count: list.length - index,
+                                  isAdmin: widget.isAdmin))),
+                ]);
+              });
+            }),
+        if (widget.isAdmin)
+          Positioned(
+              right: 20,
+              bottom: 20,
+              child: Row(children: [
+                FloatingActionButton(
+                    heroTag: 'user_export',
+                    backgroundColor: const Color(0xFFF1F5F9),
+                    foregroundColor: const Color(0xFF475569),
+                    onPressed: controller.exportToExcel,
+                    child: const Icon(IconlyLight.document, size: 22)),
+                const SizedBox(width: 12),
+                FloatingActionButton(
+                    heroTag: 'user_add',
+                    backgroundColor: const Color(0xFF4F46E5),
+                    foregroundColor: Colors.white,
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (_) => const EnterAddButton()),
+                    child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedUserAdd01,
+                        color: Colors.white,
+                        size: 15)),
+              ])),
+      ]);
+
+  int _compare(EnterModel a, EnterModel b) {
+    final l = _sortKey == 'name'
+        ? (a.username ?? '')
+        : _sortKey == 'password'
+            ? (a.password ?? '')
+            : (a.isSuperUser ?? false ? '1' : '0');
+    final r = _sortKey == 'name'
+        ? (b.username ?? '')
+        : _sortKey == 'password'
+            ? (b.password ?? '')
+            : (b.isSuperUser ?? false ? '1' : '0');
+    return _ascending
+        ? l.toLowerCase().compareTo(r.toLowerCase())
+        : r.toLowerCase().compareTo(l.toLowerCase());
+  }
+
+  Widget _header() => Container(
+      height: 48,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0)))),
+      child: Row(children: [
+        const SizedBox(width: 50),
+        _head('client_name'.tr, 'name', 3),
+        _head('Password', 'password', 3),
+        _head('Admin', 'role', 2),
+        if (widget.isAdmin) const SizedBox(width: 92)
+      ]));
+  Widget _head(String text, String key, int flex) {
+    final active = _sortKey == key;
+    return Expanded(
+        flex: flex,
+        child: InkWell(
+            onTap: () => setState(() {
+                  if (active)
+                    _ascending = !_ascending;
+                  else {
+                    _sortKey = key;
+                    _ascending = true;
+                  }
+                }),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text(text,
+                  style: TextStyle(
+                      color: active
+                          ? const Color(0xFF4F46E5)
+                          : const Color(0xFF64748B),
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700)),
+              const SizedBox(width: 4),
+              Icon(
+                  active
+                      ? (_ascending
+                          ? Icons.arrow_upward_rounded
+                          : Icons.arrow_downward_rounded)
+                      : Icons.unfold_more_rounded,
+                  size: 15,
+                  color: active
+                      ? const Color(0xFF4F46E5)
+                      : const Color(0xFF94A3B8))
+            ])));
   }
 }

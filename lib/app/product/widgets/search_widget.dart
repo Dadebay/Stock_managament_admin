@@ -12,27 +12,40 @@ class SearchWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: context.padding.low,
-      child: Card(
-        child: ListTile(
-          leading: const Icon(
-            IconlyLight.search,
-            color: Colors.black,
-          ),
-          title: TextField(
-              controller: controller,
-              style: TextStyle(color: ColorConstants.blackColor, fontSize: 16.sp, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(hintText: 'search'.tr, hintStyle: TextStyle(color: ColorConstants.greyColor, fontSize: 14.sp), border: InputBorder.none),
-              onChanged: onChanged),
-          contentPadding: EdgeInsets.only(left: 15.w),
-          trailing: Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-                icon: Icon(
-                  CupertinoIcons.xmark_circle,
-                  color: ColorConstants.greyColor,
+      child: Container(
+        height: 42.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: ColorConstants.greyColor.withOpacity(.2)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: 12.w),
+            Icon(IconlyLight.search, color: ColorConstants.greyColor, size: 18),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                style: TextStyle(color: ColorConstants.blackColor, fontSize: 13.5.sp, fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: 'search'.tr,
+                  hintStyle: TextStyle(color: ColorConstants.greyColor, fontSize: 13.sp, fontWeight: FontWeight.w500),
+                  border: InputBorder.none,
                 ),
-                onPressed: onClear),
-          ),
+                onChanged: onChanged,
+              ),
+            ),
+            IconButton(
+              splashRadius: 16,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              icon: Icon(CupertinoIcons.xmark_circle, color: ColorConstants.greyColor, size: 17),
+              onPressed: onClear,
+            ),
+            SizedBox(width: 4.w),
+          ],
         ),
       ),
     );

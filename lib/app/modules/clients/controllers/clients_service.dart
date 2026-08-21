@@ -5,17 +5,47 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class ClientsService {
+  static const int pageSize = 30;
+
   final ClientsController clientsController = Get.find();
-  Future<List<ClientModel>> getClients() async {
-    final uri = Uri.parse("${ApiConstants.clients}");
+
+  Future<ClientsPage> getClients({int page = 1, int size = pageSize, String? search}) async {
+    final uri = Uri.parse(ApiConstants.clients).replace(queryParameters: {
+      'page': '$page',
+      'page_size': '$size',
+      if (search != null && search.isNotEmpty) 'search': search,
+    });
     final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+
     if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => ClientModel.fromJson(item)).toList().reversed.toList();
+      final results = (data['results'] as List).map((item) => ClientModel.fromJson(item)).toList();
+      final count = data['count'] ?? results.length;
+      return ClientsPage(
+        clients: results,
+        page: page,
+        totalPages: count == 0 ? 1 : (count / size).ceil(),
+        count: count,
+      );
     } else if (data is List) {
-      return (data).map((item) => ClientModel.fromJson(item)).toList().reversed.toList();
+      final results = data.map((item) => ClientModel.fromJson(item)).toList().reversed.toList();
+      return ClientsPage(clients: results, page: 1, totalPages: 1, count: results.length);
     } else {
-      return [];
+      return ClientsPage(clients: [], page: 1, totalPages: 1, count: 0);
     }
+  }
+
+  /// Pulls every client in as few requests as possible (server max page size), for the Excel export only.
+  Future<List<ClientModel>> getAllClientsForExport() async {
+    const exportPageSize = 1000;
+    final List<ClientModel> all = [];
+    int page = 1;
+    while (true) {
+      final result = await getClients(page: page, size: exportPageSize);
+      all.addAll(result.clients);
+      if (page >= result.totalPages || result.clients.isEmpty) break;
+      page++;
+    }
+    return all;
   }
 
   Future addClient({required ClientModel model}) async {

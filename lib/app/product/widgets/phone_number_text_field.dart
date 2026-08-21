@@ -46,19 +46,24 @@ class PhoneNumberTextField extends StatelessWidget {
           prefixIcon: controller.text.contains('+993')
               ? SizedBox.shrink()
               : Padding(
-                  padding: EdgeInsets.only(
-                    left: 15,
-                  ),
-                  child: Text(
-                    '+ 993',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 18.sp,
-                    ),
+                  padding: const EdgeInsets.only(left: 15),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(icon: HugeIcons.strokeRoundedCall02, color: Colors.grey, size: 18.sp),
+                      SizedBox(width: 8.w),
+                      Text(
+                        '+ 993',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 18.sp,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
           contentPadding: const EdgeInsets.only(left: 25, top: 16, bottom: 18),
-          prefixIconConstraints: BoxConstraints(minWidth: controller.text.contains('+993') ? 20 : 70),
+          prefixIconConstraints: BoxConstraints(minWidth: controller.text.contains('+993') ? 20 : 98),
           isDense: true,
           hintText: '65 656565 ',
           alignLabelWithHint: true,

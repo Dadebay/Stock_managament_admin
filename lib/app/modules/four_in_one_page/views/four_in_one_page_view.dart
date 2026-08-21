@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_model.dart';
 import 'package:stock_managament_admin/app/modules/four_in_one_page/controllers/four_in_one_page_controller.dart';
@@ -17,7 +15,8 @@ class FourInOnePageView extends StatefulWidget {
 }
 
 class _FourInOnePageViewState extends State<FourInOnePageView> {
-  final FourInOnePageController fourInOnePageController = Get.find<FourInOnePageController>();
+  final FourInOnePageController fourInOnePageController =
+      Get.find<FourInOnePageController>();
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -26,58 +25,82 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
           itemCount: StringConstants.four_in_one_names.length,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
-            return Theme(
-              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                title: Text(
-                  "${StringConstants.four_in_one_names[index]['pageView'].toString()}".tr,
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 18.sp),
-                ),
-                children: [
-                  FutureBuilder<List<FourInOneModel>>(
-                    future: FourInOnePageService().getData(url: StringConstants.four_in_one_names[index]['url'].toString()),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CustomWidgets.spinKit();
-                      } else if (snapshot.hasError) {
-                        return CustomWidgets.errorData();
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return CustomWidgets.emptyData();
-                      }
+            final item = StringConstants.four_in_one_names[index];
+            final key = item['countName'].toString();
+            return FutureBuilder<List<FourInOneModel>>(
+              future:
+                  FourInOnePageService().getData(url: item['url'].toString()),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    fourInOnePageController.addListData(key, snapshot.data!);
+                  });
+                }
 
-                      final categories = snapshot.data!;
-                      final key = StringConstants.four_in_one_names[index]['countName'];
-
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        fourInOnePageController.addListData(key.toString(), categories);
-                      });
-
-                      return Obx(() {
-                        final list = fourInOnePageController.fourInOneDataMap[key] ?? <FourInOneModel>[].obs;
-
-                        return ListView.builder(
-                          itemCount: list.length,
-                          shrinkWrap: true,
-                          itemBuilder: (context, i) {
-                            return FourInOneCard(
+                return Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    tilePadding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    childrenPadding: const EdgeInsets.only(bottom: 12),
+                    collapsedIconColor: const Color(0xFF64748B),
+                    iconColor: const Color(0xFF4F46E5),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item['pageView'].toString().tr,
+                            style: TextStyle(
+                                color: const Color(0xFF0F172A),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18.sp),
+                          ),
+                        ),
+                        Obx(() => _CategoryCountBadge(
+                              count: fourInOnePageController
+                                      .fourInOneDataMap[key]?.length ??
+                                  snapshot.data?.length ??
+                                  0,
+                              isLoading: snapshot.connectionState ==
+                                  ConnectionState.waiting,
+                            )),
+                      ],
+                    ),
+                    children: [
+                      if (snapshot.connectionState == ConnectionState.waiting)
+                        CustomWidgets.spinKit()
+                      else if (snapshot.hasError)
+                        CustomWidgets.errorData()
+                      else if (!snapshot.hasData || snapshot.data!.isEmpty)
+                        CustomWidgets.emptyData()
+                      else
+                        Obx(() {
+                          final list =
+                              fourInOnePageController.fourInOneDataMap[key] ??
+                                  <FourInOneModel>[].obs;
+                          return ListView.builder(
+                            itemCount: list.length,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, i) => FourInOneCard(
                               count: i + 1,
                               fourInOneModel: list[i],
-                              dataKey: key.toString(),
-                              url: StringConstants.four_in_one_names[index]['url'].toString(),
+                              dataKey: key,
+                              url: item['url'].toString(),
                               isAdmin: widget.isAdmin,
-                            );
-                          },
-                        );
-                      });
-                    },
-                  )
-                ],
-              ),
+                            ),
+                          );
+                        }),
+                    ],
+                  ),
+                );
+              },
             );
           },
           separatorBuilder: (BuildContext context, int index) {
             return Divider(
-              color: ColorConstants.greyColor.withOpacity(.4),
+              color: ColorConstants.greyColor.withValues(alpha: .4),
               thickness: 1,
             );
           },
@@ -95,6 +118,31 @@ class _FourInOnePageViewState extends State<FourInOnePageView> {
                     )))
             : SizedBox(),
       ],
+    );
+  }
+}
+
+class _CategoryCountBadge extends StatelessWidget {
+  const _CategoryCountBadge({required this.count, required this.isLoading});
+
+  final int count;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF2FF),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        isLoading ? '…' : '$count',
+        style: TextStyle(
+            color: const Color(0xFF4338CA),
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700),
+      ),
     );
   }
 }

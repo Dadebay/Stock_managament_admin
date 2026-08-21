@@ -7,11 +7,13 @@ import 'package:stock_managament_admin/app/modules/sales/controllers/order_servi
 import 'package:stock_managament_admin/app/product/constants/string_constants.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/listview_top_text.dart';
+import 'package:stock_managament_admin/app/product/widgets/confirm_dialog.dart';
 
 class OrderProductsView extends StatefulWidget {
   final OrderModel order;
   final bool isAdmin;
-  const OrderProductsView({super.key, required this.order, required this.isAdmin});
+  const OrderProductsView(
+      {super.key, required this.order, required this.isAdmin});
 
   @override
   State<OrderProductsView> createState() => _OrderProductsViewState();
@@ -48,21 +50,19 @@ class _OrderProductsViewState extends State<OrderProductsView> {
   Widget build(BuildContext context) {
     final fieldDefinitions = buildOrderDetailsFields(_currentOrder);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xffF8FAFC),
       appBar: CustomAppBar(
         backArrow: true,
         centerTitle: true,
         actionIcon: widget.isAdmin ? true : false,
         icon: IconButton(
           onPressed: () async {
-            final confirm = await Get.defaultDialog<bool>(
-              title: 'Delete Order'.tr,
-              middleText: 'Are you sure you want to delete this order?'.tr,
-              textConfirm: 'Delete'.tr,
-              textCancel: 'Cancel'.tr,
-              confirmTextColor: Colors.white,
-              onConfirm: () => Get.back(result: true),
-              onCancel: () => Get.back(result: false),
+            final russian = Get.locale?.languageCode == 'ru';
+            final confirm = await ConfirmDialog.show(
+              title: russian ? 'Удалить заказ' : 'Sargydy pozmak',
+              message: russian
+                  ? 'Подтвердите удаление этого заказа.'
+                  : 'Soňkyra dowam etmek isleseňiz, bu sargydy pozuň.',
             );
             if (confirm == true) {
               // await OrderService().deleteOrder(model: _currentOrder);
@@ -73,52 +73,94 @@ class _OrderProductsViewState extends State<OrderProductsView> {
         ),
         name: _currentOrder.name,
       ),
-      body: ListView(
-        shrinkWrap: true,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 30.h),
-            child: Column(
-              children: List.generate(fieldDefinitions.length, (index) {
-                final fieldDef = fieldDefinitions[index];
-                return OrderDetailField(
-                  key: ValueKey(_currentOrder.id.toString() + fieldDef['label']!),
-                  label: fieldDef['label']!,
-                  isEditable: fieldDef['editable'] as bool,
-                  currentOrder: _currentOrder,
-                  onUpdate: (updatedOrderFromField) {
-                    setState(() {
-                      _currentOrder = updatedOrderFromField;
-                    });
-                    orderController.editOrderInList(updatedOrderFromField);
-                  },
-                  isAdmin: widget.isAdmin,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1480),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 32.h),
+            children: [
+              Text('Sargyt maglumatlary',
+                  style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xff172033))),
+              SizedBox(height: 4.h),
+              Text(
+                  widget.isAdmin
+                      ? 'Kartlara basyp maglumatlary üýtgedip bilersiňiz.'
+                      : 'Sargyt maglumatlary.',
+                  style: TextStyle(
+                      fontSize: 12.sp, color: const Color(0xff64748B))),
+              SizedBox(height: 16.h),
+              LayoutBuilder(builder: (context, constraints) {
+                final columns = constraints.maxWidth > 1040
+                    ? 3
+                    : constraints.maxWidth > 660
+                        ? 2
+                        : 1;
+                final width =
+                    (constraints.maxWidth - ((columns - 1) * 12.w)) / columns;
+                return Wrap(
+                  spacing: 12.w,
+                  runSpacing: 12.h,
+                  children: List.generate(fieldDefinitions.length, (index) {
+                    final fieldDef = fieldDefinitions[index];
+                    return SizedBox(
+                      width: width,
+                      child: OrderDetailField(
+                        key: ValueKey(
+                            _currentOrder.id.toString() + fieldDef['label']!),
+                        label: fieldDef['label']!,
+                        isEditable: fieldDef['editable'] as bool,
+                        currentOrder: _currentOrder,
+                        onUpdate: (updatedOrderFromField) {
+                          setState(() => _currentOrder = updatedOrderFromField);
+                          orderController
+                              .editOrderInList(updatedOrderFromField);
+                        },
+                        isAdmin: widget.isAdmin,
+                      ),
+                    );
+                  }),
                 );
               }),
-            ),
+              SizedBox(height: 26.h),
+              Text('Harytlar',
+                  style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xff172033))),
+              SizedBox(height: 12.h),
+              if (_currentOrder.products.isNotEmpty)
+                ListviewTopText<SearchModel>(
+                  names: StringConstants.searchViewtopPartNames,
+                  listToSort: _currentOrder.products,
+                  setSortedList: (newList) {},
+                  getSortValue: (model, key) =>
+                      orderController.getProductSortValue(model, key),
+                ),
+              _buildProductList(),
+            ],
           ),
-          if (_currentOrder.products.isNotEmpty)
-            ListviewTopText<SearchModel>(
-              names: StringConstants.searchViewtopPartNames,
-              listToSort: _currentOrder.products,
-              setSortedList: (newList) {},
-              getSortValue: (model, key) => orderController.getProductSortValue(model, key),
-            ),
-          _buildProductList(),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildProductList() {
     if (_currentOrder.id == 0) {
-      return SizedBox(height: 300, child: Center(child: Text("Order ID is missing".tr)));
+      return SizedBox(
+          height: 300, child: Center(child: Text("Order ID is missing".tr)));
     }
     return FutureBuilder<List<ProductModel>>(
       future: OrderService().getOrderProduct(_currentOrder.id),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) return CustomWidgets.spinKit();
-        if (snapshot.hasError) return SizedBox(height: 300, child: Center(child: Text('Error: ${snapshot.error}'.tr)));
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return CustomWidgets.spinKit();
+        if (snapshot.hasError)
+          return SizedBox(
+              height: 300,
+              child: Center(child: Text('Error: ${snapshot.error}'.tr)));
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           if (_currentOrder.products.isNotEmpty) {
             final products = _currentOrder.products;
@@ -126,7 +168,7 @@ class _OrderProductsViewState extends State<OrderProductsView> {
                 itemCount: products.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 30.w),
+                padding: EdgeInsets.zero,
                 itemBuilder: (context, index) {
                   return SearchCard(
                     product: products[index],
@@ -145,9 +187,12 @@ class _OrderProductsViewState extends State<OrderProductsView> {
             itemCount: products.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 30.w),
+            padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               final productModel = products[index];
+              if (productModel.product == null) {
+                return _deletedProductCard(count: productModel.count);
+              }
               return SearchCard(
                 product: productModel.product!,
                 externalCount: productModel.count,
@@ -159,6 +204,54 @@ class _OrderProductsViewState extends State<OrderProductsView> {
               );
             });
       },
+    );
+  }
+
+  Widget _deletedProductCard({required int count}) {
+    final russian = Get.locale?.languageCode == 'ru';
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 4.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: const Color(0xffF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xffE2E8F0)),
+      ),
+      child: Row(children: [
+        Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xffFEF2F2),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(Icons.hide_image_outlined,
+              color: Color(0xffDC2626), size: 19),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(russian ? 'Товар удалён' : 'Haryt pozulan',
+                style: TextStyle(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xff172033))),
+            SizedBox(height: 2.h),
+            Text(
+                russian
+                    ? 'Этот товар был удалён из каталога'
+                    : 'Bu haryt kataloglardan pozulypdyr',
+                style:
+                    TextStyle(fontSize: 11.5.sp, color: const Color(0xff64748B))),
+          ]),
+        ),
+        Text('x$count',
+            style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xff64748B))),
+      ]),
     );
   }
 }
@@ -221,16 +314,21 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                     print('\n========== ORDER FIELD SAVE START ==========');
                     print('Field: ${widget.label}');
                     print('Order ID: ${locallyUpdatedOrder.id}');
-                    print('Local value prepared for save: ${_getValue(widget.label, locallyUpdatedOrder)}');
+                    print(
+                        'Local value prepared for save: ${_getValue(widget.label, locallyUpdatedOrder)}');
 
-                    final updatedOrderFromBackend = await OrderService().editOrderManually(model: locallyUpdatedOrder);
+                    final updatedOrderFromBackend = await OrderService()
+                        .editOrderManually(model: locallyUpdatedOrder);
 
                     if (updatedOrderFromBackend != null) {
-                      print('Backend update success. Applying backend response to UI.');
-                      print('Backend value after save: ${_getValue(widget.label, updatedOrderFromBackend)}');
+                      print(
+                          'Backend update success. Applying backend response to UI.');
+                      print(
+                          'Backend value after save: ${_getValue(widget.label, updatedOrderFromBackend)}');
                       widget.onUpdate(updatedOrderFromBackend);
                     } else {
-                      print('Backend update failed or returned null. UI will not be updated from local draft.');
+                      print(
+                          'Backend update failed or returned null. UI will not be updated from local draft.');
                     }
 
                     print('========== ORDER FIELD SAVE END ==========\n');
@@ -238,52 +336,59 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                 );
             },
       child: Container(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 10.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.label == "date" ? widget.label.tr : "${widget.label.tr} :",
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey, fontSize: 16.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 10.w),
-                  widget.label == 'status'
-                      ? Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color']?.withOpacity(0.15),
-                              border: Border.all(color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color']!, width: 1),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Text(
-                            "${StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['name']}".tr,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: StringConstants.statusMapping.firstWhere((s) => s['name'] == _displayedValue)['color'], fontSize: 16.sp, fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      : Expanded(
-                          child: Text(
-                            _displayedValue, // Her zaman güncel olan _displayedValue'yu kullan
-                            textAlign: TextAlign.end,
-                            style: TextStyle(color: Colors.black, fontSize: 16.sp, fontWeight: FontWeight.bold),
-                          ),
-                        )
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.h),
-              child: Divider(color: Colors.grey.shade200, height: 1),
-            )
+        constraints: BoxConstraints(minHeight: 82.h),
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xffE2E8F0)),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x080F172A), blurRadius: 10, offset: Offset(0, 3))
           ],
         ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(
+                child: Text(widget.label.tr,
+                    style: TextStyle(
+                        color: const Color(0xff64748B),
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500))),
+            if (widget.isAdmin && widget.isEditable)
+              const Icon(Icons.edit_outlined,
+                  size: 15, color: Color(0xff94A3B8)),
+          ]),
+          SizedBox(height: 8.h),
+          if (widget.label == 'status')
+            _statusPill()
+          else
+            Text(_displayedValue,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: const Color(0xff172033),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600)),
+        ]),
       ),
+    );
+  }
+
+  Widget _statusPill() {
+    final status = StringConstants.statusMapping.firstWhere(
+      (item) => item['name'] == _displayedValue,
+      orElse: () => {'name': _displayedValue, 'color': const Color(0xff64748B)},
+    );
+    final color = status['color'] as Color? ?? const Color(0xff64748B);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
+      decoration: BoxDecoration(
+          color: color.withOpacity(.12),
+          borderRadius: BorderRadius.circular(20)),
+      child: Text('${status['name']}'.tr,
+          style: TextStyle(
+              color: color, fontSize: 12.sp, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -297,44 +402,7 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
     final TextEditingController controller = TextEditingController();
 
     if (label == 'status') {
-      Get.defaultDialog(
-        title: label.tr,
-        titleStyle: TextStyle(color: Colors.black, fontSize: 28.sp, fontWeight: FontWeight.bold),
-        contentPadding: EdgeInsets.zero,
-        content: Container(
-          width: Get.size.width / 3,
-          padding: context.padding.normal,
-          child: SingleChildScrollView(
-            child: Column(
-              children: StringConstants.statusMapping2.map((statusItem) {
-                return GestureDetector(
-                  onTap: () async {
-                    final updatedOrder = currentOrder.copyWith(status: statusItem['sortName']!);
-                    Get.back();
-
-                    await onSave(updatedOrder);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.symmetric(vertical: 4.h),
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: (statusItem['color'] as Color).withOpacity(0.5)),
-                      borderRadius: BorderRadius.circular(10),
-                      color: (statusItem['color'] as Color).withOpacity(0.2),
-                    ),
-                    child: Text(
-                      "${statusItem['name']!}".tr,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: statusItem['color'] as Color, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-      );
+      _showStatusDialog(currentOrder, onSave);
       return;
     }
 
@@ -342,72 +410,222 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
       controller.text = currentOrder.discount.replaceAll(" % ", "").trim();
     } else if (label == 'phone') {
       final phoneNum = currentOrder.clientDetailModel?.phone ?? '';
-      controller.text = phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum;
+      controller.text =
+          phoneNum.startsWith('+993') ? phoneNum.substring(4) : phoneNum;
     } else {
       controller.text = initialValue == 'N/A' ? '' : initialValue;
     }
 
-    Get.defaultDialog(
-      title: label.tr,
-      content: StatefulBuilder(
-        builder: (context, setStateDialog) {
-          return Container(
-            width: Get.size.width / 3,
-            padding: context.padding.normal,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomTextField(
-                  labelName: label.tr,
-                  controller: controller,
-
-                  isNumberOnly: ['discount'].contains(label) || (label == 'phone'), // Telefon için de sayısal olabilir
-                  readOnly: label == 'date',
-                  onTap: label == 'date'
-                      ? () async {
-                          final resultTime = await CustomWidgets.showDateTimePickerWidget(context: context);
-                          if (resultTime != null) {
-                            controller.text = DateFormat('yyyy-MM-dd HH:mm').format(resultTime);
-                            setStateDialog(() {});
-                          }
-                        }
-                      : null,
-                  focusNode: FocusNode(),
-                  requestfocusNode: FocusNode(),
-                ),
-                SizedBox(height: 10.h),
-                AgreeButton(
-                  text: 'Change Data'.tr,
-                  onTap: () async {
-                    final newValueFromInput = controller.text;
-                    OrderModel updatedOrderWithNewValue = _copyUpdatedOrder(label, newValueFromInput, currentOrder);
-
-                    Get.back();
-                    await onSave(updatedOrderWithNewValue); // onSave çağrısı
-                  },
-                ),
-                SizedBox(height: 5.h),
-                AgreeButton(onTap: () => Get.back(), text: 'Cancel'.tr, showBorder: true),
-              ],
-            ),
-          );
-        },
+    Get.dialog(
+      Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 470),
+          child: Padding(
+            padding: EdgeInsets.all(22.w),
+            child: StatefulBuilder(
+                builder: (dialogContext, setStateDialog) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                    color: const Color(0xffEEF2FF),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: const Icon(Icons.edit_outlined,
+                                    size: 19, color: Color(0xff4F46E5))),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                  Text('${label.tr} üýtget',
+                                      style: TextStyle(
+                                          fontSize: 17.sp,
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xff172033))),
+                                  Text('Maglumaty täze baha bilen çalşyryň.',
+                                      style: TextStyle(
+                                          fontSize: 11.sp,
+                                          color: const Color(0xff64748B)))
+                                ])),
+                            IconButton(
+                                onPressed: Get.back,
+                                icon: const Icon(Icons.close,
+                                    size: 19, color: Color(0xff94A3B8))),
+                          ]),
+                          SizedBox(height: 22.h),
+                          TextFormField(
+                            controller: controller,
+                            readOnly: label == 'date',
+                            keyboardType: [
+                              'discount',
+                              'phone',
+                              'count',
+                              'cost',
+                              'totalIncome'
+                            ].contains(label)
+                                ? TextInputType.number
+                                : TextInputType.text,
+                            maxLines:
+                                label == 'description' || label == 'address'
+                                    ? 3
+                                    : 1,
+                            onTap: label == 'date'
+                                ? () async {
+                                    final result = await CustomWidgets
+                                        .showDateTimePickerWidget(
+                                            context: dialogContext);
+                                    if (result != null) {
+                                      controller.text =
+                                          DateFormat('yyyy-MM-dd HH:mm')
+                                              .format(result);
+                                      setStateDialog(() {});
+                                    }
+                                  }
+                                : null,
+                            decoration: InputDecoration(
+                                labelText: label.tr,
+                                filled: true,
+                                fillColor: const Color(0xffF8FAFC),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 14.w, vertical: 13.h),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xffDCE4EF))),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xffDCE4EF))),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xff4F46E5)))),
+                          ),
+                          SizedBox(height: 22.h),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                    onPressed: Get.back,
+                                    child: Text('Cancel'.tr)),
+                                SizedBox(width: 8.w),
+                                FilledButton.icon(
+                                    onPressed: () async {
+                                      final updated = _copyUpdatedOrder(
+                                          label, controller.text, currentOrder);
+                                      Get.back();
+                                      await onSave(updated);
+                                    },
+                                    icon: const Icon(Icons.check, size: 17),
+                                    label: Text('Change Data'.tr),
+                                    style: FilledButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xff4F46E5),
+                                        minimumSize: const Size(0, 42),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10)))),
+                              ]),
+                        ])),
+          ),
+        ),
       ),
     );
+  }
+
+  void _showStatusDialog(OrderModel currentOrder, Function(OrderModel) onSave) {
+    Get.dialog(Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: Padding(
+          padding: EdgeInsets.all(22.w),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  const Icon(Icons.local_shipping_outlined,
+                      size: 20, color: Color(0xff4F46E5)),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                      child: Text('status'.tr,
+                          style: TextStyle(
+                              fontSize: 17.sp, fontWeight: FontWeight.w700))),
+                  IconButton(
+                      onPressed: Get.back,
+                      icon: const Icon(Icons.close,
+                          size: 19, color: Color(0xff94A3B8)))
+                ]),
+                SizedBox(height: 16.h),
+                ...StringConstants.statusMapping2.map((item) {
+                  final color = item['color'] as Color;
+                  return Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: InkWell(
+                          onTap: () async {
+                            Get.back();
+                            await onSave(currentOrder.copyWith(
+                                status: item['sortName']!));
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 13.w, vertical: 12.h),
+                              decoration: BoxDecoration(
+                                  color: color.withOpacity(.08),
+                                  border:
+                                      Border.all(color: color.withOpacity(.25)),
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Row(children: [
+                                Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                        color: color, shape: BoxShape.circle)),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                    child: Text('${item['name']}'.tr,
+                                        style: TextStyle(
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xff172033)))),
+                                const Icon(Icons.chevron_right,
+                                    size: 18, color: Color(0xff94A3B8))
+                              ]))));
+                }),
+              ]),
+        ),
+      ),
+    ));
   }
 
   String _getValue(String label, OrderModel order) {
     switch (label) {
       case 'status':
-        return StringConstants.statusMapping.firstWhere((s) => s['sortName'] == order.status, orElse: () => {'name': 'Unknown'})['name']!;
+        return StringConstants.statusMapping.firstWhere(
+            (s) => s['sortName'] == order.status,
+            orElse: () => {'name': 'Unknown'})['name']!;
       case 'date':
         String dateStr = order.date.toString();
-        return dateStr.length >= 16 ? dateStr.substring(0, 16).replaceAll("T", ' ') : dateStr.replaceAll("T", ' ');
+        return dateStr.length >= 16
+            ? dateStr.substring(0, 16).replaceAll("T", ' ')
+            : dateStr.replaceAll("T", ' ');
       case 'clientName':
         return order.clientDetailModel?.name ?? 'N/A';
       case 'phone':
         final phoneNum = order.clientDetailModel?.phone ?? 'N/A';
-        return phoneNum.startsWith('+993') && phoneNum.length > 4 ? phoneNum.substring(4) : phoneNum; // Display without +993
+        return phoneNum.startsWith('+993') && phoneNum.length > 4
+            ? phoneNum.substring(4)
+            : phoneNum; // Display without +993
       case 'address':
         return order.clientDetailModel?.address ?? 'N/A';
       case 'gaplama':
@@ -431,17 +649,22 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
   }
 
   OrderModel _copyUpdatedOrder(String label, String value, OrderModel current) {
-    ClientDetailModel clientDetails = current.clientDetailModel ?? ClientDetailModel(id: current.clientID, name: '');
+    ClientDetailModel clientDetails = current.clientDetailModel ??
+        ClientDetailModel(id: current.clientID, name: '');
     switch (label) {
       case 'date':
         return current.copyWith(date: value.replaceAll(" ", "T"));
       case 'clientName':
-        return current.copyWith(clientDetailModel: clientDetails.copyWith(name: value));
+        return current.copyWith(
+            clientDetailModel: clientDetails.copyWith(name: value));
       case 'phone':
-        final String phoneNumber = value.startsWith('+993') || value.isEmpty ? value : '+993$value';
-        return current.copyWith(clientDetailModel: clientDetails.copyWith(phone: phoneNumber));
+        final String phoneNumber =
+            value.startsWith('+993') || value.isEmpty ? value : '+993$value';
+        return current.copyWith(
+            clientDetailModel: clientDetails.copyWith(phone: phoneNumber));
       case 'address':
-        return current.copyWith(clientDetailModel: clientDetails.copyWith(address: value));
+        return current.copyWith(
+            clientDetailModel: clientDetails.copyWith(address: value));
       case 'gaplama':
         return current.copyWith(gaplama: value);
       case 'discount':

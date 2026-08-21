@@ -12,11 +12,13 @@ class OrderCardView extends StatelessWidget {
       {Key? key,
       required this.order,
       required this.index,
-      required this.isAdmin})
+      required this.isAdmin,
+      required this.onChanged})
       : super(key: key);
   final OrderModel order;
   final int index;
   final bool isAdmin;
+  final VoidCallback onChanged;
 
   /// Status (durum) bilgisini güvenli bir şekilde almak için yardımcı fonksiyon.
   /// `firstWhere` metoduna `orElse` ekleyerek bilinmeyen bir status değeri gelirse
@@ -47,14 +49,21 @@ class OrderCardView extends StatelessWidget {
         : 'No Phone'.tr;
 
     return GestureDetector(
-      onTap: () => Get.to(() => OrderProductsView(
-            order: order,
-            isAdmin: isAdmin,
-          )),
+      // Sipariş içeriği sadece yönetim tarafında görüntülenebilir.
+      onTap: isAdmin
+          ? () => Get.to(() => OrderProductsView(
+                    order: order,
+                    isAdmin: isAdmin,
+                  ))
+              ?.then((_) => onChanged())
+          : null,
       child: Container(
-        color: Colors.white,
-        padding:
-            EdgeInsets.only(top: 10.h, bottom: 10.h, right: 15.w, left: 5.w),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFE2E8F0))),
         child: Row(
           children: [
             CustomWidgets.counter(index),
@@ -66,8 +75,8 @@ class OrderCardView extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: Colors.black,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600),
               ),
             ),
             SizedBox(width: 20.w),
@@ -82,7 +91,8 @@ class OrderCardView extends StatelessWidget {
                       : order.date.toString(),
                   textAlign: TextAlign.start,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey, fontSize: 16.sp),
+                  style: TextStyle(
+                      color: const Color(0xFF64748B), fontSize: 13.sp),
                 )),
             // COUNT
             Expanded(
@@ -91,7 +101,8 @@ class OrderCardView extends StatelessWidget {
                 order.count.toString(),
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.grey, fontSize: 16.sp),
+                style:
+                    TextStyle(color: const Color(0xFF64748B), fontSize: 13.sp),
               ),
             ),
             Expanded(
@@ -102,8 +113,8 @@ class OrderCardView extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: Colors.black,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold),
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600),
               ),
             ),
             // TOTAL SUM
@@ -115,8 +126,8 @@ class OrderCardView extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: Colors.black,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold),
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600),
               ),
             ),
             // TOTAL COST
@@ -125,7 +136,8 @@ class OrderCardView extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
                     // Önceden aldığımız güvenli `statusColor`'ı kullanıyoruz.
                     color: statusColor.withOpacity(0.15),
@@ -138,8 +150,8 @@ class OrderCardView extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       color: statusColor,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold),
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600),
                 ),
               ),
             ),

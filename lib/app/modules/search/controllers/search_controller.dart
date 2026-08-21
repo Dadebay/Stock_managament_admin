@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:image_picker_web/image_picker_web.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
@@ -18,6 +18,57 @@ class SearchViewController extends GetxController {
   String _currentSearchText = '';
   String _activeFilterType = '';
   String _activeFilterValue = '';
+
+  // Paginated browsing mode (the main "Gözleg" tab, when no filter/picker needs the full catalog).
+  RxList<SearchModel> pageItems = <SearchModel>[].obs;
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 1.obs;
+  RxInt totalCount = 0.obs;
+  RxBool pageLoading = true.obs;
+  String _pagedSearchText = '';
+
+  Future<void> loadProductsPage({int page = 1}) async {
+    pageLoading.value = true;
+    try {
+      final result = await SearchService().getProducts(page: page, search: _pagedSearchText);
+      pageItems.assignAll(result.products);
+      currentPage.value = result.page;
+      totalPages.value = result.totalPages < 1 ? 1 : result.totalPages;
+      totalCount.value = result.count;
+    } finally {
+      pageLoading.value = false;
+    }
+  }
+
+  void onPagedSearchTextChanged(String word) {
+    _pagedSearchText = word.trim();
+    loadProductsPage(page: 1);
+  }
+
+  // Catalog-wide totals for the bottom stats bar in paginated mode - computed
+  // from the *entire* product catalog, not just the currently loaded page.
+  RxInt catalogProductCount = 0.obs;
+  RxInt catalogStockCount = 0.obs;
+  RxDouble catalogTotalCost = 0.0.obs;
+  RxDouble catalogTotalSell = 0.0.obs;
+  RxBool catalogTotalsLoaded = false.obs;
+
+  Future<void> loadCatalogTotals() async {
+    final all = await SearchService().getAllProducts();
+    int stock = 0;
+    double cost = 0;
+    double sell = 0;
+    for (final product in all) {
+      stock += product.count;
+      cost += (double.tryParse(product.cost) ?? 0) * product.count;
+      sell += (double.tryParse(product.price) ?? 0) * product.count;
+    }
+    catalogProductCount.value = all.length;
+    catalogStockCount.value = stock;
+    catalogTotalCost.value = cost;
+    catalogTotalSell.value = sell;
+    catalogTotalsLoaded.value = true;
+  }
 
   @override
   void onInit() {
@@ -40,7 +91,7 @@ class SearchViewController extends GetxController {
     try {
       print('===== LOAD PRODUCTS: Ürünler yüklenmeye başladı =====');
       isLoading.value = true;
-      final products = await SearchService().getProducts();
+      final products = await SearchService().getAllProducts();
       print('===== LOAD PRODUCTS: ${products.length} ürün yüklendi =====');
 
       // İlk ürünün tarih bilgisini kontrol et
@@ -128,7 +179,12 @@ class SearchViewController extends GetxController {
     productsList.assignAll(GeciciListe);
   }
 
-  void applyFilter(String filterType, String filterValue) {
+  Future<void> applyFilter(String filterType, String filterValue) async {
+    if (historyList.isEmpty) {
+      // Paginated browsing mode only had the current page loaded - pull the
+      // full catalog now that a filter that needs it is actually being used.
+      await loadProducts();
+    }
     _activeFilterType = filterType;
     _activeFilterValue = filterValue;
     if (_currentSearchText.isEmpty) {
@@ -214,7 +270,9 @@ class SearchViewController extends GetxController {
         historyList.insert(0, newProduct);
         productsList.insert(0, newProduct);
         searchResult.insert(0, newProduct);
+        pageItems.insert(0, newProduct);
         calculateTotals();
+        if (catalogTotalsLoaded.value) loadCatalogTotals();
 
         clearSelectedImage();
         Get.back();
@@ -236,7 +294,7 @@ class SearchViewController extends GetxController {
   Future<void> refreshProducts() async {
     try {
       print('===== REFRESH PRODUCTS: Ürünler çekiliyor... =====');
-      final products = await SearchService().getProducts();
+      final products = await SearchService().getAllProducts();
       print('===== REFRESH PRODUCTS: ${products.length} ürün çekildi =====');
       print('===== ÖNCEKİ historyList: ${historyList.length} =====');
       print('===== ÖNCEKİ productsList: ${productsList.length} =====');
@@ -292,10 +350,23 @@ class SearchViewController extends GetxController {
       searchResult[indexInSearch] = updatedProduct;
     }
 
+    final indexInHistory = historyList.indexWhere((item) => item.id == updatedProduct.id);
+    if (indexInHistory != -1) {
+      historyList[indexInHistory] = updatedProduct;
+    }
+
+    final indexInPage = pageItems.indexWhere((item) => item.id == updatedProduct.id);
+    if (indexInPage != -1) {
+      pageItems[indexInPage] = updatedProduct;
+    }
+
     calculateTotals();
+    if (catalogTotalsLoaded.value) loadCatalogTotals();
 
     productsList.refresh();
     searchResult.refresh();
+    historyList.refresh();
+    pageItems.refresh();
     update();
   }
 
@@ -323,11 +394,12 @@ class SearchViewController extends GetxController {
 
   Future<void> pickImage() async {
     try {
-      var fileInfo = await ImagePickerWeb.getImageInfo; // Bu MediaInfo döndürür
-      if (fileInfo != null && fileInfo.data != null && fileInfo.fileName != null) {
-        selectedImageBytes.value = fileInfo.data;
-        selectedImageFileName.value = fileInfo.fileName; // Yeni: Dosya adını sakla
-        CustomWidgets.showSnackBar("Success", "Image selected: ${fileInfo.fileName}", Colors.green);
+      final XFile? file = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (file != null) {
+        final bytes = await file.readAsBytes();
+        selectedImageBytes.value = bytes;
+        selectedImageFileName.value = file.name;
+        CustomWidgets.showSnackBar("Success", "Image selected: ${file.name}", Colors.green);
       }
     } catch (e) {
       CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);
@@ -337,7 +409,10 @@ class SearchViewController extends GetxController {
   void deleteProduct(int id) {
     productsList.removeWhere((product) => product.id == id);
     searchResult.removeWhere((product) => product.id == id);
+    historyList.removeWhere((product) => product.id == id);
+    pageItems.removeWhere((product) => product.id == id);
     calculateTotals();
+    if (catalogTotalsLoaded.value) loadCatalogTotals();
 
     update();
   }
