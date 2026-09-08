@@ -7,6 +7,17 @@ import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_s
 import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
+/// Thrown when the server created the product but its response could not be
+/// turned into a [SearchModel].
+class ProductCreatedButUnreadable implements Exception {
+  const ProductCreatedButUnreadable(this.responseBody);
+
+  final String responseBody;
+
+  @override
+  String toString() => 'ProductCreatedButUnreadable';
+}
+
 class SearchService {
   static const int pageSize = 30;
 
@@ -91,14 +102,6 @@ class SearchService {
         contentType: MediaType('image', extension), // Dinamik içerik tipi
       ));
     }
-    print(token);
-    print(fields);
-    request.files.forEach((file) {
-      print(file.field);
-      print(file.filename);
-    });
-    print(request.files);
-    print(request);
     try {
       final streamedResponse = await request.send();
       final responseBody = await streamedResponse.stream.bytesToString();
@@ -147,26 +150,35 @@ class SearchService {
         contentType: MediaType('image', extension),
       ));
     }
-    print(token);
-    print(fields);
-    request.files.forEach((file) {
-      print(file.field);
-      print(file.filename);
-    });
-    print(request.files);
-    print(request);
-    final streamedResponse = await request.send();
 
+    final streamedResponse = await request.send();
     final statusCode = streamedResponse.statusCode;
-    print(statusCode);
-    if (statusCode == 200 || statusCode == 201) {
-      final responseBody = await streamedResponse.stream.bytesToString();
-      final jsonData = jsonDecode(responseBody);
-      final updatedModel = SearchModel.fromJson(jsonData);
-      searchViewController.updateProductLocally(updatedModel);
-      return updatedModel;
-    } else {
-      throw Exception('Failed to create product');
+    final responseBody = await streamedResponse.stream.bytesToString();
+
+    if (statusCode != 200 && statusCode != 201) {
+      // Surface the server's own validation message (Django returns a map of
+      // field -> errors), otherwise the user only sees a status code.
+      if (statusCode == 413) {
+        throw Exception('413 - Surat gaty uly (server kabul etmeýär)');
+      }
+      String detail = responseBody;
+      try {
+        final decoded = jsonDecode(responseBody);
+        if (decoded is Map) {
+          detail = decoded['detail']?.toString() ?? decoded.toString();
+        }
+      } catch (_) {}
+      debugPrint('Create product failed ($statusCode): $responseBody');
+      throw Exception('$statusCode - $detail');
+    }
+
+    try {
+      return SearchModel.fromJson(jsonDecode(responseBody));
+    } catch (error) {
+      // The server accepted the product; only the payload is unexpected. The
+      // caller refreshes the list instead of reporting a failure.
+      debugPrint('Product created but response could not be parsed: $error');
+      throw ProductCreatedButUnreadable(responseBody);
     }
   }
 

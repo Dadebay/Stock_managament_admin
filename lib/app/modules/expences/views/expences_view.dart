@@ -78,23 +78,31 @@ class _ExpencesViewState extends State<ExpencesView> {
                     .where((item) => _yearOf(item) == _selectedYear)
                     .toList();
             final display = _sort(filtered);
-            return Column(children: [
-              _pageBar(years, source),
-              _header(),
-              Expanded(
-                child: display.isEmpty
-                    ? CustomWidgets.emptyData()
-                    : ListView.separated(
-                        itemCount: display.length,
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 92),
-                        separatorBuilder: (_, __) => const SizedBox(height: 6),
-                        itemBuilder: (_, index) => ExpencesCard(
-                            expencesModel: display[index],
-                            count: display.length - index,
-                            isAdmin: widget.isAdmin),
-                      ),
-              ),
-              _summary(display),
+            return Stack(children: [
+              Column(children: [
+                _pageBar(years, source),
+                _header(),
+                Expanded(
+                  child: display.isEmpty
+                      ? CustomWidgets.emptyData()
+                      : ListView.separated(
+                          itemCount: display.length,
+                          // Bottom padding clears the floating summary/actions
+                          // so the last row is never trapped behind them.
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 84),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 6),
+                          itemBuilder: (_, index) => ExpencesCard(
+                              expencesModel: display[index],
+                              count: display.length - index,
+                              isAdmin: widget.isAdmin),
+                        ),
+                ),
+              ]),
+              // The total floats over the list instead of sitting on an opaque
+              // strip, so the rows behind it stay visible while scrolling.
+              Positioned(
+                  left: 0, right: 0, bottom: 12, child: _summary(display)),
             ]);
           });
         },
@@ -284,21 +292,30 @@ class _ExpencesViewState extends State<ExpencesView> {
   Widget _summary(List<ExpencesModel> display) => Align(
       alignment: Alignment.centerRight,
       child: Container(
-          margin: const EdgeInsets.fromLTRB(20, 0, 116, 12),
-          width: 270,
+          margin: EdgeInsets.only(
+              left: 20, right: widget.isAdmin ? 116 : 20, bottom: 0),
+          constraints: const BoxConstraints(maxWidth: 270),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
               color: const Color(0xFF9A3412),
-              borderRadius: BorderRadius.circular(14)),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                    color: const Color(0xFF9A3412).withValues(alpha: .28),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6))
+              ]),
           child: Row(children: [
             const Icon(IconlyLight.wallet, color: Colors.white, size: 19),
             const SizedBox(width: 10),
-            Text(_selectedYear ?? 'allYears'.tr,
-                style: TextStyle(
-                    color: Colors.white.withValues(alpha: .8),
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600)),
-            const Spacer(),
+            Flexible(
+                child: Text(_selectedYear ?? 'allYears'.tr,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: .8),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600))),
+            const SizedBox(width: 10),
             Text('${_total(display).toStringAsFixed(2)} \$',
                 style: TextStyle(
                     color: Colors.white,

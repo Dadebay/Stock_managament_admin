@@ -48,6 +48,32 @@ Manual check any time:
 curl -sI -H 'Accept-Encoding: gzip' http://216.250.11.255/main.dart.js | grep -i 'content-encoding\|content-length'
 ```
 
+## Why WASM is never pre-compressed
+
+`main.dart.wasm` is fetched in 64 KB byte ranges by `web/wasm_range_loader.js`
+(the network path resets large responses). If a `main.dart.wasm.gz` sits next
+to it, `gzip_static` answers those Range requests with gzipped bytes and the
+browser dies on them:
+
+```
+GET main.dart.wasm  net::ERR_CONNECTION_RESET 206 (Partial Content)
+Uncaught (in promise) TypeError: Failed to fetch
+```
+
+`curl -H 'Accept-Encoding: identity'` never reproduces it — only a real browser
+does, because it always asks for gzip. So the deploy script skips `*.wasm` when
+gzipping, deletes any stale `*.wasm.gz`, and verifies the range response with a
+browser-like `Accept-Encoding` header. If you ever see a `Content-Encoding`
+header on that 206, either a `.gz` came back or nginx compressed it; the
+belt-and-braces server-side fix is:
+
+```nginx
+location = /main.dart.wasm {
+    gzip off;
+    gzip_static off;
+}
+```
+
 ## Overriding the target
 
 ```bash

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stock_managament_admin/app/modules/search/controllers/search_service.dart';
+import 'package:stock_managament_admin/app/product/image_compressor.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class SearchViewController extends GetxController {
@@ -29,14 +30,19 @@ class SearchViewController extends GetxController {
 
   Future<void> loadProductsPage({int page = 1}) async {
     pageLoading.value = true;
+    logState('loadProductsPage: start page=$page');
     try {
       final result = await SearchService().getProducts(page: page, search: _pagedSearchText);
       pageItems.assignAll(result.products);
       currentPage.value = result.page;
       totalPages.value = result.totalPages < 1 ? 1 : result.totalPages;
       totalCount.value = result.count;
+    } catch (error) {
+      debugPrint('[SEARCH] loadProductsPage failed: $error');
+      rethrow;
     } finally {
       pageLoading.value = false;
+      logState('loadProductsPage: done');
     }
   }
 
@@ -89,15 +95,12 @@ class SearchViewController extends GetxController {
 
   Future<void> loadProducts() async {
     try {
-      print('===== LOAD PRODUCTS: Ürünler yüklenmeye başladı =====');
       isLoading.value = true;
+      logState('loadProducts: start');
       final products = await SearchService().getAllProducts();
-      print('===== LOAD PRODUCTS: ${products.length} ürün yüklendi =====');
+      debugPrint('[SEARCH] loadProducts: ${products.length} items');
 
       // İlk ürünün tarih bilgisini kontrol et
-      if (products.isNotEmpty) {
-        print('===== İLK ÜRÜN TARİH BİLGİSİ: createdAT = ${products[0].createdAT} =====');
-      }
 
       // Tarihe göre sırala (en yeni en üstte, tarih olmayanlar en altta)
       final sortedProducts = products.toList();
@@ -122,7 +125,7 @@ class SearchViewController extends GetxController {
           return dateB.compareTo(dateA);
         } catch (e) {
           // Tarih parse hatası varsa, bu ürünü alta gönder
-          print('===== TARİH PARSE HATASI: ${e.toString()} =====');
+          debugPrint('[SEARCH] date parse failed: $e');
           return 1;
         }
       });
@@ -132,10 +135,11 @@ class SearchViewController extends GetxController {
       searchResult.assignAll(sortedProducts);
       calculateTotals();
       isLoading.value = false;
-      print('===== LOAD PRODUCTS: Tamamlandı =====');
+      logState('loadProducts: done');
     } catch (e) {
-      print('===== LOAD PRODUCTS HATASI: $e =====');
+      debugPrint('[SEARCH] loadProducts failed: $e');
       isLoading.value = false;
+      logState('loadProducts: failed');
     }
   }
 
@@ -251,44 +255,83 @@ class SearchViewController extends GetxController {
     required Uint8List? selectedImageBytes,
     required String? selectedImageFileName,
   }) async {
+    final HomeController homeController = Get.find();
+    homeController.agreeButton.value = true;
+    logState('addNewProduct: start');
     try {
-      print('===== ADD NEW PRODUCT BAŞLADI =====');
-      final HomeController homeController = Get.find();
-      homeController.agreeButton.value = true;
-
-      final SearchModel? newProduct = await SearchService().createProductWithImage(
+      final SearchModel? newProduct =
+          await SearchService().createProductWithImage(
         fields: productData,
-        imageBytes: selectedImageBytes, // Controller'daki byte'ları kullan
-        imageFileName: selectedImageFileName, // Controller'daki dosya adını kullan
+        imageBytes: selectedImageBytes,
+        imageFileName: selectedImageFileName,
       );
-      homeController.agreeButton.value = false;
 
-      if (newProduct != null) {
-        print('===== ÜRÜN BAŞARIYLA EKLENDİ, ID: ${newProduct.id} =====');
+      if (newProduct == null) {
+        CustomWidgets.showSnackBar(
+            "Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
+        return;
+      }
 
-        // Yeni ürünü mevcut listelere ekle
-        historyList.insert(0, newProduct);
-        productsList.insert(0, newProduct);
-        searchResult.insert(0, newProduct);
-        pageItems.insert(0, newProduct);
-        calculateTotals();
-        if (catalogTotalsLoaded.value) loadCatalogTotals();
+      logState('addNewProduct: created id=${newProduct.id}');
+      _insertNewProduct(newProduct);
+      logState('addNewProduct: lists updated');
 
-        clearSelectedImage();
-        Get.back();
-
-        CustomWidgets.showSnackBar("Başarılı", "Ürün başarıyla eklendi", Colors.green);
-
-        print('===== NAVBAR SAYFASINA GERİ DÖNÜLÜYOR =====');
-        print('===== LİSTEDE ŞİMDİ ${historyList.length} ÜRÜN VAR =====');
+      clearSelectedImage();
+      Get.back();
+      CustomWidgets.showSnackBar(
+          "Başarılı", "Ürün başarıyla eklendi", Colors.green);
+    } on ProductCreatedButUnreadable {
+      // The product exists on the server, only its response could not be
+      // parsed: close the form and pull the fresh list instead of leaving the
+      // user on a spinner.
+      clearSelectedImage();
+      Get.back();
+      CustomWidgets.showSnackBar(
+          "Başarılı", "Ürün eklendi, liste yenileniyor", Colors.green);
+      if (fullCatalogLoaded) {
+        await refreshProducts();
       } else {
-        print('===== ÜRÜN EKLENEMEDİ: newProduct null =====');
-        CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi. Sunucudan veri dönmedi.", Colors.red);
+        await loadProductsPage(page: currentPage.value);
       }
     } catch (e) {
-      print('===== ÜRÜN EKLEME HATASI: $e =====');
+      debugPrint('Add product failed: $e');
       CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi: $e", Colors.red);
+    } finally {
+      // Always release the shared loading flag; otherwise every AgreeButton in
+      // the app keeps spinning until the page is reloaded.
+      homeController.agreeButton.value = false;
+      logState('addNewProduct: done (agreeButton=false)');
     }
+  }
+
+  /// Dumps every flag the search screen uses to decide between the list and a
+  /// spinner. Call it from anywhere a spinner is shown or a list changes.
+  void logState(String tag) {
+    debugPrint('[SEARCH] $tag | isLoading=${isLoading.value} '
+        'pageLoading=${pageLoading.value} history=${historyList.length} '
+        'products=${productsList.length} pageItems=${pageItems.length} '
+        'page=${currentPage.value}/${totalPages.value} '
+        'totalCount=${totalCount.value} '
+        'catalogTotals=${catalogTotalsLoaded.value}');
+  }
+
+  /// True once the whole catalog has been pulled into [historyList]. The
+  /// search screen switches to its full-catalog layout as soon as that list is
+  /// filled, so the paginated screen must not populate it on its own.
+  bool get fullCatalogLoaded => historyList.isNotEmpty;
+
+  /// Shows a freshly created product without switching the screen out of
+  /// paginated mode.
+  void _insertNewProduct(SearchModel newProduct) {
+    if (fullCatalogLoaded) {
+      historyList.insert(0, newProduct);
+      productsList.insert(0, newProduct);
+      searchResult.insert(0, newProduct);
+      calculateTotals();
+    }
+    pageItems.insert(0, newProduct);
+    totalCount.value = totalCount.value + 1;
+    if (catalogTotalsLoaded.value) loadCatalogTotals();
   }
 
   Future<void> refreshProducts() async {
@@ -380,7 +423,7 @@ class SearchViewController extends GetxController {
     for (var product in productsList) {
       final sell = double.tryParse(product.price) ?? 0.0;
       final cost = double.tryParse(product.cost) ?? 0.0;
-      final count = product.count ?? 0;
+      final count = product.count;
 
       totalSell += sell * count;
       totalCost += cost * count;
@@ -394,12 +437,24 @@ class SearchViewController extends GetxController {
 
   Future<void> pickImage() async {
     try {
-      final XFile? file = await ImagePicker().pickImage(source: ImageSource.gallery);
+      // Downscale on pick: the server (nginx) rejects large bodies, and a full
+      // resolution photo is far bigger than the catalogue needs.
+      final XFile? file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1280,
+        maxHeight: 1280,
+        imageQuality: 80,
+      );
       if (file != null) {
-        final bytes = await file.readAsBytes();
-        selectedImageBytes.value = bytes;
-        selectedImageFileName.value = file.name;
-        CustomWidgets.showSnackBar("Success", "Image selected: ${file.name}", Colors.green);
+        final original = await file.readAsBytes();
+        // Re-encode to WebP in the browser: nginx rejects bodies over its
+        // limit and the API stores WebP anyway.
+        final compressed = await compressImageForUpload(original, file.name);
+        selectedImageBytes.value = compressed.bytes;
+        selectedImageFileName.value = compressed.fileName;
+        final kb = (compressed.bytes.lengthInBytes / 1024).round();
+        CustomWidgets.showSnackBar(
+            "Success", "Image selected: ${compressed.fileName} ($kb KB)", Colors.green);
       }
     } catch (e) {
       CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);

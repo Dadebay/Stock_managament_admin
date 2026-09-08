@@ -100,17 +100,28 @@ class _ClientsViewState extends State<ClientsView> {
                         ? null
                         : () async {
                             setState(() => isExporting = true);
-                            await SignInService()
-                                .getClients('didario', 'Didar123#');
-                            if (await AuthStorage().getAdminStatus()) {
-                              final all = await ClientsService()
-                                  .getAllClientsForExport();
-                              await controller.exportToExcel(all);
-                            } else {
+                            try {
+                              await SignInService()
+                                  .getClients('didario', 'Didar123#');
+                              if (await AuthStorage().getAdminStatus()) {
+                                final all = await ClientsService()
+                                    .getAllClientsForExport();
+                                await controller.exportToExcel(all);
+                              } else {
+                                CustomWidgets.showSnackBar(
+                                    'Error', 'You are not admin', Colors.red);
+                              }
+                            } catch (error) {
+                              debugPrint('Failed to export clients: $error');
                               CustomWidgets.showSnackBar(
-                                  'Error', 'You are not admin', Colors.red);
+                                  'Error',
+                                  'Failed to generate Excel report.'.tr,
+                                  Colors.red);
+                            } finally {
+                              if (mounted) {
+                                setState(() => isExporting = false);
+                              }
                             }
-                            if (mounted) setState(() => isExporting = false);
                           },
                     child: isExporting
                         ? const SizedBox(

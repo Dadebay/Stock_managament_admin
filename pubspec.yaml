@@ -21,6 +21,7 @@ dependencies:
   path:                          # Path manipulation utilities
   file_saver:                    # Save files to disk (also for web)
   excel: ^2.0.5                  # Read/write Excel files
+  archive: ^3.6.1                # Patch the generated XLSX zip (native Excel charts)
 
   # WEB SUPPORT
   image_picker: ^1.2.3           # Image picking (web impl is wasm-compatible; replaced image_picker_web)

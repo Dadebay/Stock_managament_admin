@@ -1,6 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/user_entering_app/controllers/enter_model.dart';
+import 'package:stock_managament_admin/app/product/excel_export.dart';
 
 class EnterController extends GetxController {
   RxList<EnterModel> clients = <EnterModel>[].obs;
@@ -27,7 +28,7 @@ class EnterController extends GetxController {
     for (var client in clients) {
       sheet.appendRow([client.username.toString(), client.password.toString(), client.isSuperUser.toString()]);
     }
-    excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_users.xlsx");
+    await downloadExcel(excel, '${excelTimestamp()}_users.xlsx');
   }
 
   void addClient(EnterModel model) {

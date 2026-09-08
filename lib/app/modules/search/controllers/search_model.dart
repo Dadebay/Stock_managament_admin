@@ -1,3 +1,16 @@
+/// The API is not consistent about types: the list endpoint returns numbers as
+/// strings while the create/update responses can return them as numbers. These
+/// helpers accept both so parsing never throws on a freshly created product.
+String _text(dynamic value) => value == null ? '' : value.toString();
+
+String? _nullableText(dynamic value) => value?.toString();
+
+int _number(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(_text(value)) ?? 0;
+}
+
 class SearchModel {
   final int id;
   final String name;
@@ -46,8 +59,8 @@ class SearchModel {
     }
 
     return SearchModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      id: _number(json['id']),
+      name: _text(json['name']),
       category: json['category_detail'] != null
           ? CategoryModel.fromJson(json['category_detail'])
           : null,
@@ -62,14 +75,14 @@ class SearchModel {
           : null,
       // Ayrıştırılan listeyi burada kullanıyoruz. Eğer 'purch' boş veya null ise boş bir liste atanır.
       purch: purchList,
-      price: json['price'] ?? '',
-      gramm: json['gram'] ?? '',
-      count: json['count'] ?? 0,
-      description: json['description'] ?? '',
-      gaplama: json['gaplama'] ?? '',
-      createdAT: json['created_at'] ?? '',
-      img: json['img'] ?? '',
-      cost: json['cost'] ?? '',
+      price: _text(json['price']),
+      gramm: _text(json['gram']),
+      count: _number(json['count']),
+      description: _text(json['description']),
+      gaplama: _text(json['gaplama']),
+      createdAT: _text(json['created_at']),
+      img: _text(json['img']),
+      cost: _text(json['cost']),
     );
   }
 
@@ -109,9 +122,9 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      notes: json['notes'],
+      id: _number(json['id']),
+      name: _text(json['name']),
+      notes: _nullableText(json['notes']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -140,11 +153,11 @@ class PurchaseModelInsideProduct {
 
   factory PurchaseModelInsideProduct.fromJson(Map<String, dynamic> json) {
     return PurchaseModelInsideProduct(
-      id: json['id'] ?? 0,
-      count: json['count'].toString() ?? '',
-      priceOfSale: json['priceofsale'].toString() ?? '',
-      datePurhcase: json['date_purchase'].toString() ?? '',
-      purchaseName: json['purchase_name'].toString() ?? '',
+      id: _number(json['id']),
+      count: _text(json['count']),
+      priceOfSale: _text(json['priceofsale']),
+      datePurhcase: _text(json['date_purchase']),
+      purchaseName: _text(json['purchase_name']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -171,9 +184,9 @@ class BrendModel {
 
   factory BrendModel.fromJson(Map<String, dynamic> json) {
     return BrendModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      notes: json['notes'],
+      id: _number(json['id']),
+      name: _text(json['name']),
+      notes: _nullableText(json['notes']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -198,9 +211,9 @@ class MaterialModel {
 
   factory MaterialModel.fromJson(Map<String, dynamic> json) {
     return MaterialModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      notes: json['notes'],
+      id: _number(json['id']),
+      name: _text(json['name']),
+      notes: _nullableText(json['notes']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -227,9 +240,9 @@ class LocationModel {
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      notes: json['notes'],
+      id: _number(json['id']),
+      name: _text(json['name']),
+      notes: _nullableText(json['notes']),
       address: json['address'],
     );
   }
@@ -256,8 +269,8 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id'] ?? 0,
-      count: json['count'] ?? 0,
+      id: _number(json['id']),
+      count: _number(json['count']),
       product: json['product'] is Map<String, dynamic>
           ? SearchModel.fromJson(json['product'] as Map<String, dynamic>)
           : null,

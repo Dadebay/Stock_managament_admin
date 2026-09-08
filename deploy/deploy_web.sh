@@ -43,12 +43,19 @@ build() {
         perl -0pi -e 's{(<script src="flutter_bootstrap\.js" async></script>)}{<script src="wasm_range_loader.js"></script>\n  $1}' "$BUILD_DIR/index.html"
     fi
 
-    echo "==> Compressing"
+    # *.wasm is deliberately NOT pre-compressed: with a .gz next to it,
+    # gzip_static answers the loader's Range requests with gzipped bytes, and
+    # the browser (which always sends Accept-Encoding: gzip, unlike curl
+    # -H 'Accept-Encoding: identity') resets the connection on them —
+    # net::ERR_CONNECTION_RESET on a 206. Ranges must be served from the raw
+    # file.
+    echo "==> Compressing (wasm excluded on purpose)"
     find "$BUILD_DIR" -type f \
-         \( -name '*.js' -o -name '*.mjs' -o -name '*.wasm' -o -name '*.json' \
+         \( -name '*.js' -o -name '*.mjs' -o -name '*.json' \
          -o -name '*.css' -o -name '*.html' -o -name '*.ttf' \
          -o -name '*.otf' -o -name '*.svg' \) \
          -exec gzip -9 -k -f {} +
+    find "$BUILD_DIR" -type f -name '*.wasm.gz' -delete
 
     echo "==> Build size"
     du -sh "$BUILD_DIR"
@@ -58,10 +65,19 @@ upload() {
     echo "==> Uploading to $SSH_TARGET:$REMOTE_DIR"
     rsync -avz --delete "$BUILD_DIR/" "$SSH_TARGET:$REMOTE_DIR/"
 
+    # Verify the way a browser asks: Accept-Encoding: gzip. The response must
+    # be a 206 of 65536 raw bytes with no Content-Encoding, otherwise the range
+    # loader hits ERR_CONNECTION_RESET.
     echo "==> Verifying a 64 KB WASM byte range is actually served"
-    curl -sS -o /dev/null -w "HTTP:%{http_code} size:%{size_download}\n" --max-time 30 \
-        -H 'Accept-Encoding: identity' -H 'Range: bytes=0-65535' \
-        "http://216.250.11.255/main.dart.wasm" || echo "WARNING: verification request failed"
+    headers="$(curl -sSD - -o /dev/null --max-time 30 \
+        -H 'Accept-Encoding: gzip, deflate, br' -H 'Range: bytes=0-65535' \
+        "http://216.250.11.255/main.dart.wasm" || true)"
+    printf '%s\n' "$headers" | grep -iE '^(HTTP/|content-range|content-length|content-encoding)' || true
+    if printf '%s' "$headers" | grep -qi '^content-encoding'; then
+        echo "ERROR: the server gzips WASM range responses; browsers will reset the connection."
+        echo "       Remove main.dart.wasm.gz from $REMOTE_DIR, or add to the nginx site:"
+        echo "       location = /main.dart.wasm { gzip off; gzip_static off; }"
+    fi
 
     echo "==> Done: http://216.250.11.255/"
 }

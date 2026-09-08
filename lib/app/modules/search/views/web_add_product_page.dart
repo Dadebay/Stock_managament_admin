@@ -18,6 +18,10 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
   late List<FocusNode> focusNodes;
   late List<String?> selectedIds;
 
+  /// Guards the submit button: without it the form can be posted twice and the
+  /// user gets no feedback while the upload runs.
+  bool _submitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +44,7 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
   }
 
   Future<void> _handleAddProduct() async {
+    if (_submitting) return;
     if (textControllers[0].text.isEmpty) {
       CustomWidgets.showSnackBar(
           "Hata", "Ürün adı boş bırakılamaz.", Colors.red);
@@ -57,19 +62,36 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
         productData[key] = textControllers[i].text;
       }
     }
-    controller.selectedImageFileName.value =
-        "${textControllers[0].text.replaceAll(' ', '_')}_image.png";
-    productData['gram'] =
-        (productData['gram'] == '' ? '0' : productData['gram'])!;
-    print(productData);
-    print(controller.selectedImageBytes.value);
-    print("${textControllers[0].text.replaceAll(' ', '_')}_image.png");
+    // Keep the extension the compressor produced (webp), otherwise the upload
+    // would be sent with a wrong content type.
+    final pickedName = controller.selectedImageFileName.value ?? '';
+    final extension =
+        pickedName.contains('.') ? pickedName.split('.').last : 'png';
+    final uploadName =
+        "${textControllers[0].text.replaceAll(' ', '_')}_image.$extension";
+    controller.selectedImageFileName.value = uploadName;
+    // Decimals are typed with a comma or a dot; Django only accepts the dot.
+    for (final key in ['price', 'cost', 'gram']) {
+      final value = (productData[key] ?? '').replaceAll(',', '.');
+      productData[key] = value.isEmpty ? '0' : value;
+    }
+    if ((productData['count'] ?? '').isEmpty) productData['count'] = '0';
+    // The picker shows "2026-09-08, 00:00" but Django only accepts the value
+    // without the comma; send the API format, keep the pretty text on screen.
+    final date = productData['date'];
+    if (date != null && date.isNotEmpty) {
+      productData['date'] = date.replaceFirst(', ', ' ');
+    }
 
-    await controller.addNewProduct(
-        productData: productData,
-        selectedImageBytes: controller.selectedImageBytes.value,
-        selectedImageFileName:
-            "${textControllers[0].text.replaceAll(' ', '_')}_image.png");
+    setState(() => _submitting = true);
+    try {
+      await controller.addNewProduct(
+          productData: productData,
+          selectedImageBytes: controller.selectedImageBytes.value,
+          selectedImageFileName: uploadName);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
@@ -179,9 +201,15 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton.icon(
-              onPressed: _handleAddProduct,
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Haryt goş'),
+              onPressed: _submitting ? null : _handleAddProduct,
+              icon: _submitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.add_rounded, size: 18),
+              label: Text(_submitting ? 'Ýatda saklanýar...' : 'Haryt goş'),
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF4F46E5),
                 padding:
@@ -194,33 +222,88 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
         ]),
       );
 
+  /// Typed fields on the left, pickers (date + dropdowns) on the right, with
+  /// the two prices next to each other. Long notes span the full width.
+  static const List<int> _typedFields = [0, 1, 11, 7, 8];
+  static const List<int> _pickerFields = [2, 3, 4, 5, 6];
+  static const List<int> _wideFields = [9, 10];
+
   Widget _buildTextFields(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final width = (constraints.maxWidth - 12) / 2;
-      return Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: List.generate(fieldCount, (index) {
-          final wide = index == 9 || index == 10;
-          return SizedBox(
-            width: wide ? constraints.maxWidth : width,
-            child: _field(context, index),
-          );
-        }),
+      final narrow = constraints.maxWidth < 640;
+      if (narrow) {
+        return Column(
+          children: [
+            for (final index in [
+              ..._typedFields,
+              ..._pickerFields,
+              ..._wideFields
+            ])
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _field(context, index),
+              ),
+          ],
+        );
+      }
+
+      final rows = _typedFields.length > _pickerFields.length
+          ? _typedFields.length
+          : _pickerFields.length;
+      return Column(
+        children: [
+          for (int row = 0; row < rows; row++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: row < _typedFields.length
+                        ? _field(context, _typedFields[row])
+                        : const SizedBox.shrink(),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: row < _pickerFields.length
+                        ? _field(context, _pickerFields[row])
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+          for (final index in _wideFields)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _field(context, index),
+            ),
+        ],
       );
     });
   }
+
+  /// price, cost and gram accept decimals; count is a whole number.
+  static const List<int> _decimalFields = [1, 11, 7];
+  static const int _integerField = 8;
 
   Widget _field(BuildContext context, int index) {
     final label = StringConstants.fieldLabels[index];
     final selectable = [3, 4, 5, 6].contains(index);
     final date = index == 2;
     final multiline = index == 9 || index == 10;
+    final decimal = _decimalFields.contains(index);
+    final integer = index == _integerField;
     return TextFormField(
       controller: textControllers[index],
       focusNode: focusNodes[index],
       readOnly: selectable || date,
       maxLines: multiline ? 3 : 1,
+      keyboardType: decimal
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : (integer ? TextInputType.number : null),
+      inputFormatters: decimal
+          ? [_DecimalInputFormatter()]
+          : (integer ? [FilteringTextInputFormatter.digitsOnly] : null),
       onTap: () async {
         if (date) {
           final value =
@@ -273,5 +356,20 @@ class _WebAddProductPageState extends State<WebAddProductPage> {
             borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.4)),
       ),
     );
+  }
+}
+
+/// Allows digits with a single decimal separator (comma or dot); letters and
+/// extra separators are rejected as they are typed.
+class _DecimalInputFormatter extends TextInputFormatter {
+  static final RegExp _pattern = RegExp(r'^\d*[.,]?\d*$');
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty || _pattern.hasMatch(newValue.text)) {
+      return newValue;
+    }
+    return oldValue;
   }
 }

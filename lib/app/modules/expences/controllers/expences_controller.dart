@@ -1,6 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/expences/controllers/expences_model.dart';
+import 'package:stock_managament_admin/app/product/excel_export.dart';
 
 class ExpencesController extends GetxController {
   RxList<ExpencesModel> expencesList = <ExpencesModel>[].obs;
@@ -59,6 +60,6 @@ class ExpencesController extends GetxController {
     for (var expence in expencesList) {
       sheet.appendRow([expence.name.toString(), expence.date.toString(), expence.cost.toString(), expence.note.toString()]);
     }
-    excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_expences.xlsx");
+    await downloadExcel(excel, '${excelTimestamp()}_expences.xlsx');
   }
 }

@@ -96,6 +96,14 @@ class _ProductProfilViewState extends State<ProductProfilView> {
       }
     }
 
+    // Decimals are typed with a comma or a dot; Django only accepts the dot.
+    for (final key in ['price', 'cost', 'gram']) {
+      final value = productData[key];
+      if (value != null && value.isNotEmpty) {
+        productData[key] = value.replaceAll(',', '.');
+      }
+    }
+
     String? finalImageFileName;
     if (controller.selectedImageBytes.value != null) {
       finalImageFileName = controller.selectedImageFileName.value; // Resim seçildiyse dosya adını al
@@ -517,29 +525,86 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     );
   }
 
+  /// Typed fields on the left, pickers (date + dropdowns) on the right, with
+  /// the two prices next to each other. Long notes span the full width.
+  static const List<int> _typedFields = [0, 1, 11, 7, 8];
+  static const List<int> _pickerFields = [2, 3, 4, 5, 6];
+  static const List<int> _wideFields = [9, 10];
+
   Widget _buildTextFields(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final itemWidth = (constraints.maxWidth - 12) / 2;
-      return Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: List.generate(fieldCount, (index) {
-          final isWide = index == 9 || index == 10;
-          return SizedBox(width: isWide ? constraints.maxWidth : itemWidth, child: _productField(index));
-        }),
+      if (constraints.maxWidth < 640) {
+        return Column(
+          children: [
+            for (final index in [
+              ..._typedFields,
+              ..._pickerFields,
+              ..._wideFields
+            ])
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _productField(index),
+              ),
+          ],
+        );
+      }
+
+      final rows = _typedFields.length > _pickerFields.length
+          ? _typedFields.length
+          : _pickerFields.length;
+      return Column(
+        children: [
+          for (int row = 0; row < rows; row++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: row < _typedFields.length
+                        ? _productField(_typedFields[row])
+                        : const SizedBox.shrink(),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: row < _pickerFields.length
+                        ? _productField(_pickerFields[row])
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+          for (final index in _wideFields)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _productField(index),
+            ),
+        ],
       );
     });
   }
+
+  /// price, cost and gram accept decimals; count is a whole number.
+  static const List<int> _decimalFields = [1, 11, 7];
+  static const int _integerField = 8;
 
   Widget _productField(int index) {
     final label = StringConstants.fieldLabels[index];
     final selectable = [3, 4, 5, 6].contains(index);
     final multiline = index == 9 || index == 10;
+    final decimal = _decimalFields.contains(index);
+    final integer = index == _integerField;
     return TextFormField(
       controller: textControllers[index],
       focusNode: focusNodes[index],
       readOnly: !widget.isAdmin || selectable,
       maxLines: multiline ? 3 : 1,
+      keyboardType: decimal
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : (integer ? TextInputType.number : null),
+      inputFormatters: decimal
+          ? [_DecimalInputFormatter()]
+          : (integer ? [FilteringTextInputFormatter.digitsOnly] : null),
       onTap: () {
         if (!widget.isAdmin || !selectable) return;
         final fieldName = StringConstants.apiFieldNames[index];
@@ -563,5 +628,21 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.4)),
       ),
     );
+  }
+}
+
+
+/// Allows digits with a single decimal separator (comma or dot); letters and
+/// extra separators are rejected as they are typed.
+class _DecimalInputFormatter extends TextInputFormatter {
+  static final RegExp _pattern = RegExp(r'^\d*[.,]?\d*$');
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty || _pattern.hasMatch(newValue.text)) {
+      return newValue;
+    }
+    return oldValue;
   }
 }

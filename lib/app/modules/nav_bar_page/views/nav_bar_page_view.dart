@@ -269,39 +269,47 @@ class _NavBarPageViewState extends State<NavBarPageView> {
       height: 84,
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.symmetric(horizontal: compactNavigation ? 22 : 18),
+      // While the rail animates between 84 and 280 px the expanded header is
+      // briefly wider than its parent, so clip instead of overflowing.
       child: compactNavigation
           ? mark
-          : Row(
-              children: [
-                mark,
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kümüş',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20,
-                            height: 1.1),
-                      ),
-                      SizedBox(height: 3),
-                      Text(
-                        'ONLINE PLATFORMA',
-                        style: TextStyle(
-                            color: Color(0xFF64748B),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 9,
-                            letterSpacing: 1.2),
-                      ),
-                    ],
+          : ClipRect(
+              child: OverflowBox(
+              alignment: Alignment.centerLeft,
+              minWidth: 0,
+              maxWidth: 280,
+              child: Row(
+                children: [
+                  mark,
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Kümüş',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20,
+                              height: 1.1),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          'ONLINE PLATFORMA',
+                          style: TextStyle(
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 9,
+                              letterSpacing: 1.2),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            )),
     );
   }
 }

@@ -87,7 +87,11 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget _buildFullCatalogBody() {
-    if (searchViewController.isLoading.value) {
+    // Only spin while there is nothing to show; with data on hand a stale
+    // isLoading flag must never hide the list.
+    if (searchViewController.isLoading.value &&
+        searchViewController.historyList.isEmpty) {
+      searchViewController.logState('spinner: full catalog');
       return CustomWidgets.spinKit();
     } else if (searchViewController.historyList.isEmpty) {
       return CustomWidgets.emptyData();
@@ -189,6 +193,11 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
+  Widget _pagedSpinner() {
+    searchViewController.logState('spinner: paged');
+    return CustomWidgets.spinKit();
+  }
+
   Widget _buildPagedBody() {
     final displayList = searchViewController.pageItems.toList();
     final isLoading = searchViewController.pageLoading.value;
@@ -205,7 +214,7 @@ class _SearchViewState extends State<SearchView> {
                 : _topTextPaged(displayList),
             Expanded(
                 child: isLoading && displayList.isEmpty
-                    ? CustomWidgets.spinKit()
+                    ? _pagedSpinner()
                     : displayList.isEmpty
                         ? CustomWidgets.emptyData()
                         : (searchViewController.showInGrid.value

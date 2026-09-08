@@ -27,12 +27,13 @@ class SearchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final SearchViewController seacrhViewController =
         Get.find<SearchViewController>();
-    String url = '';
-    if (product.img!.contains(ApiConstants.imageURL)) {
-      url = product.img!;
-    } else {
-      url = ApiConstants.imageURL2 + product.img!;
-    }
+    // Products without a picture come back with a null img.
+    final rawImage = product.img ?? '';
+    final String url = rawImage.isEmpty
+        ? ''
+        : (rawImage.contains(ApiConstants.imageURL)
+            ? rawImage
+            : ApiConstants.imageURL2 + rawImage);
     return GestureDetector(
       onTap: () {
         if (!disableOnTap) {
@@ -95,15 +96,18 @@ class SearchCard extends StatelessWidget {
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: CachedNetworkImage(
-                  imageUrl: url,
-                  fit: BoxFit.cover,
-                  memCacheWidth: 160,
-                  memCacheHeight: 160,
-                  errorWidget: (_, __, ___) => const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: Color(0xFF94A3B8)),
-                ),
+                child: url.isEmpty
+                    ? const Icon(Icons.image_not_supported_outlined,
+                        color: Color(0xFF94A3B8))
+                    : CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 160,
+                        memCacheHeight: 160,
+                        errorWidget: (_, __, ___) => const Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Color(0xFF94A3B8)),
+                      ),
               ),
               SizedBox(width: 10.w),
               Expanded(
@@ -319,30 +323,32 @@ class SecondProductCard extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: CachedNetworkImage(
-              imageUrl: product.img ?? '',
-              fit: BoxFit.cover,
-              // Optimize for list view - smaller cache size
-              memCacheWidth: 300,
-              memCacheHeight: 300,
-              maxWidthDiskCache: 600,
-              maxHeightDiskCache: 600,
-              fadeInDuration: const Duration(milliseconds: 200),
-              placeholder: (context, url) => Container(
-                color: Colors.grey.shade200,
-                child: Center(
-                  child: SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.grey),
+            child: (product.img ?? '').isEmpty
+                ? CustomWidgets.noImage()
+                : CachedNetworkImage(
+                    imageUrl: product.img!,
+                    fit: BoxFit.cover,
+                    // Optimize for list view - smaller cache size
+                    memCacheWidth: 300,
+                    memCacheHeight: 300,
+                    maxWidthDiskCache: 600,
+                    maxHeightDiskCache: 600,
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey.shade200,
+                      child: Center(
+                        child: SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, error, stackTrace) {
+                      return CustomWidgets.noImage();
+                    },
                   ),
-                ),
-              ),
-              errorWidget: (context, error, stackTrace) {
-                return CustomWidgets.noImage();
-              },
-            ),
           )),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:get/get.dart';
 import 'package:stock_managament_admin/app/modules/clients/controllers/client_model.dart';
+import 'package:stock_managament_admin/app/product/excel_export.dart';
 
 class ClientsController extends GetxController {
   RxList<ClientModel> clients = <ClientModel>[].obs;
@@ -28,7 +29,7 @@ class ClientsController extends GetxController {
     for (var client in clientsToExport) {
       sheet.appendRow([client.name.toString(), client.phone.toString(), client.address.toString(), client.orderCount.toString(), client.sumPrice.toString()]);
     }
-    excel.save(fileName: "${DateTime.now().toString().substring(0, 19)}_clients.xlsx");
+    await downloadExcel(excel, '${excelTimestamp()}_clients.xlsx');
   }
 
   void addClient(ClientModel model) {
