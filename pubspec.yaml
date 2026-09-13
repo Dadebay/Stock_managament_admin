@@ -34,7 +34,7 @@ dependencies:
   fl_chart: ^0.68.0              # Draw line, bar, pie, and other charts
   scroll_to_hide: ^2.1.0         # Hide widgets on scroll (e.g., bottom navigation)
   flutter_screenutil:            # Adapt UI to different screen sizes (responsive)
-  cached_network_image: ^3.0.0
+  cached_network_image: ^3.4.1
   http_parser:
 
   flutter:
