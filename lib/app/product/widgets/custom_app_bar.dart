@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, file_names, use_key_in_widget_constructors, avoid_implementing_value_types
 
 import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:stock_managament_admin/app/product/constants/admin_icons.dart';
 import 'package:get/get.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSize {
@@ -11,7 +11,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSize {
   final bool actionIcon;
   final String name;
 
-  const CustomAppBar({required this.backArrow, required this.actionIcon, required this.name, this.icon, this.centerTitle});
+  const CustomAppBar(
+      {required this.backArrow,
+      required this.actionIcon,
+      required this.name,
+      this.icon,
+      this.centerTitle});
 
   @override
   Widget get child => Text('ad');
@@ -48,7 +53,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSize {
               ),
             )
           : SizedBox.shrink(),
-      actions: [if (actionIcon) Padding(padding: const EdgeInsets.only(right: 5), child: icon) else SizedBox.shrink()],
+      actions: [
+        if (actionIcon)
+          Padding(padding: const EdgeInsets.only(right: 5), child: icon)
+        else
+          SizedBox.shrink()
+      ],
       automaticallyImplyLeading: false,
       backgroundColor: Colors.white,
       title: Text(

@@ -16,12 +16,13 @@ class ClientModel {
   });
 
   factory ClientModel.fromJson(Map<String, dynamic> json) {
+    final phone = json['phone']?.toString() ?? '';
     return ClientModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       address: json['address'] ?? '',
-      phone: json['phone'].toString().contains("+993") ? json['phone'].toString().replaceFirst("+993", "") : json['phone'].toString() ?? '',
-      sumPrice: json['sumprice'] ?? 0,
+      phone: phone.startsWith('+993') ? phone.substring(4) : phone,
+      sumPrice: json['sumprice']?.toString(),
       orderCount: json['ordercount'] ?? 0,
     );
   }
