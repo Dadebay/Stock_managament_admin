@@ -10,7 +10,13 @@ class PhoneNumberTextField extends StatelessWidget {
   final bool style;
   final bool? disabled;
   final bool unFocus;
-  const PhoneNumberTextField({required this.mineFocus, required this.controller, required this.requestFocus, required this.style, this.disabled, required this.unFocus});
+  const PhoneNumberTextField(
+      {required this.mineFocus,
+      required this.controller,
+      required this.requestFocus,
+      required this.style,
+      this.disabled,
+      required this.unFocus});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +24,8 @@ class PhoneNumberTextField extends StatelessWidget {
       padding: EdgeInsets.only(top: 15.h),
       child: TextFormField(
         enabled: disabled ?? true,
-        style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w600),
+        style: TextStyle(
+            color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w600),
         cursorColor: Colors.black,
         textInputAction: TextInputAction.next,
         keyboardType: TextInputType.number,
@@ -33,10 +40,13 @@ class PhoneNumberTextField extends StatelessWidget {
           return null;
         },
         inputFormatters: [
-          LengthLimitingTextInputFormatter(controller.text.contains('+993') ? 12 : 8),
+          LengthLimitingTextInputFormatter(
+              controller.text.contains('+993') ? 12 : 8),
         ],
         onEditingComplete: () {
-          unFocus ? FocusScope.of(context).unfocus() : requestFocus.requestFocus();
+          unFocus
+              ? FocusScope.of(context).unfocus()
+              : requestFocus.requestFocus();
         },
         enableSuggestions: false,
         autocorrect: false,
@@ -50,7 +60,10 @@ class PhoneNumberTextField extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      HugeIcon(icon: HugeIcons.strokeRoundedCall02, color: Colors.grey, size: 18.sp),
+                      HugeIcon(
+                          icon: HugeIcons.strokeRoundedCall02,
+                          color: Colors.grey,
+                          size: 18.sp),
                       SizedBox(width: 8.w),
                       Text(
                         '+ 993',
@@ -63,18 +76,24 @@ class PhoneNumberTextField extends StatelessWidget {
                   ),
                 ),
           contentPadding: const EdgeInsets.only(left: 25, top: 16, bottom: 18),
-          prefixIconConstraints: BoxConstraints(minWidth: controller.text.contains('+993') ? 20 : 98),
+          prefixIconConstraints: BoxConstraints(
+              minWidth: controller.text.contains('+993') ? 20 : 98),
           isDense: true,
           hintText: '65 656565 ',
           alignLabelWithHint: true,
           hintStyle: TextStyle(
             color: Colors.grey.shade400,
           ),
-          border: _buildOutlineInputBorder(borderColor: ColorConstants.blackColor),
-          enabledBorder: _buildOutlineInputBorder(borderColor: ColorConstants.greyColor.withOpacity(.5)),
-          focusedBorder: _buildOutlineInputBorder(borderColor: ColorConstants.kPrimaryColor),
-          focusedErrorBorder: _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
-          errorBorder: _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
+          border:
+              _buildOutlineInputBorder(borderColor: ColorConstants.blackColor),
+          enabledBorder: _buildOutlineInputBorder(
+              borderColor: ColorConstants.greyColor.withOpacity(.5)),
+          focusedBorder: _buildOutlineInputBorder(
+              borderColor: ColorConstants.kPrimaryColor),
+          focusedErrorBorder:
+              _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
+          errorBorder:
+              _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
         ),
       ),
     );

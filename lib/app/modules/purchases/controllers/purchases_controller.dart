@@ -16,11 +16,13 @@ class PurchasesController extends GetxController {
 
   /// Dates arrive as 'YYYY-MM-DD' strings, so take the year off the front
   /// instead of parsing — malformed rows just fall out of the year buckets.
-  static String yearOf(PurchasesModel model) => model.date.length >= 4 ? model.date.substring(0, 4) : '';
+  static String yearOf(PurchasesModel model) =>
+      model.date.length >= 4 ? model.date.substring(0, 4) : '';
 
   /// Years present in [list], newest first.
   List<String> availableYears(List<PurchasesModel> list) {
-    final years = list.map(yearOf).where((year) => year.isNotEmpty).toSet().toList();
+    final years =
+        list.map(yearOf).where((year) => year.isNotEmpty).toSet().toList();
     years.sort((a, b) => b.compareTo(a));
     return years;
   }

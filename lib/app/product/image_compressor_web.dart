@@ -54,8 +54,8 @@ Future<CompressedImage> compressImageForUpload(
       ..height = targetHeight;
     final context = canvas.getContext('2d') as web.CanvasRenderingContext2D?;
     if (context == null) return CompressedImage(bytes, fileName);
-    context.drawImage(image, 0, 0, targetWidth.toDouble(),
-        targetHeight.toDouble());
+    context.drawImage(
+        image, 0, 0, targetWidth.toDouble(), targetHeight.toDouble());
 
     final encoded = Completer<web.Blob?>();
     canvas.toBlob(

@@ -5,7 +5,12 @@ class FourInOneModel {
   final String? address;
   final String quantity;
 
-  FourInOneModel({this.id, required this.quantity, required this.name, required this.notes, this.address});
+  FourInOneModel(
+      {this.id,
+      required this.quantity,
+      required this.name,
+      required this.notes,
+      this.address});
 
   factory FourInOneModel.fromJson(Map<String, dynamic> json) {
     return FourInOneModel(

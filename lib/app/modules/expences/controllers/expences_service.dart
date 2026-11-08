@@ -8,17 +8,25 @@ class ExpencesService {
   final ExpencesController expencesController = Get.find<ExpencesController>();
 
   Future<List<ExpencesModel>> getExpences() async {
-    final data = await ApiService().getRequest(ApiConstants.expences, requiresToken: true);
+    final data = await ApiService()
+        .getRequest(ApiConstants.expences, requiresToken: true);
     if (data is Map && data['data'] != null) {
-      return (data['data'] as List).map((item) => ExpencesModel.fromJson(item)).toList().toList();
+      return (data['data'] as List)
+          .map((item) => ExpencesModel.fromJson(item))
+          .toList()
+          .toList();
     } else if (data is List) {
-      return (data).map((item) => ExpencesModel.fromJson(item)).toList().toList();
+      return (data)
+          .map((item) => ExpencesModel.fromJson(item))
+          .toList()
+          .toList();
     } else {
       return [];
     }
   }
 
-  Future addExpence({required ExpencesModel model, required BuildContext context}) async {
+  Future addExpence(
+      {required ExpencesModel model, required BuildContext context}) async {
     return ApiService().handleApiRequest(
       endpoint: ApiConstants.expences,
       method: 'POST',
@@ -33,18 +41,22 @@ class ExpencesService {
         if (responseJson.isNotEmpty) {
           final model = ExpencesModel.fromJson(responseJson);
           expencesController.addExpences(model);
-          CustomWidgets.showSnackBar('success'.tr, 'Expences added'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Expences added'.tr, Colors.green);
           await Future.delayed(const Duration(milliseconds: 100));
           Navigator.of(context).pop();
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot add expence please try again '.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr,
+              'Cannot add expence please try again '.tr, Colors.red);
         }
       },
     );
   }
 
-  Future editExpence({required ExpencesModel model, required BuildContext context}) async {
-    final ExpencesController expencesController = Get.find<ExpencesController>();
+  Future editExpence(
+      {required ExpencesModel model, required BuildContext context}) async {
+    final ExpencesController expencesController =
+        Get.find<ExpencesController>();
 
     return ApiService().handleApiRequest(
       endpoint: ApiConstants.expences + "${model.id}/",
@@ -61,11 +73,13 @@ class ExpencesService {
         if (responseJson.isNotEmpty) {
           final model = ExpencesModel.fromJson(responseJson);
           expencesController.editExpences(model);
-          CustomWidgets.showSnackBar('success'.tr, 'Expences added'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Expences added'.tr, Colors.green);
           await Future.delayed(const Duration(milliseconds: 100));
           Navigator.of(context).pop();
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot add expence please try again '.tr, Colors.red);
+          CustomWidgets.showSnackBar('error'.tr,
+              'Cannot add expence please try again '.tr, Colors.red);
         }
       },
     );

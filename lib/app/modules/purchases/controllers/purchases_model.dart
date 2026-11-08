@@ -30,7 +30,11 @@ class PurchasesModel {
       cost: json['cost'] ?? '',
       description: json['description'] ?? '',
       count: json['count'] ?? 0,
-      products: json['product_detail'] != null ? (json['product_detail'] as List).map((i) => SearchModel.fromJson(i)).toList() : [],
+      products: json['product_detail'] != null
+          ? (json['product_detail'] as List)
+              .map((i) => SearchModel.fromJson(i))
+              .toList()
+          : [],
     );
   }
 

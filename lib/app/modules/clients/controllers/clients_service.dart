@@ -9,16 +9,20 @@ class ClientsService {
 
   final ClientsController clientsController = Get.find();
 
-  Future<ClientsPage> getClients({int page = 1, int size = pageSize, String? search}) async {
+  Future<ClientsPage> getClients(
+      {int page = 1, int size = pageSize, String? search}) async {
     final uri = Uri.parse(ApiConstants.clients).replace(queryParameters: {
       'page': '$page',
       'page_size': '$size',
       if (search != null && search.isNotEmpty) 'search': search,
     });
-    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+    final data =
+        await ApiService().getRequest(uri.toString(), requiresToken: true);
 
     if (data is Map && data['results'] != null) {
-      final results = (data['results'] as List).map((item) => ClientModel.fromJson(item)).toList();
+      final results = (data['results'] as List)
+          .map((item) => ClientModel.fromJson(item))
+          .toList();
       final count = data['count'] ?? results.length;
       return ClientsPage(
         clients: results,
@@ -27,8 +31,13 @@ class ClientsService {
         count: count,
       );
     } else if (data is List) {
-      final results = data.map((item) => ClientModel.fromJson(item)).toList().reversed.toList();
-      return ClientsPage(clients: results, page: 1, totalPages: 1, count: results.length);
+      final results = data
+          .map((item) => ClientModel.fromJson(item))
+          .toList()
+          .reversed
+          .toList();
+      return ClientsPage(
+          clients: results, page: 1, totalPages: 1, count: results.length);
     } else {
       return ClientsPage(clients: [], page: 1, totalPages: 1, count: 0);
     }
@@ -63,9 +72,11 @@ class ClientsService {
           clientsController.addClient(ClientModel.fromJson(responseJson));
           Get.back();
 
-          CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'clientAdded'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'clientNotAdded'.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'clientNotAdded'.tr, Colors.red);
         }
       },
     );
@@ -78,17 +89,20 @@ class ClientsService {
       body: <String, dynamic>{
         'name': model.name,
         'address': model.address,
-        'phone': model.phone.contains("+993") ? model.phone : "+993${model.phone}",
+        'phone':
+            model.phone.contains("+993") ? model.phone : "+993${model.phone}",
       },
       requiresToken: true,
       handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
           clientsController.editClient(ClientModel.fromJson(responseJson));
-          CustomWidgets.showSnackBar('success'.tr, 'Edited succesfully'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Edited succesfully'.tr, Colors.green);
           await Future.delayed(const Duration(milliseconds: 100));
           Get.back();
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Cannot edit please try again'.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'Cannot edit please try again'.tr, Colors.red);
         }
       },
     );
@@ -101,9 +115,11 @@ class ClientsService {
       requiresToken: true,
       handleSuccess: (responseJson) async {
         if (responseJson.isNotEmpty) {
-          CustomWidgets.showSnackBar('success'.tr, 'clientAdded'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'clientAdded'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'clientNotAdded'.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'clientNotAdded'.tr, Colors.red);
         }
       },
     );
