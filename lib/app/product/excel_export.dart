@@ -89,8 +89,7 @@ void styleExcelWorkbook(Excel excel) {
     for (final row in sheet.rows) {
       // Cell values are SharedString/CellValue objects, so compare on text.
       final isEmphasizedRow = row.isNotEmpty &&
-          (row.first?.rowIndex == 0 ||
-              row.first?.value?.toString() == 'Total');
+          (row.first?.rowIndex == 0 || row.first?.value?.toString() == 'Total');
       for (final cell in row) {
         if (cell == null) continue;
         cell.cellStyle = CellStyle(
@@ -282,7 +281,8 @@ String _numberFormatVariant(String xf) {
     'numFmtId="$_customNumberFormatId"',
   );
   if (!variant.contains('numFmtId=')) {
-    variant = variant.replaceFirst('<xf', '<xf numFmtId="$_customNumberFormatId"');
+    variant =
+        variant.replaceFirst('<xf', '<xf numFmtId="$_customNumberFormatId"');
   }
   if (!variant.contains('applyNumberFormat=')) {
     variant = variant.replaceFirst('<xf', '<xf applyNumberFormat="1"');
@@ -316,7 +316,8 @@ String _patchSheet(String xml, ExcelChartSpec spec, _NumericStyles styles) {
   );
 
   if (!result.contains('<drawing ')) {
-    result = result.replaceFirst('</worksheet>', '<drawing r:id="rId1"/></worksheet>');
+    result = result.replaceFirst(
+        '</worksheet>', '<drawing r:id="rId1"/></worksheet>');
   }
   return result;
 }
@@ -341,8 +342,7 @@ String _patchNumericCells(String xml, _NumericStyles styles) {
 /// its current style.
 String _withNumericStyle(String attributes, _NumericStyles styles) {
   final current = RegExp(r's="(\d+)"').firstMatch(attributes);
-  final index =
-      styles.variantFor(current == null ? 0 : int.parse(current[1]!));
+  final index = styles.variantFor(current == null ? 0 : int.parse(current[1]!));
   return current == null
       ? '$attributes s="$index"'
       : attributes.replaceFirst(current[0]!, 's="$index"');
@@ -461,8 +461,7 @@ String _chartXml(ExcelChartSpec spec) {
       ..write('<c:grouping val="standard"/>')
       ..write('<c:varyColors val="0"/>');
     for (var index = 0; index < lineSeries.length; index++) {
-      buffer.write(_series(
-          spec, lineSeries[index], columnSeries.length + index,
+      buffer.write(_series(spec, lineSeries[index], columnSeries.length + index,
           line: true));
     }
     buffer
@@ -538,8 +537,7 @@ String _series(ExcelChartSpec spec, ExcelChartSeries series, int index,
     {required bool line}) {
   final sheet = _sheetRef(spec.sheetName);
   final headerRef = '$sheet!\$${series.column}\$1';
-  final categoryRef =
-      '$sheet!\$${spec.categoryColumn}\$${spec.firstDataRow}:'
+  final categoryRef = '$sheet!\$${spec.categoryColumn}\$${spec.firstDataRow}:'
       '\$${spec.categoryColumn}\$${spec.lastDataRow}';
   final valueRef = '$sheet!\$${series.column}\$${spec.firstDataRow}:'
       '\$${series.column}\$${spec.lastDataRow}';
@@ -573,7 +571,8 @@ String _series(ExcelChartSpec spec, ExcelChartSeries series, int index,
 }
 
 String _stringCache(List<String> values) {
-  final buffer = StringBuffer('<c:strCache><c:ptCount val="${values.length}"/>');
+  final buffer =
+      StringBuffer('<c:strCache><c:ptCount val="${values.length}"/>');
   for (var index = 0; index < values.length; index++) {
     buffer.write(
         '<c:pt idx="$index"><c:v>${_escapeText(values[index])}</c:v></c:pt>');

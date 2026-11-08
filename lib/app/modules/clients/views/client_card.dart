@@ -26,7 +26,8 @@ class ClientCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           hoverColor: const Color(0xFFF8FAFC),
           onTap: () => showDialog(
-                  context: context, builder: (_) => ClientAddButton(model: client))
+                  context: context,
+                  builder: (_) => ClientAddButton(model: client))
               .then((_) => onChanged()),
           child: Container(
             height: 68,

@@ -16,17 +16,17 @@ class EnterController extends GetxController {
     List<String> words = word.trim().toLowerCase().split(' ');
     searchResult.value = clients.where((client) {
       final name = client.username!.toLowerCase();
-      final phone = client.password!.toLowerCase();
-      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()));
+      return words.every((word) => name.contains(word.toLowerCase()));
     }).toList();
   }
 
   Future<void> exportToExcel() async {
     var excel = Excel.createExcel();
     var sheet = excel['Clients'];
-    sheet.appendRow(['Username', 'Password', 'Admin']);
+    sheet.appendRow(['Username', 'Admin']);
     for (var client in clients) {
-      sheet.appendRow([client.username.toString(), client.password.toString(), client.isSuperUser.toString()]);
+      sheet.appendRow(
+          [client.username.toString(), client.isSuperUser.toString()]);
     }
     await downloadExcel(excel, '${excelTimestamp()}_users.xlsx');
   }

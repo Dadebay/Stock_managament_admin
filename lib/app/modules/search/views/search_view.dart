@@ -434,25 +434,12 @@ class _SearchViewState extends State<SearchView> {
           : StringConstants.searchViewtopPartNames,
       listToSort: displayList,
       setSortedList: (newList) {
-        print('===== SORT CALLBACK CALLED =====');
-        print('New list length: ${newList.length}');
-        print('First 3 items after sort:');
-        for (int i = 0; i < (newList.length > 3 ? 3 : newList.length); i++) {
-          print(
-              '  $i: ${newList[i].name} - Price: ${newList[i].price} - Cost: ${newList[i].cost}');
-        }
+        for (int i = 0; i < (newList.length > 3 ? 3 : newList.length); i++) {}
 
         // Update all three lists to maintain sort order
         searchViewController.historyList.assignAll(newList);
         searchViewController.searchResult.assignAll(newList);
         searchViewController.productsList.assignAll(newList);
-
-        print(
-            'After assignment - historyList length: ${searchViewController.historyList.length}');
-        print(
-            'After assignment - searchResult length: ${searchViewController.searchResult.length}');
-        print(
-            'After assignment - productsList length: ${searchViewController.productsList.length}');
       },
       getSortValue: (model, key) {
         switch (key) {
@@ -571,7 +558,6 @@ class _SearchViewState extends State<SearchView> {
     return ListView.separated(
         key: ValueKey(list.map((e) => e.id).join('-')),
         itemCount: list.length,
-        cacheExtent: 500.0,
         padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 96.h),
         physics: const BouncingScrollPhysics(),
         separatorBuilder: (_, __) => const SizedBox(height: 2),

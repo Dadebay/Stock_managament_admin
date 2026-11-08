@@ -1,9 +1,10 @@
 # Web panel deployment
 
-The admin panel is currently served straight off `216.250.11.255` (no domain,
-no HTTPS) — nginx site `/etc/nginx/sites-available/webstock`, root
-`/home/ubuntu/web`. The build living there right now is from **May 5** — none
-of the recent work is live until you deploy.
+The admin panel is currently documented at `216.250.11.255` (no domain or
+HTTPS), with nginx site `/etc/nginx/sites-available/webstock` and root
+`/home/ubuntu/web`. Verify the live build before deployment; source changes do
+not reach the server until the upload step runs. Do not send staff credentials
+over this HTTP deployment. Configure HTTPS for both the panel and API first.
 
 ## One-time nginx change
 
@@ -34,10 +35,13 @@ nginx package doesn't have the module — check with
 ./deploy/deploy_web.sh
 ```
 
-This builds (`flutter build web --release`), gzips the JS/WASM/CSS/HTML/fonts
+This builds (`flutter build web --wasm --release`), gzips the JS/CSS/HTML/fonts
 next to their originals, `rsync --delete`s the whole `build/web/` to
 `/home/ubuntu/web` on the server, and checks that `Content-Encoding: gzip`
 actually comes back afterward.
+
+Set `STOCK_API_ORIGIN=https://your-api-host` to compile a different backend
+origin into the web build. This is a public build value, never a secret.
 
 Run `./deploy/deploy_web.sh build` and `./deploy/deploy_web.sh upload`
 separately if you ever need to inspect the build before shipping it.

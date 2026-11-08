@@ -32,7 +32,6 @@ class ProductsPageController extends GetxController {
   }
 
   Future<void> onLoadingController() async {
-    int length = productsListHomeView.length;
     loadingData.value = true;
     loadingData.value = false;
   }

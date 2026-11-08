@@ -23,16 +23,20 @@ class SearchService {
 
   final SearchViewController searchViewController = Get.find();
 
-  Future<ProductsPage> getProducts({int page = 1, int size = pageSize, String? search}) async {
+  Future<ProductsPage> getProducts(
+      {int page = 1, int size = pageSize, String? search}) async {
     final uri = Uri.parse(ApiConstants.products).replace(queryParameters: {
       'page': '$page',
       'page_size': '$size',
       if (search != null && search.isNotEmpty) 'search': search,
     });
-    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+    final data =
+        await ApiService().getRequest(uri.toString(), requiresToken: true);
 
     if (data is Map && data['results'] != null) {
-      final results = (data['results'] as List).map((item) => SearchModel.fromJson(item)).toList();
+      final results = (data['results'] as List)
+          .map((item) => SearchModel.fromJson(item))
+          .toList();
       final count = data['count'] ?? results.length;
       return ProductsPage(
         products: results,
@@ -42,7 +46,8 @@ class SearchService {
       );
     } else if (data is List) {
       final results = data.map((item) => SearchModel.fromJson(item)).toList();
-      return ProductsPage(products: results, page: 1, totalPages: 1, count: results.length);
+      return ProductsPage(
+          products: results, page: 1, totalPages: 1, count: results.length);
     } else {
       return ProductsPage(products: [], page: 1, totalPages: 1, count: 0);
     }
@@ -65,7 +70,8 @@ class SearchService {
   }
 
   Future<SearchModel?> getProductByID(String id) async {
-    final data = await ApiService().getRequest('${ApiConstants.products}/$id/', requiresToken: true);
+    final data = await ApiService()
+        .getRequest('${ApiConstants.products}/$id/', requiresToken: true);
     if (data != null && data['results'] != null) {
       return SearchModel.fromJson(data['results']);
     } else {
@@ -88,7 +94,9 @@ class SearchService {
     request.headers['Authorization'] = 'Bearer $token';
     request.fields.addAll(fields);
 
-    if (imageBytes != null && imageFileName != null && imageFileName.isNotEmpty) {
+    if (imageBytes != null &&
+        imageFileName != null &&
+        imageFileName.isNotEmpty) {
       String extension = imageFileName.split('.').last.toLowerCase();
       if (extension.isEmpty) {
         extension = 'png'; // Varsayılan bir uzantı, eğer dosya adında yoksa
@@ -107,11 +115,13 @@ class SearchService {
       final responseBody = await streamedResponse.stream.bytesToString();
       final statusCode = streamedResponse.statusCode;
       if (statusCode == 200) {
+        ApiService.clearCache();
         final jsonData = jsonDecode(responseBody);
         final updatedModel = SearchModel.fromJson(jsonData);
         searchViewController.updateProductLocally(updatedModel);
       } else {
-        String errorMessage = "Failed to update product. Status code: $statusCode";
+        String errorMessage =
+            "Failed to update product. Status code: $statusCode";
         try {
           final errorJson = jsonDecode(responseBody);
           if (errorJson is Map && errorJson.containsKey('detail')) {
@@ -137,6 +147,9 @@ class SearchService {
     final uri = Uri.parse(ApiConstants.products);
     final request = http.MultipartRequest('POST', uri);
     final token = await AuthStorage().getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Authentication required.');
+    }
     request.headers['Authorization'] = 'Bearer $token';
     request.fields.addAll(fields);
     if (imageBytes != null && imageFileName != null) {
@@ -168,16 +181,16 @@ class SearchService {
           detail = decoded['detail']?.toString() ?? decoded.toString();
         }
       } catch (_) {}
-      debugPrint('Create product failed ($statusCode): $responseBody');
       throw Exception('$statusCode - $detail');
     }
 
+    ApiService.clearCache();
     try {
       return SearchModel.fromJson(jsonDecode(responseBody));
     } catch (error) {
       // The server accepted the product; only the payload is unexpected. The
       // caller refreshes the list instead of reporting a failure.
-      debugPrint('Product created but response could not be parsed: $error');
+      debugPrint('Product created but response could not be parsed');
       throw ProductCreatedButUnreadable(responseBody);
     }
   }
@@ -191,9 +204,11 @@ class SearchService {
         if (responseJson.isNotEmpty) {
           searchViewController.deleteProduct(id);
 
-          CustomWidgets.showSnackBar('success'.tr, 'Product Deleted'.tr, Colors.green);
+          CustomWidgets.showSnackBar(
+              'success'.tr, 'Product Deleted'.tr, Colors.green);
         } else {
-          CustomWidgets.showSnackBar('error'.tr, 'Product Not Deleted'.tr, Colors.red);
+          CustomWidgets.showSnackBar(
+              'error'.tr, 'Product Not Deleted'.tr, Colors.red);
         }
       },
     );

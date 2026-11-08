@@ -330,21 +330,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
       }
     }
     if (_formKey.currentState!.validate()) {
-      print('\n===== ORDER CREATE VIEW DEBUG =====');
-      print('Selected Status: $selectedStatus');
-      print('Status Key: $key');
-      print('Date: ${textControllers[0].text}');
-      print('Package/Gaplama: ${textControllers[1].text}');
-      print('Phone: ${textControllers[2].text}');
-      print('Client Name: ${textControllers[3].text}');
-      print('Client Address: ${textControllers[4].text}');
-      print('Coupon: ${textControllers[5].text}');
-      print('Description: ${textControllers[6].text}');
-      print('Discount (raw): "${textControllers[7].text}"');
-      print('Discount isEmpty: ${textControllers[7].text.isEmpty}');
-      print(
-          'Discount parsed: ${double.tryParse(textControllers[7].text.isEmpty ? "0" : textControllers[7].text)}');
-
       List<Map<String, int>> products = [];
       _searchController.selectedProductsToOrder.forEach(
         (element) {
@@ -353,17 +338,11 @@ class _OrderCreateViewState extends State<OrderCreateView> {
         },
       );
 
-      print('Products count: ${products.length}');
-      print('Products: $products');
-
       // Discount değerini temizle ve parse et
       String discountText = textControllers[7].text.trim();
       if (discountText.isEmpty) {
         discountText = "0";
       }
-
-      print('Cleaned discount: "$discountText"');
-      print('===================================\n');
 
       final OrderModel model = OrderModel(
         id: 0,

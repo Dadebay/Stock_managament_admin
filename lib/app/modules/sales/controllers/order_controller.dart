@@ -41,7 +41,6 @@ class OrderController extends GetxController {
       sumCost.value = result.stats.totalCost;
       sumProductCount.value = result.stats.count;
     } catch (e) {
-      print("Error fetching orders: $e");
     } finally {
       isLoading(false);
       pageLoading(false);
@@ -71,7 +70,6 @@ class OrderController extends GetxController {
     try {
       final newOrder =
           await _orderService.createOrder(model: model, products: products);
-      print(newOrder);
       if (newOrder != null) {
         // Refetch page 1 so both the list and the shipped-order totals stay accurate.
         await fetchOrders(page: 1);
@@ -83,9 +81,9 @@ class OrderController extends GetxController {
         CustomWidgets.showSnackBar(
             'error'.tr, 'Order not added'.tr, Colors.red);
       }
-    } catch (e) {
+    } catch (_) {
       CustomWidgets.showSnackBar(
-          'error'.tr, 'An error occurred: $e'.tr, Colors.red);
+          'error'.tr, 'Order could not be completed'.tr, Colors.red);
     }
   }
 

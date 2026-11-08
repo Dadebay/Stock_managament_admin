@@ -10,7 +10,12 @@ class AgreeButton extends StatelessWidget {
   final RxBool? isLoading;
   final bool compact;
 
-  AgreeButton({required this.onTap, required this.text, this.showBorder, this.isLoading, this.compact = false});
+  AgreeButton(
+      {required this.onTap,
+      required this.text,
+      this.showBorder,
+      this.isLoading,
+      this.compact = false});
   HomeController? homeController;
 
   @override
@@ -35,10 +40,14 @@ class AgreeButton extends StatelessWidget {
       return AnimatedContainer(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(compact ? 14 : 20),
-            color: showBorder == true ? Colors.transparent : ColorConstants.kPrimaryColor2,
+            color: showBorder == true
+                ? Colors.transparent
+                : ColorConstants.kPrimaryColor2,
             border: Border.all(color: ColorConstants.kPrimaryColor2)),
         margin: compact ? EdgeInsets.zero : context.padding.onlyTopNormal,
-        padding: compact ? const EdgeInsets.symmetric(vertical: 12) : context.padding.normal.copyWith(top: 15, bottom: 15),
+        padding: compact
+            ? const EdgeInsets.symmetric(vertical: 12)
+            : context.padding.normal.copyWith(top: 15, bottom: 15),
         width: loadingValue.value ? 60.w : (compact ? null : Get.size.width),
         duration: const Duration(milliseconds: 800),
         alignment: Alignment.center,
@@ -58,7 +67,9 @@ class AgreeButton extends StatelessWidget {
                 style: context.general.textTheme.titleLarge!.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: compact ? 15.sp : 20.sp,
-                    color: showBorder == true ? ColorConstants.kPrimaryColor2 : Colors.white),
+                    color: showBorder == true
+                        ? ColorConstants.kPrimaryColor2
+                        : Colors.white),
               ),
       );
     });

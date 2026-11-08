@@ -8,7 +8,11 @@ import 'package:stock_managament_admin/app/product/init/packages.dart';
 import 'package:stock_managament_admin/app/product/widgets/confirm_dialog.dart';
 
 class ProductProfilView extends StatefulWidget {
-  const ProductProfilView({super.key, required this.product, required this.disableUpdate, required this.isAdmin});
+  const ProductProfilView(
+      {super.key,
+      required this.product,
+      required this.disableUpdate,
+      required this.isAdmin});
   final bool isAdmin;
   final SearchModel product;
   final bool disableUpdate;
@@ -50,8 +54,10 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     textControllers[1].text = widget.product.price;
 
     // Safe substring handling for createdAT
-    String dateString = widget.product.createdAT.toString().replaceAll("T", " ");
-    textControllers[2].text = dateString.length >= 15 ? dateString.substring(0, 15) : dateString;
+    String dateString =
+        widget.product.createdAT.toString().replaceAll("T", " ");
+    textControllers[2].text =
+        dateString.length >= 15 ? dateString.substring(0, 15) : dateString;
 
     textControllers[3].text = widget.product.category?.name ?? '';
     textControllers[4].text = widget.product.brend?.name ?? '';
@@ -106,7 +112,8 @@ class _ProductProfilViewState extends State<ProductProfilView> {
 
     String? finalImageFileName;
     if (controller.selectedImageBytes.value != null) {
-      finalImageFileName = controller.selectedImageFileName.value; // Resim seçildiyse dosya adını al
+      finalImageFileName = controller
+          .selectedImageFileName.value; // Resim seçildiyse dosya adını al
       if (finalImageFileName == null || finalImageFileName.isEmpty) {
         finalImageFileName = "${widget.product.name}_updated.png";
       }
@@ -115,14 +122,18 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         .updateProductWithImage(
       id: widget.product.id,
       fields: productData,
-      imageBytes: controller.selectedImageBytes.value, // Controller'dan byte'ları al
-      imageFileName: finalImageFileName, // Controller'dan veya oluşturulan dosya adını al
+      imageBytes:
+          controller.selectedImageBytes.value, // Controller'dan byte'ları al
+      imageFileName:
+          finalImageFileName, // Controller'dan veya oluşturulan dosya adını al
     )
         .then((_) {
       Navigator.pop(context);
-      CustomWidgets.showSnackBar("Success", "Product updated successfully", Colors.green);
+      CustomWidgets.showSnackBar(
+          "Success", "Product updated successfully", Colors.green);
     }).catchError((error) {
-      CustomWidgets.showSnackBar("Error", "Failed to update product: $error", Colors.red);
+      CustomWidgets.showSnackBar(
+          "Error", "Failed to update product: $error", Colors.red);
     });
   }
 
@@ -143,14 +154,18 @@ class _ProductProfilViewState extends State<ProductProfilView> {
 
   @override
   Widget build(BuildContext context) {
-    List<PurchaseModelInsideProduct> purchList = widget.product.purch.reversed.toList();
+    List<PurchaseModelInsideProduct> purchList =
+        widget.product.purch.reversed.toList();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
           backArrow: true,
           centerTitle: true,
           actionIcon: widget.isAdmin ? true : false,
-          icon: IconButton(tooltip: "Delete Product", onPressed: _handleDeleteRequest, icon: Icon(IconlyLight.delete, color: Colors.red)),
+          icon: IconButton(
+              tooltip: "Delete Product",
+              onPressed: _handleDeleteRequest,
+              icon: Icon(IconlyLight.delete, color: Colors.red)),
           name: "${widget.product.name}"),
       body: Row(
         children: [
@@ -164,16 +179,31 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                 children: [
                   Row(children: [
                     const Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Satyn alma taryhy', style: TextStyle(color: Color(0xFF0F172A), fontSize: 18, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 3),
-                        Text('Soňky hereketler', style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
-                      ]),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Satyn alma taryhy',
+                                style: TextStyle(
+                                    color: Color(0xFF0F172A),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700)),
+                            SizedBox(height: 3),
+                            Text('Soňky hereketler',
+                                style: TextStyle(
+                                    color: Color(0xFF64748B), fontSize: 12)),
+                          ]),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                      decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(7)),
-                      child: Text('${purchList.length} ýazgy', style: const TextStyle(color: Color(0xFF2563EB), fontSize: 12, fontWeight: FontWeight.w700)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(7)),
+                      child: Text('${purchList.length} ýazgy',
+                          style: const TextStyle(
+                              color: Color(0xFF2563EB),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
                     ),
                   ]),
                   const SizedBox(height: 16),
@@ -187,14 +217,16 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                         final item = purchList[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: const Color(0xFFE2E8F0)),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF0F172A).withValues(alpha: .04),
+                                color: const Color(0xFF0F172A)
+                                    .withValues(alpha: .04),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -230,7 +262,10 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                       },
                     ),
                   ),
-                  Align(alignment: Alignment.centerRight, child: SizedBox(width: 360, child: _buildTotalSummary(purchList))),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                          width: 360, child: _buildTotalSummary(purchList))),
                 ],
               ),
             ),
@@ -420,8 +455,10 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                     label: const Text('Üýtget'),
                     style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF4F46E5),
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
                   ),
                 )
               : const SizedBox.shrink(),
@@ -439,7 +476,10 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         ),
         child: Row(children: [
           Obx(() {
-            final image = controller.selectedImageBytes.value != null ? Image.memory(controller.selectedImageBytes.value!, fit: BoxFit.cover) : CustomWidgets.imageWidget(widget.product.img);
+            final image = controller.selectedImageBytes.value != null
+                ? Image.memory(controller.selectedImageBytes.value!,
+                    fit: BoxFit.cover)
+                : CustomWidgets.imageWidget(widget.product.img);
             return InkWell(
               onTap: _showImagePreview,
               borderRadius: BorderRadius.circular(10),
@@ -447,26 +487,44 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                 width: 132,
                 height: 132,
                 clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(10)),
                 child: image,
               ),
             );
           }),
           const SizedBox(width: 16),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(widget.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF0F172A), fontSize: 20, fontWeight: FontWeight.w700)),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(widget.product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Color(0xFF0F172A),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
-              Text('ID #${widget.product.id}', style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+              Text('ID #${widget.product.id}',
+                  style:
+                      const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
               const SizedBox(height: 14),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
-                  color: widget.product.count > 0 ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                  color: widget.product.count > 0
+                      ? const Color(0xFFDCFCE7)
+                      : const Color(0xFFFEE2E2),
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Text('Sany: ${widget.product.count}',
-                    style: TextStyle(color: widget.product.count > 0 ? const Color(0xFF15803D) : const Color(0xFFDC2626), fontWeight: FontWeight.w700, fontSize: 12)),
+                    style: TextStyle(
+                        color: widget.product.count > 0
+                            ? const Color(0xFF15803D)
+                            : const Color(0xFFDC2626),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12)),
               ),
               if (widget.isAdmin) ...[
                 const SizedBox(height: 10),
@@ -491,7 +549,9 @@ class _ProductProfilViewState extends State<ProductProfilView> {
     final imageBytes = controller.selectedImageBytes.value;
     final rawImage = widget.product.img ?? '';
     if (imageBytes == null && rawImage.isEmpty) return;
-    final imageUrl = rawImage.startsWith(ApiConstants.imageURL) ? rawImage : '${ApiConstants.imageURL2}$rawImage';
+    final imageUrl = rawImage.startsWith(ApiConstants.imageURL)
+        ? rawImage
+        : '${ApiConstants.imageURL2}$rawImage';
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
@@ -506,8 +566,13 @@ class _ProductProfilViewState extends State<ProductProfilView> {
                   : CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.contain,
-                      placeholder: (_, __) => const SizedBox(height: 320, child: Center(child: CircularProgressIndicator())),
-                      errorWidget: (_, __, ___) => const SizedBox(height: 240, child: Center(child: Icon(Icons.broken_image_outlined))),
+                      placeholder: (_, __) => const SizedBox(
+                          height: 320,
+                          child: Center(child: CircularProgressIndicator())),
+                      errorWidget: (_, __, ___) => const SizedBox(
+                          height: 240,
+                          child:
+                              Center(child: Icon(Icons.broken_image_outlined))),
                     ),
             ),
           ),
@@ -517,7 +582,9 @@ class _ProductProfilViewState extends State<ProductProfilView> {
             child: Material(
               color: Colors.black.withValues(alpha: .55),
               shape: const CircleBorder(),
-              child: IconButton(onPressed: Get.back, icon: const Icon(Icons.close_rounded, color: Colors.white)),
+              child: IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(Icons.close_rounded, color: Colors.white)),
             ),
           ),
         ]),
@@ -608,7 +675,9 @@ class _ProductProfilViewState extends State<ProductProfilView> {
       onTap: () {
         if (!widget.isAdmin || !selectable) return;
         final fieldName = StringConstants.apiFieldNames[index];
-        final url = StringConstants.four_in_one_names.firstWhere((element) => element['countName'] == fieldName)['url'].toString();
+        final url = StringConstants.four_in_one_names
+            .firstWhere((element) => element['countName'] == fieldName)['url']
+            .toString();
         DialogsUtils().showSelectableDialog(
           context: context,
           title: label,
@@ -622,15 +691,21 @@ class _ProductProfilViewState extends State<ProductProfilView> {
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: true,
         fillColor: widget.isAdmin ? Colors.white : const Color(0xFFF8FAFC),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.4)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.4)),
       ),
     );
   }
 }
-
 
 /// Allows digits with a single decimal separator (comma or dot); letters and
 /// extra separators are rejected as they are typed.

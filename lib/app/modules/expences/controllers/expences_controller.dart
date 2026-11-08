@@ -18,7 +18,8 @@ class ExpencesController extends GetxController {
       final cost = double.tryParse(expence.cost.toString()) ?? 0.0;
       map[date.year] = (map[date.year] ?? 0) + cost;
     }
-    final sortedEntries = map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    final sortedEntries = map.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
     return Map.fromEntries(sortedEntries);
   }
 
@@ -33,7 +34,10 @@ class ExpencesController extends GetxController {
       final name = expences.name.toLowerCase();
       final phone = expences.cost.toLowerCase();
       final note = expences.note.toLowerCase();
-      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()) || note.contains(word.toLowerCase()));
+      return words.every((word) =>
+          name.contains(word.toLowerCase()) ||
+          phone.contains(word.toLowerCase()) ||
+          note.contains(word.toLowerCase()));
     }).toList();
   }
 
@@ -58,7 +62,12 @@ class ExpencesController extends GetxController {
     var sheet = excel['Expences'];
     sheet.appendRow(['Expences Name', 'Date', 'Cost', 'Note']);
     for (var expence in expencesList) {
-      sheet.appendRow([expence.name.toString(), expence.date.toString(), expence.cost.toString(), expence.note.toString()]);
+      sheet.appendRow([
+        expence.name.toString(),
+        expence.date.toString(),
+        expence.cost.toString(),
+        expence.note.toString()
+      ]);
     }
     await downloadExcel(excel, '${excelTimestamp()}_expences.xlsx');
   }

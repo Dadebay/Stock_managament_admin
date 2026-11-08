@@ -14,24 +14,23 @@ class LoginView extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   dynamic loginButtonOnTap() async {
     if (_formKey.currentState!.validate()) {
-      homeController.agreeButton.value = !homeController.agreeButton.value;
-
-      await SignInService()
-          .login(
-              username: textEditingController.text,
-              password: textEditingController1.text)
-          .then((value) async {
-        if (value != null) {
-          await SignInService().getClients(
-              textEditingController.text, textEditingController1.text);
-
+      if (homeController.agreeButton.value) return;
+      homeController.agreeButton.value = true;
+      try {
+        final username = textEditingController.text.trim();
+        final result = await SignInService().login(
+          username: username,
+          password: textEditingController1.text,
+        );
+        if (result != null) {
+          await SignInService().updateAdminStatus(username);
           Get.offAll(() => const NavBarPageView());
         } else {
-          textEditingController.clear();
           textEditingController1.clear();
         }
-      });
-      homeController.agreeButton.value = !homeController.agreeButton.value;
+      } finally {
+        homeController.agreeButton.value = false;
+      }
     } else {
       CustomWidgets.showSnackBar(
           'errorTitle', 'loginErrorFillBlanks', Colors.red);

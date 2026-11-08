@@ -3,7 +3,7 @@ export 'dart:io';
 export 'package:cached_network_image/cached_network_image.dart';
 export 'package:flutter/material.dart';
 export 'package:flutter/services.dart';
-export 'package:flutter_iconly/flutter_iconly.dart';
+export 'package:stock_managament_admin/app/product/constants/admin_icons.dart';
 export 'package:hugeicons/hugeicons.dart';
 export 'package:flutter_screenutil/flutter_screenutil.dart';
 export 'package:stock_managament_admin/app/product/init/app_storage.dart';

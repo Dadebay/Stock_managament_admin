@@ -101,8 +101,6 @@ class _ClientsViewState extends State<ClientsView> {
                         : () async {
                             setState(() => isExporting = true);
                             try {
-                              await SignInService()
-                                  .getClients('didario', 'Didar123#');
                               if (await AuthStorage().getAdminStatus()) {
                                 final all = await ClientsService()
                                     .getAllClientsForExport();
@@ -112,7 +110,7 @@ class _ClientsViewState extends State<ClientsView> {
                                     'Error', 'You are not admin', Colors.red);
                               }
                             } catch (error) {
-                              debugPrint('Failed to export clients: $error');
+                              debugPrint('Failed to export clients');
                               CustomWidgets.showSnackBar(
                                   'Error',
                                   'Failed to generate Excel report.'.tr,

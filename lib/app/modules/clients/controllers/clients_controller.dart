@@ -18,7 +18,10 @@ class ClientsController extends GetxController {
       final name = client.name.toLowerCase();
       final phone = client.phone.toLowerCase();
       final address = client.address.toLowerCase();
-      return words.every((word) => name.contains(word.toLowerCase()) || phone.contains(word.toLowerCase()) || address.contains(word.toLowerCase()));
+      return words.every((word) =>
+          name.contains(word.toLowerCase()) ||
+          phone.contains(word.toLowerCase()) ||
+          address.contains(word.toLowerCase()));
     }).toList();
   }
 
@@ -27,7 +30,13 @@ class ClientsController extends GetxController {
     var sheet = excel['Clients'];
     sheet.appendRow(['Name', 'Number', 'Address', 'Order Count', 'Sum Price']);
     for (var client in clientsToExport) {
-      sheet.appendRow([client.name.toString(), client.phone.toString(), client.address.toString(), client.orderCount.toString(), client.sumPrice.toString()]);
+      sheet.appendRow([
+        client.name.toString(),
+        client.phone.toString(),
+        client.address.toString(),
+        client.orderCount.toString(),
+        client.sumPrice.toString()
+      ]);
     }
     await downloadExcel(excel, '${excelTimestamp()}_clients.xlsx');
   }

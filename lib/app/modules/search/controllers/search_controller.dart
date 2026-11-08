@@ -32,13 +32,14 @@ class SearchViewController extends GetxController {
     pageLoading.value = true;
     logState('loadProductsPage: start page=$page');
     try {
-      final result = await SearchService().getProducts(page: page, search: _pagedSearchText);
+      final result = await SearchService()
+          .getProducts(page: page, search: _pagedSearchText);
       pageItems.assignAll(result.products);
       currentPage.value = result.page;
       totalPages.value = result.totalPages < 1 ? 1 : result.totalPages;
       totalCount.value = result.count;
     } catch (error) {
-      debugPrint('[SEARCH] loadProductsPage failed: $error');
+      debugPrint('[SEARCH] loadProductsPage failed');
       rethrow;
     } finally {
       pageLoading.value = false;
@@ -84,7 +85,8 @@ class SearchViewController extends GetxController {
       final uniqueCategories = <CategoryModel>[];
       final categoryNames = <String>{};
       for (var product in products) {
-        if (product.category != null && !categoryNames.contains(product.category!.name)) {
+        if (product.category != null &&
+            !categoryNames.contains(product.category!.name)) {
           uniqueCategories.add(product.category!);
           categoryNames.add(product.category!.name);
         }
@@ -125,7 +127,7 @@ class SearchViewController extends GetxController {
           return dateB.compareTo(dateA);
         } catch (e) {
           // Tarih parse hatası varsa, bu ürünü alta gönder
-          debugPrint('[SEARCH] date parse failed: $e');
+          debugPrint('[SEARCH] date parse failed');
           return 1;
         }
       });
@@ -137,7 +139,7 @@ class SearchViewController extends GetxController {
       isLoading.value = false;
       logState('loadProducts: done');
     } catch (e) {
-      debugPrint('[SEARCH] loadProducts failed: $e');
+      debugPrint('[SEARCH] loadProducts failed');
       isLoading.value = false;
       logState('loadProducts: failed');
     }
@@ -149,7 +151,8 @@ class SearchViewController extends GetxController {
   /// [onSearchTextChanged] with the current search text.
   ///
 
-/*******  29e92759-1f69-4682-84fe-0c698289ded1  *******/ void filterByCategory(String categoryName) {
+/*******  29e92759-1f69-4682-84fe-0c698289ded1  *******/ void filterByCategory(
+      String categoryName) {
     selectedCategory.value = categoryName;
     onSearchTextChanged(_currentSearchText);
   }
@@ -160,13 +163,17 @@ class SearchViewController extends GetxController {
       GeciciListe = GeciciListe.where((product) {
         switch (_activeFilterType) {
           case 'category':
-            return product.category?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.category?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           case 'brends':
-            return product.brend?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.brend?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           case 'location':
-            return product.location?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.location?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           case 'material':
-            return product.material?.name.toLowerCase() == _activeFilterValue.toLowerCase();
+            return product.material?.name.toLowerCase() ==
+                _activeFilterValue.toLowerCase();
           default:
             return true;
         }
@@ -211,7 +218,8 @@ class SearchViewController extends GetxController {
     selectedImageFileName.value = null;
   }
 
-  RxList<Map<String, dynamic>> selectedProductsToOrder = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> selectedProductsToOrder =
+      <Map<String, dynamic>>[].obs;
 
   void addOrUpdateProduct({required SearchModel product, required int count}) {
     final index = selectedProductsToOrder.indexWhere(
@@ -294,8 +302,8 @@ class SearchViewController extends GetxController {
         await loadProductsPage(page: currentPage.value);
       }
     } catch (e) {
-      debugPrint('Add product failed: $e');
-      CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi: $e", Colors.red);
+      debugPrint('Add product failed');
+      CustomWidgets.showSnackBar("Hata", "Ürün eklenemedi", Colors.red);
     } finally {
       // Always release the shared loading flag; otherwise every AgreeButton in
       // the app keeps spinning until the page is reloaded.
@@ -336,29 +344,21 @@ class SearchViewController extends GetxController {
 
   Future<void> refreshProducts() async {
     try {
-      print('===== REFRESH PRODUCTS: Ürünler çekiliyor... =====');
       final products = await SearchService().getAllProducts();
-      print('===== REFRESH PRODUCTS: ${products.length} ürün çekildi =====');
-      print('===== ÖNCEKİ historyList: ${historyList.length} =====');
-      print('===== ÖNCEKİ productsList: ${productsList.length} =====');
-      print('===== ÖNCEKİ searchResult: ${searchResult.length} =====');
 
       historyList.assignAll(products);
       productsList.assignAll(products);
       searchResult.assignAll(products);
       calculateTotals();
-
-      print('===== SONRAKİ historyList: ${historyList.length} =====');
-      print('===== SONRAKİ productsList: ${productsList.length} =====');
-      print('===== SONRAKİ searchResult: ${searchResult.length} =====');
     } catch (e) {
-      print('===== REFRESH PRODUCTS HATASI: $e =====');
+      debugPrint('Unable to refresh products');
     }
   }
 
   void onSearchTextChanged(String word) {
     _currentSearchText = word;
-    List<SearchModel> filteredList = historyList.toList(); // Start with the full history list
+    List<SearchModel> filteredList =
+        historyList.toList(); // Start with the full history list
 
     // Apply category filter
     if (selectedCategory.value != 'All') {
@@ -374,7 +374,10 @@ class SearchViewController extends GetxController {
         final name = product.name.toLowerCase();
         final price = product.price.toLowerCase().toString();
         final cost = product.cost.toLowerCase().toString();
-        return words.every((w) => name.contains(w) || price.contains(w.toString()) || cost.contains(w.toString()));
+        return words.every((w) =>
+            name.contains(w) ||
+            price.contains(w.toString()) ||
+            cost.contains(w.toString()));
       }).toList();
     }
 
@@ -383,22 +386,26 @@ class SearchViewController extends GetxController {
   }
 
   void updateProductLocally(SearchModel updatedProduct) {
-    final indexInProducts = productsList.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInProducts =
+        productsList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInProducts != -1) {
       productsList[indexInProducts] = updatedProduct;
     }
 
-    final indexInSearch = searchResult.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInSearch =
+        searchResult.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInSearch != -1) {
       searchResult[indexInSearch] = updatedProduct;
     }
 
-    final indexInHistory = historyList.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInHistory =
+        historyList.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInHistory != -1) {
       historyList[indexInHistory] = updatedProduct;
     }
 
-    final indexInPage = pageItems.indexWhere((item) => item.id == updatedProduct.id);
+    final indexInPage =
+        pageItems.indexWhere((item) => item.id == updatedProduct.id);
     if (indexInPage != -1) {
       pageItems[indexInPage] = updatedProduct;
     }
@@ -453,11 +460,12 @@ class SearchViewController extends GetxController {
         selectedImageBytes.value = compressed.bytes;
         selectedImageFileName.value = compressed.fileName;
         final kb = (compressed.bytes.lengthInBytes / 1024).round();
-        CustomWidgets.showSnackBar(
-            "Success", "Image selected: ${compressed.fileName} ($kb KB)", Colors.green);
+        CustomWidgets.showSnackBar("Success",
+            "Image selected: ${compressed.fileName} ($kb KB)", Colors.green);
       }
     } catch (e) {
-      CustomWidgets.showSnackBar("Error", "Could not pick image: $e", Colors.red);
+      CustomWidgets.showSnackBar(
+          "Error", "Could not pick image: $e", Colors.red);
     }
   }
 

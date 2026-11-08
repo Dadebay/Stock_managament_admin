@@ -34,7 +34,11 @@ cd "$(dirname "$0")/.."
 
 build() {
     echo "==> Building (wasm)"
-    flutter build web --wasm --release
+    build_args=(--wasm --release)
+    if [[ -n "${STOCK_API_ORIGIN:-}" ]]; then
+        build_args+=("--dart-define=STOCK_API_ORIGIN=$STOCK_API_ORIGIN")
+    fi
+    flutter build web "${build_args[@]}"
 
     echo "==> Installing WASM range loader"
     test -f "$WASM_RANGE_LOADER"

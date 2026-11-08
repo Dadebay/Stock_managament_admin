@@ -51,7 +51,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
       width: MediaQuery.of(context).size.width,
       padding: context.padding.onlyTopNormal,
       child: TextFormField(
-        style: context.general.textTheme.bodyLarge!.copyWith(color: widget.enabled == false ? ColorConstants.greyColor : ColorConstants.blackColor, fontSize: 16.sp, fontWeight: FontWeight.w600),
+        style: context.general.textTheme.bodyLarge!.copyWith(
+            color: widget.enabled == false
+                ? ColorConstants.greyColor
+                : ColorConstants.blackColor,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600),
         enabled: widget.enabled ?? true,
         controller: widget.controller,
         onTap: widget.onTap,
@@ -65,13 +70,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
         onEditingComplete: () => widget.requestfocusNode.requestFocus(),
         maxLines: widget.obscureText ? 1 : (widget.maxLine ?? 1),
         obscureText: _obscure,
-        keyboardType: widget.isNumberOnly ? TextInputType.number : TextInputType.text,
-        inputFormatters: widget.isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
+        keyboardType:
+            widget.isNumberOnly ? TextInputType.number : TextInputType.text,
+        inputFormatters:
+            widget.isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
         focusNode: widget.focusNode,
         enableSuggestions: false,
         autocorrect: false,
         decoration: InputDecoration(
-          prefixIconConstraints: BoxConstraints(minWidth: (widget.prefixIcon == null && widget.prefixIconWidget == null) ? 20 : 10, minHeight: 0),
+          prefixIconConstraints: BoxConstraints(
+              minWidth:
+                  (widget.prefixIcon == null && widget.prefixIconWidget == null)
+                      ? 20
+                      : 10,
+              minHeight: 0),
           prefixIcon: widget.prefixIconWidget != null
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -91,7 +103,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
               ? IconButton(
                   splashRadius: 20,
                   icon: Icon(
-                    _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    _obscure
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                     color: ColorConstants.greyColor,
                     size: 22,
                   ),
@@ -99,16 +113,24 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 )
               : null,
           labelText: widget.labelName.tr,
-          labelStyle: context.general.textTheme.bodyLarge!.copyWith(color: ColorConstants.greyColor, fontSize: 16.sp, fontWeight: FontWeight.w500),
+          labelStyle: context.general.textTheme.bodyLarge!.copyWith(
+              color: ColorConstants.greyColor,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500),
           floatingLabelAlignment: FloatingLabelAlignment.start,
           contentPadding: context.padding.normal,
           isDense: true,
           alignLabelWithHint: true,
-          border: _buildOutlineInputBorder(borderColor: ColorConstants.blackColor),
-          enabledBorder: _buildOutlineInputBorder(borderColor: ColorConstants.greyColor.withOpacity(.5)),
-          focusedBorder: _buildOutlineInputBorder(borderColor: ColorConstants.kPrimaryColor),
-          focusedErrorBorder: _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
-          errorBorder: _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
+          border:
+              _buildOutlineInputBorder(borderColor: ColorConstants.blackColor),
+          enabledBorder: _buildOutlineInputBorder(
+              borderColor: ColorConstants.greyColor.withOpacity(.5)),
+          focusedBorder: _buildOutlineInputBorder(
+              borderColor: ColorConstants.kPrimaryColor),
+          focusedErrorBorder:
+              _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
+          errorBorder:
+              _buildOutlineInputBorder(borderColor: ColorConstants.redColor),
         ),
       ),
     );

@@ -115,7 +115,9 @@ class YearFilterBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: (dense ? 9.5 : 11.5).sp,
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white.withValues(alpha: 0.85) : _mutedText,
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : _mutedText,
                 ),
               ),
             ],

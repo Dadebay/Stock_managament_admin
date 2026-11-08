@@ -55,7 +55,7 @@ class EnterCard extends StatelessWidget {
                             fontWeight: FontWeight.w700))),
                 const SizedBox(width: 14),
                 _cell(client.username ?? '—', flex: 3, bold: true),
-                _cell(client.password ?? '—', flex: 3),
+                _cell('••••••••', flex: 3),
                 Expanded(
                     flex: 2,
                     child: Align(

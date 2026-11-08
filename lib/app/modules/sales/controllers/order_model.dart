@@ -24,7 +24,11 @@ class ClientDetailModel {
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       address: json['address'] ?? '',
-      phone: json['phone'] != null ? (json['phone'].toString().startsWith("+993") ? json['phone'].toString() : "+993${json['phone'].toString()}") : null,
+      phone: json['phone'] != null
+          ? (json['phone'].toString().startsWith("+993")
+              ? json['phone'].toString()
+              : "+993${json['phone'].toString()}")
+          : null,
       description: json['description'] ?? '',
       ordercount: json['ordercount']?.toString() ?? '',
       sumprice: json['sumprice']?.toString() ?? '',
@@ -100,19 +104,29 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       id: json['id'] as int? ?? 0,
-      status: json['status'].toString() ?? '1',
+      status: json['status']?.toString() ?? '',
       gaplama: json['gaplama'] as String? ?? '',
       date: json['datetime'] as String? ?? (json['date'] as String? ?? ''),
       name: json['name'] as String? ?? '',
-      clientID: json['client'] as int? ?? (json['client_detail'] != null ? json['client_detail']['id'] : 0),
-      clientDetailModel: json['client_detail'] != null && json['client_detail'] is Map<String, dynamic> ? ClientDetailModel.fromJson(json['client_detail'] as Map<String, dynamic>) : null,
+      clientID: json['client'] as int? ??
+          (json['client_detail'] != null ? json['client_detail']['id'] : 0),
+      clientDetailModel: json['client_detail'] != null &&
+              json['client_detail'] is Map<String, dynamic>
+          ? ClientDetailModel.fromJson(
+              json['client_detail'] as Map<String, dynamic>)
+          : null,
       discount: json['discount']?.toString() ?? '0',
       coupon: json['coupon'] as String? ?? '',
       description: json['description'] as String? ?? '',
       count: json['count'] as int? ?? 0,
       totalsum: json['totalsum']?.toString() ?? '0',
       totalchykdajy: json['totalchykdajy']?.toString() ?? '0',
-      products: (json['product_detail'] != null && json['product_detail'] is List) ? (json['product_detail'] as List).map((i) => SearchModel.fromJson(i as Map<String, dynamic>)).toList() : [],
+      products:
+          (json['product_detail'] != null && json['product_detail'] is List)
+              ? (json['product_detail'] as List)
+                  .map((i) => SearchModel.fromJson(i as Map<String, dynamic>))
+                  .toList()
+              : [],
     );
   }
 
@@ -200,7 +214,8 @@ class OrderStats {
   final double totalCost;
   final int count;
 
-  OrderStats({required this.totalSum, required this.totalCost, required this.count});
+  OrderStats(
+      {required this.totalSum, required this.totalCost, required this.count});
 
   factory OrderStats.fromJson(Map<String, dynamic>? json) {
     if (json == null) return OrderStats(totalSum: 0, totalCost: 0, count: 0);

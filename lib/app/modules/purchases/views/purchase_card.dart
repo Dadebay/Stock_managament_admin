@@ -27,8 +27,8 @@ class PurchaseCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () => Get.to(() => PurchasesProductsView(
-                purchasesModel: purchasesModel, isAdmin: isAdmin))
-            ?.then((_) => onChanged()),
+            purchasesModel: purchasesModel,
+            isAdmin: isAdmin))?.then((_) => onChanged()),
         borderRadius: BorderRadius.circular(12),
         hoverColor: const Color(0xFFF8FAFC),
         child: Container(
@@ -117,8 +117,8 @@ class PurchaseCard extends StatelessWidget {
           color: const Color(0xFF475569),
           background: const Color(0xFFF1F5F9),
           onPressed: () => Get.to(() => PurchasesProductsView(
-                  purchasesModel: purchasesModel, isAdmin: isAdmin))
-              ?.then((_) => onChanged()),
+              purchasesModel: purchasesModel,
+              isAdmin: isAdmin))?.then((_) => onChanged()),
         ),
       ]),
     );

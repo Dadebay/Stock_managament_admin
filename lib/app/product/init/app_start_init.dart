@@ -1,12 +1,5 @@
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
-class HttpOverridesCustom extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-  }
-}
-
 @immutable
 class AppStartInit {
   final storage = AppStorage();
@@ -23,7 +16,6 @@ class AppStartInit {
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    HttpOverrides.global = HttpOverridesCustom();
     await AppStorage.init();
   }
 }

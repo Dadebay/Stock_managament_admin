@@ -1,7 +1,12 @@
 class ApiConstants {
-  static const String baseUrl = 'http://216.250.11.255:9000/api/';
-  static const String imageURL = 'http://216.250.11.255:9000/';
-  static const String imageURL2 = 'http://216.250.11.255:9000';
+  /// Set STOCK_API_ORIGIN at build time when the backend has an HTTPS domain.
+  static const String apiOrigin = String.fromEnvironment(
+    'STOCK_API_ORIGIN',
+    defaultValue: 'http://216.250.11.255:9000',
+  );
+  static const String baseUrl = '$apiOrigin/api/';
+  static const String imageURL = '$apiOrigin/';
+  static const String imageURL2 = apiOrigin;
   static const String authUrl = '${baseUrl}login/';
   static const String clients = '${baseUrl}client/';
   static const String expences = '${baseUrl}expences/';

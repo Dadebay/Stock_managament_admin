@@ -52,10 +52,9 @@ class OrderCardView extends StatelessWidget {
       // Sipariş içeriği sadece yönetim tarafında görüntülenebilir.
       onTap: isAdmin
           ? () => Get.to(() => OrderProductsView(
-                    order: order,
-                    isAdmin: isAdmin,
-                  ))
-              ?.then((_) => onChanged())
+                order: order,
+                isAdmin: isAdmin,
+              ))?.then((_) => onChanged())
           : null,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
