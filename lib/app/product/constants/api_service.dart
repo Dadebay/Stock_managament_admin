@@ -9,7 +9,13 @@ import 'package:stock_managament_admin/app/modules/login_view/controllers/auth_s
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class ApiService {
-  final AuthStorage _auth = AuthStorage();
+  ApiService({http.Client? client, AuthStorage? auth})
+      : _client = client ?? _sharedClient,
+        _auth = auth ?? AuthStorage();
+
+  static final http.Client _sharedClient = http.Client();
+  final http.Client _client;
+  final AuthStorage _auth;
 
   // Cache for GET requests (simple in-memory cache)
   static final Map<String, dynamic> _cache = {};
@@ -51,9 +57,16 @@ class ApiService {
     bool useCache = true,
   }) async {
     try {
+      final token = await _auth.getToken();
+      if (requiresToken && (token == null || token.isEmpty)) {
+        _handleApiError(401, 'Authentication required');
+        return null;
+      }
+      // Cache entries belong to one session. Never return another user's data.
+      final cacheKey = '${token ?? 'public'}|$endpoint';
       // Check cache first for GET requests
       if (useCache) {
-        final cachedData = _getFromCache(endpoint);
+        final cachedData = _getFromCache(cacheKey);
         if (cachedData != null) {
           if (handleSuccess != null) {
             await handleSuccess(cachedData);
@@ -62,14 +75,13 @@ class ApiService {
         }
       }
 
-      final token = await _auth.getToken();
       final headers = <String, String>{
         if (requiresToken && token != null) 'Authorization': 'Bearer $token',
         'Accept-Encoding': 'gzip, deflate',
         'Connection': 'keep-alive',
       };
 
-      final response = await http
+      final response = await _client
           .get(
         Uri.parse(endpoint),
         headers: headers,
@@ -85,11 +97,12 @@ class ApiService {
       final decodedBody = utf8.decode(response.bodyBytes);
 
       if (response.statusCode == 200) {
-        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
+        final responseJson =
+            decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
 
         // Save successful response to cache
         if (useCache) {
-          _saveToCache(endpoint, responseJson);
+          _saveToCache(cacheKey, responseJson);
         }
 
         if (handleSuccess != null) {
@@ -98,18 +111,30 @@ class ApiService {
         return responseJson;
       } else {
         // DÜZELTME: Hata durumunda bile doğru karakter setini kullanıyoruz.
-        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
-        _handleApiError(response.statusCode, responseJson['message']?.toString() ?? 'anErrorOccurred'.tr);
+        dynamic responseJson;
+        try {
+          responseJson =
+              decodedBody.isNotEmpty ? json.decode(decodedBody) : null;
+        } on FormatException {
+          // HTML and other malformed responses should not be shown to staff.
+        }
+        final serverMessage =
+            responseJson is Map ? responseJson['message'] : null;
+        _handleApiError(response.statusCode,
+            serverMessage?.toString() ?? 'anErrorOccurred'.tr);
         return null;
       }
     } on TimeoutException {
-      CustomWidgets.showSnackBar('Error', 'Request timeout. Please try again.', Colors.red);
+      CustomWidgets.showSnackBar(
+          'Error', 'Request timeout. Please try again.', Colors.red);
       return null;
     } on SocketException {
-      CustomWidgets.showSnackBar('networkError'.tr, 'noInternet'.tr, Colors.red);
+      CustomWidgets.showSnackBar(
+          'networkError'.tr, 'noInternet'.tr, Colors.red);
       return null;
     } catch (e) {
-      CustomWidgets.showSnackBar('unknownError'.tr, 'anErrorOccurred'.tr, Colors.red);
+      CustomWidgets.showSnackBar(
+          'unknownError'.tr, 'anErrorOccurred'.tr, Colors.red);
       return null;
     }
   }
@@ -123,6 +148,10 @@ class ApiService {
   }) async {
     try {
       final token = await _auth.getToken();
+      if (requiresToken && (token == null || token.isEmpty)) {
+        _handleApiError(401, 'Authentication required');
+        return null;
+      }
       final headers = <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept-Encoding': 'gzip, deflate',
@@ -130,22 +159,16 @@ class ApiService {
         if (requiresToken && token != null) 'Authorization': 'Bearer $token',
       };
       http.Response response;
-      print('\n===== API REQUEST =====');
-      print('Method: $method');
-      print('Endpoint: $endpoint');
-      if (body != null) {
-        print('Request Body: $body');
-      }
-
       switch (method.toUpperCase()) {
         case 'GET':
-          response = await http.get(Uri.parse(endpoint), headers: headers).timeout(
-                const Duration(seconds: 30),
-                onTimeout: () => throw TimeoutException('Request timeout'),
-              );
+          response =
+              await _client.get(Uri.parse(endpoint), headers: headers).timeout(
+                    const Duration(seconds: 30),
+                    onTimeout: () => throw TimeoutException('Request timeout'),
+                  );
           break;
         case 'POST':
-          response = await http
+          response = await _client
               .post(
                 Uri.parse(endpoint),
                 headers: headers,
@@ -157,7 +180,7 @@ class ApiService {
               );
           break;
         case 'DELETE':
-          response = await http
+          response = await _client
               .delete(
                 Uri.parse(endpoint),
                 headers: headers,
@@ -168,7 +191,7 @@ class ApiService {
               );
           break;
         case 'PUT':
-          response = await http
+          response = await _client
               .put(
                 Uri.parse(endpoint),
                 headers: headers,
@@ -186,11 +209,8 @@ class ApiService {
       // DÜZELTME: Yanıtı her zaman önce UTF-8 olarak çözüyoruz.
       final decodedBody = utf8.decode(response.bodyBytes);
 
-      print('===== API RESPONSE =====');
-      print('Status Code: ${response.statusCode}');
-      print('Response Body: $decodedBody');
-      print('======================\n');
       if ([200, 201, 204].contains(response.statusCode)) {
+        if (method.toUpperCase() != 'GET') clearCache();
         if (response.statusCode == 204) {
           if (handleSuccess != null) {
             await handleSuccess({"statusCode": response.statusCode});
@@ -198,48 +218,39 @@ class ApiService {
           return {"statusCode": response.statusCode};
         }
 
-        final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : null;
+        final responseJson =
+            decodedBody.isNotEmpty ? json.decode(decodedBody) : null;
         if (handleSuccess != null && responseJson != null) {
           await handleSuccess(responseJson);
         }
         return responseJson ?? response.statusCode;
       } else {
-        print('\n===== ERROR RESPONSE =====');
-        print('Status Code: ${response.statusCode}');
-
-        // DÜZELTME: Hata yanıtını da UTF-8 olarak çözüyoruz.
+        dynamic errorBody;
         try {
-          final responseJson = decodedBody.isNotEmpty ? json.decode(decodedBody) : {};
-          // Hata mesajı artık bir Map olabilir, bu yüzden toString() kullanmak daha güvenli.
-          String errorMessage = responseJson.toString();
-
-          print('Error Response JSON: $responseJson');
-
-          _handleApiError(
-            response.statusCode,
-            errorMessage,
-          );
-        } catch (e) {
-          print('⚠️ Response is not JSON (possibly HTML error page)');
-          print('Parse Error: $e');
-          print('Response preview: ${decodedBody.substring(0, decodedBody.length > 500 ? 500 : decodedBody.length)}');
-
-          _handleApiError(
-            response.statusCode,
-            'Server returned non-JSON response (possibly HTML error page)',
-          );
+          errorBody = decodedBody.isNotEmpty ? json.decode(decodedBody) : null;
+        } on FormatException {
+          // HTML and other malformed responses can contain private data.
         }
-        print('========================\n');
+        final serverMessage = errorBody is Map ? errorBody['message'] : null;
+        final message = serverMessage is String
+            ? serverMessage
+            : serverMessage is List
+                ? serverMessage.whereType<String>().join(', ')
+                : 'anErrorOccurred'.tr;
+        _handleApiError(response.statusCode, message);
         return null;
       }
     } on TimeoutException {
-      CustomWidgets.showSnackBar('Error', 'Request timeout. Please try again.', Colors.red);
+      CustomWidgets.showSnackBar(
+          'Error', 'Request timeout. Please try again.', Colors.red);
       return null;
     } on SocketException {
-      CustomWidgets.showSnackBar('networkError'.tr, 'noInternet'.tr, Colors.red);
+      CustomWidgets.showSnackBar(
+          'networkError'.tr, 'noInternet'.tr, Colors.red);
       return null;
     } catch (e) {
-      CustomWidgets.showSnackBar('unknownError'.tr, 'anErrorOccurred'.tr, Colors.red);
+      CustomWidgets.showSnackBar(
+          'unknownError'.tr, 'anErrorOccurred'.tr, Colors.red);
       return null;
     }
   }
@@ -261,6 +272,15 @@ class ApiService {
         break;
       case 405:
         errorMessage = 'userDoesNotExist'.tr;
+        break;
+      case 408:
+        errorMessage = 'Request timeout. Please try again.';
+        break;
+      case 426:
+        errorMessage = 'Update this app before continuing.';
+        break;
+      case 429:
+        errorMessage = 'Too many requests. Please try again later.';
         break;
       case 500:
         errorMessage = '${'serverError'.tr}: $message';

@@ -231,7 +231,8 @@ class _OrderProductsViewState extends State<OrderProductsView> {
         ),
         SizedBox(width: 12.w),
         Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(russian ? 'Товар удалён' : 'Haryt pozulan',
                 style: TextStyle(
                     fontSize: 13.5.sp,
@@ -242,8 +243,8 @@ class _OrderProductsViewState extends State<OrderProductsView> {
                 russian
                     ? 'Этот товар был удалён из каталога'
                     : 'Bu haryt kataloglardan pozulypdyr',
-                style:
-                    TextStyle(fontSize: 11.5.sp, color: const Color(0xff64748B))),
+                style: TextStyle(
+                    fontSize: 11.5.sp, color: const Color(0xff64748B))),
           ]),
         ),
         Text('x$count',
@@ -311,27 +312,12 @@ class _OrderDetailFieldState extends State<OrderDetailField> {
                   initialValue: _displayedValue, // Dialog için başlangıç değeri
                   currentOrder: widget.currentOrder,
                   onSave: (locallyUpdatedOrder) async {
-                    print('\n========== ORDER FIELD SAVE START ==========');
-                    print('Field: ${widget.label}');
-                    print('Order ID: ${locallyUpdatedOrder.id}');
-                    print(
-                        'Local value prepared for save: ${_getValue(widget.label, locallyUpdatedOrder)}');
-
                     final updatedOrderFromBackend = await OrderService()
                         .editOrderManually(model: locallyUpdatedOrder);
 
                     if (updatedOrderFromBackend != null) {
-                      print(
-                          'Backend update success. Applying backend response to UI.');
-                      print(
-                          'Backend value after save: ${_getValue(widget.label, updatedOrderFromBackend)}');
                       widget.onUpdate(updatedOrderFromBackend);
-                    } else {
-                      print(
-                          'Backend update failed or returned null. UI will not be updated from local draft.');
-                    }
-
-                    print('========== ORDER FIELD SAVE END ==========\n');
+                    } else {}
                   },
                 );
             },

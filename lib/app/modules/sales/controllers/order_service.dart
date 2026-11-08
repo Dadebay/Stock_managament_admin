@@ -7,17 +7,6 @@ import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
 
 class OrderService {
-  void _printSection(String title) {
-    print('\n========== $title ==========');
-  }
-
-  void _printMap(String title, Map<String, dynamic> map) {
-    print('$title:');
-    map.forEach((key, value) {
-      print('  - $key: $value');
-    });
-  }
-
   String? _normalizeClientPhone(String? phone) {
     if (phone == null) return null;
     final normalized = phone.trim();
@@ -31,38 +20,23 @@ class OrderService {
     return normalized.isEmpty ? null : normalized;
   }
 
-  String _extractHtmlErrorSummary(String html) {
-    final titleMatch =
-        RegExp(r'<title>(.*?)</title>', dotAll: true).firstMatch(html);
-    final exceptionTypeMatch =
-        RegExp(r'Exception Type:</th>\\s*<td>(.*?)</td>', dotAll: true)
-            .firstMatch(html);
-    final exceptionValueMatch =
-        RegExp(r'Exception Value:</th>\\s*<td><pre>(.*?)</pre>', dotAll: true)
-            .firstMatch(html);
-
-    final title = titleMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
-    final exceptionType =
-        exceptionTypeMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
-    final exceptionValue =
-        exceptionValueMatch?.group(1)?.replaceAll(RegExp(r'\\s+'), ' ').trim();
-
-    return 'title=$title | exceptionType=$exceptionType | exceptionValue=$exceptionValue';
-  }
-
   static const int pageSize = 30;
 
-  Future<OrdersPage> getOrders({int page = 1, String? search, String? status}) async {
+  Future<OrdersPage> getOrders(
+      {int page = 1, String? search, String? status}) async {
     final uri = Uri.parse(ApiConstants.order).replace(queryParameters: {
       'page': '$page',
       'page_size': '$pageSize',
       if (search != null && search.isNotEmpty) 'search': search,
       if (status != null && status.isNotEmpty) 'status': status,
     });
-    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
+    final data =
+        await ApiService().getRequest(uri.toString(), requiresToken: true);
 
     if (data is Map && data['results'] != null) {
-      final results = (data['results'] as List).map((item) => OrderModel.fromJson(item)).toList();
+      final results = (data['results'] as List)
+          .map((item) => OrderModel.fromJson(item))
+          .toList();
       final count = data['count'] ?? results.length;
       return OrdersPage(
         orders: results,
@@ -73,9 +47,19 @@ class OrderService {
       );
     } else if (data is List) {
       final results = data.map((item) => OrderModel.fromJson(item)).toList();
-      return OrdersPage(orders: results, page: 1, totalPages: 1, count: results.length, stats: OrderStats.fromJson(null));
+      return OrdersPage(
+          orders: results,
+          page: 1,
+          totalPages: 1,
+          count: results.length,
+          stats: OrderStats.fromJson(null));
     } else {
-      return OrdersPage(orders: [], page: 1, totalPages: 1, count: 0, stats: OrderStats.fromJson(null));
+      return OrdersPage(
+          orders: [],
+          page: 1,
+          totalPages: 1,
+          count: 0,
+          stats: OrderStats.fromJson(null));
     }
   }
 
@@ -97,12 +81,8 @@ class OrderService {
   Future<OrderModel?> createOrder(
       {required OrderModel model,
       required List<Map<String, int>> products}) async {
-    print('\n===== CREATE ORDER REQUEST =====');
-    print('Endpoint: ${ApiConstants.order}');
-
     // Discount değerini kontrol et
     final discountValue = double.tryParse(model.discount.toString()) ?? 0.0;
-    print('Discount value: $discountValue');
 
     final body = <String, dynamic>{
       'status': model.status,
@@ -120,10 +100,6 @@ class OrderService {
       'products': products,
     };
 
-    print('Request body: $body');
-    print('Products: $products');
-    print('==============================\n');
-
     final responseJson = await ApiService().handleApiRequest(
       endpoint: ApiConstants.order,
       method: 'POST',
@@ -131,23 +107,22 @@ class OrderService {
       requiresToken: true,
     );
 
-    print('\n===== CREATE ORDER RESPONSE =====');
-    print('Response: $responseJson');
-    print('Response type: ${responseJson.runtimeType}');
-    print('=================================\n');
-
-    if (responseJson != null && responseJson is Map<String, dynamic>) {
+    if (responseJson is Map<String, dynamic>) {
       return OrderModel.fromJson(responseJson);
-    } else {
-      print('⚠️ Response is null or not a Map<String, dynamic>');
-      return null;
     }
+    // A successful empty response still means the order was accepted.
+    if (responseJson is int &&
+        (responseJson == 200 || responseJson == 201 || responseJson == 204)) {
+      return model;
+    }
+    return null;
   }
 
   Future<OrderModel?> editOrderManually({required OrderModel model}) async {
     final AuthStorage auth = AuthStorage();
 
     final token = await auth.getToken();
+    if (token == null || token.isEmpty) return null;
     final url = Uri.parse("${ApiConstants.order}${model.id}/");
     final headers = {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -179,70 +154,23 @@ class OrderService {
     };
     final body = json.encode(rawBody);
 
-    _printSection('EDIT ORDER REQUEST START');
-    print('Request method: PUT');
-    print('Request URL: $url');
-    print('Order ID: ${model.id}');
-    print('Token exists: ${token != null && token.isNotEmpty}');
-    print('Token length: ${token?.length ?? 0}');
-    _printMap('Request headers', headers);
-    _printMap('Request body (raw map)', rawBody);
-    print('Request body (json): $body');
-
     try {
-      final response = await http.put(url, headers: headers, body: body);
-
-      _printSection('EDIT ORDER RESPONSE RECEIVED');
-      print('Status code: ${response.statusCode}');
-      print('Reason phrase: ${response.reasonPhrase}');
-      print('Response headers: ${response.headers}');
-      if (response.body.length > 3000) {
-        print('Response body length: ${response.body.length}');
-        print(
-            'Response body preview (first 3000 chars): ${response.body.substring(0, 3000)}');
-      } else {
-        print('Response body (raw): ${response.body}');
+      final response = await http
+          .put(url, headers: headers, body: body)
+          .timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 204) {
+        ApiService.clearCache();
+        if (response.bodyBytes.isEmpty) return model;
+        final decoded = json.decode(utf8.decode(response.bodyBytes));
+        return decoded is Map<String, dynamic>
+            ? OrderModel.fromJson(decoded)
+            : model;
       }
-
-      final contentType = response.headers['content-type'] ?? '';
-      if (response.statusCode >= 500 && contentType.contains('text/html')) {
-        print(
-            'Server returned HTML error page. Parsed summary: ${_extractHtmlErrorSummary(response.body)}');
-      }
-
-      dynamic decoded;
-      try {
-        decoded = json.decode(response.body);
-        print('Response body type (decoded): ${decoded.runtimeType}');
-        print('Response body (decoded): $decoded');
-      } catch (decodeError, decodeStack) {
-        print('Response decode error: $decodeError');
-        print('Response decode stack: $decodeStack');
-      }
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (decoded is Map<String, dynamic>) {
-          final updatedOrder = OrderModel.fromJson(decoded);
-          _printSection('EDIT ORDER SUCCESS');
-          print('Updated order id from response: ${updatedOrder.id}');
-          return updatedOrder;
-        }
-
-        print(
-            'Edit success status but response JSON is not Map<String, dynamic>.');
-        return null;
-      }
-
-      _printSection('EDIT ORDER FAILED');
-      print('Non-success response. UI should not treat this as saved.');
       return null;
-    } catch (error, stackTrace) {
-      _printSection('EDIT ORDER EXCEPTION');
-      print('Error: $error');
-      print('StackTrace: $stackTrace');
+    } catch (_) {
       return null;
-    } finally {
-      _printSection('EDIT ORDER REQUEST END');
     }
   }
 

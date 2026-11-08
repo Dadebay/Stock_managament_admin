@@ -92,9 +92,8 @@ class _HomeViewState extends State<HomeView> {
                     }
                   }
                 }
-              } catch (e) {
-                debugPrint(
-                    "Error parsing API chart data for key: $yearMonthKey, value: $value. Error: $e");
+              } catch (_) {
+                debugPrint('Unable to parse chart data');
               }
             });
           }
@@ -122,8 +121,8 @@ class _HomeViewState extends State<HomeView> {
       }
 
       await _calculateProfitAndGenerateExcel(forExcelExport, dateForYear);
-    } catch (error) {
-      debugPrint('Failed to load or export financial report: $error');
+    } catch (_) {
+      debugPrint('Failed to load or export financial report');
       CustomWidgets.showSnackBar(
           'Error'.tr, 'Failed to generate Excel report.'.tr, Colors.red);
     } finally {
@@ -369,7 +368,9 @@ class _HomeViewState extends State<HomeView> {
     if (value == 0) return '0';
     final bool useK = _axisMax >= 1000 || _axisMin <= -1000;
     if (!useK) {
-      return value.abs() < 1 ? value.toStringAsFixed(2) : value.toStringAsFixed(0);
+      return value.abs() < 1
+          ? value.toStringAsFixed(2)
+          : value.toStringAsFixed(0);
     }
     final scaled = value / 1000;
     final decimals = _axisStep >= 1000 ? 0 : (_axisStep >= 100 ? 1 : 2);
@@ -488,14 +489,12 @@ class _HomeViewState extends State<HomeView> {
           // leaving a ragged last row.
           final int columns = width >= 620 ? 3 : (width >= 380 ? 2 : 1);
           const double gap = 10;
-          final double tileWidth =
-              (width - gap * (columns - 1)) / columns;
+          final double tileWidth = (width - gap * (columns - 1)) / columns;
           return Wrap(
             spacing: gap,
             runSpacing: gap,
             children: [
-              for (final tile in tiles)
-                SizedBox(width: tileWidth, child: tile),
+              for (final tile in tiles) SizedBox(width: tileWidth, child: tile),
             ],
           );
         },
@@ -868,7 +867,8 @@ class _HomeViewState extends State<HomeView> {
                 backgroundColor: Colors.white,
                 child: SizedBox(
                   // Never wider than the screen on small windows.
-                  width: min(340.0, MediaQuery.of(dialogContext).size.width - 48),
+                  width:
+                      min(340.0, MediaQuery.of(dialogContext).size.width - 48),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(

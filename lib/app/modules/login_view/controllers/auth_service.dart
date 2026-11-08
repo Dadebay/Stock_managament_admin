@@ -3,6 +3,9 @@
 import 'package:stock_managament_admin/app/modules/login_view/views/login_view.dart';
 import 'package:stock_managament_admin/app/product/constants/api_service.dart';
 import 'package:stock_managament_admin/app/product/init/packages.dart';
+import 'dart:async';
+
+import 'package:http/http.dart' as http;
 
 class AuthStorage {
   final storage = AppStorage();
@@ -10,11 +13,14 @@ class AuthStorage {
   Future<bool> logout() async {
     await storage.remove('AccessToken');
     await storage.remove('RefreshToken');
+    await storage.remove('isAdmin');
+    ApiService.clearCache();
     return storage.read('AccessToken') == null ? true : false;
   }
 
   /////////////////////////////////////////User Token///////////////////////////////////
   Future<bool> setToken(String token) async {
+    ApiService.clearCache();
     await storage.write('AccessToken', token);
     return storage.read('AccessToken') == null ? false : true;
   }
@@ -32,7 +38,7 @@ class AuthStorage {
 
   Future<bool> setRefreshToken(String token) async {
     await storage.write('RefreshToken', token);
-    return storage.read('AccessToken') == null ? false : true;
+    return storage.read('RefreshToken') != null;
   }
 
   Future<String?> getRefreshToken() async {
@@ -57,39 +63,42 @@ class AuthStorage {
 class SignInService {
   final AuthStorage _auth = AuthStorage();
 
-  Future<List<EnterModel>> getClients(String userName, String password) async {
+  Future<bool> updateAdminStatus(String userName) async {
     await _auth.setAdmin(false);
-
-    final uri = Uri.parse(ApiConstants.users);
-    final data = await ApiService().getRequest(uri.toString(), requiresToken: true);
-    if (data is Map && data['results'] != null) {
-      return (data['results'] as List).map((item) => EnterModel.fromJson(item)).toList();
-    } else if (data is List) {
-      List<EnterModel> list = [];
-
-      list = (data).map((item) => EnterModel.fromJson(item)).toList();
-      for (var element in list) {
-        if (element.username == userName && element.password == password) {
-          if (element.isSuperUser == true) {
-            await _auth.setAdmin(true);
-          }
-        }
-      }
-      return list;
-    } else {
-      return [];
-    }
+    final data = await ApiService()
+        .getRequest(ApiConstants.users, requiresToken: true, useCache: false);
+    final users = data is Map ? data['results'] : data;
+    if (users is! List) return false;
+    final isAdmin = users.whereType<Map>().any(
+        (user) => user['username'] == userName && user['is_superuser'] == true);
+    await _auth.setAdmin(isAdmin);
+    return isAdmin;
   }
 
   Future<dynamic> logOut(BuildContext context) async {
-    final uri = Uri.parse("${ApiConstants.logOut}");
-    await ApiService().getRequest(uri.toString(), requiresToken: true);
-    await AuthStorage().logout();
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginView()));
+    final token = await _auth.getToken();
+    await _auth.logout();
+    if (token != null && token.isNotEmpty) {
+      unawaited(_revokeToken(token));
+    }
+    if (context.mounted) {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginView()));
+    }
+  }
+
+  Future<void> _revokeToken(String token) async {
+    try {
+      await http.get(Uri.parse(ApiConstants.logOut), headers: {
+        'Authorization': 'Bearer $token'
+      }).timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Local sign-out must succeed even when the server is unreachable.
+    }
   }
 
   Future login({required String username, required String password}) async {
-    return ApiService().handleApiRequest(
+    final response = await ApiService().handleApiRequest(
       endpoint: ApiConstants.authUrl,
       method: 'POST',
       body: <String, dynamic>{
@@ -98,45 +107,17 @@ class SignInService {
       },
       requiresToken: false,
       handleSuccess: (responseJson) async {
-        if (responseJson['access'] != null) {
-          await _auth.setToken(responseJson['access']);
-          await _auth.setRefreshToken(responseJson['refresh']);
+        if (responseJson is Map && responseJson['access'] is String) {
+          await _auth.setToken(responseJson['access'] as String);
+          if (responseJson['refresh'] is String) {
+            await _auth.setRefreshToken(responseJson['refresh'] as String);
+          } else {
+            await _auth.removeRefreshToken();
+          }
         }
         return responseJson;
       },
     );
-  }
-}
-
-class EnterModel {
-  final int? id;
-  final String? username;
-  final String? password;
-  final bool? isSuperUser;
-
-  EnterModel({
-    this.id,
-    this.username,
-    this.password,
-    this.isSuperUser,
-  });
-
-  factory EnterModel.fromJson(Map<String, dynamic> json) {
-    return EnterModel(
-      id: json['id'] ?? 0,
-      username: json['username'] ?? '',
-      password: json['password'] ?? '',
-      isSuperUser: json['is_superuser'] ?? false,
-    );
-  }
-
-  // Nesneyi JSON'a çevirme
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'password': password,
-      'is_superuser': isSuperUser,
-    };
+    return response is Map && response['access'] is String ? response : null;
   }
 }

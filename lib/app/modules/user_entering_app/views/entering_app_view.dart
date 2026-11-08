@@ -104,14 +104,10 @@ class _EnteringAppViewState extends State<EnteringAppView> {
   int _compare(EnterModel a, EnterModel b) {
     final l = _sortKey == 'name'
         ? (a.username ?? '')
-        : _sortKey == 'password'
-            ? (a.password ?? '')
-            : (a.isSuperUser ?? false ? '1' : '0');
+        : (a.isSuperUser ?? false ? '1' : '0');
     final r = _sortKey == 'name'
         ? (b.username ?? '')
-        : _sortKey == 'password'
-            ? (b.password ?? '')
-            : (b.isSuperUser ?? false ? '1' : '0');
+        : (b.isSuperUser ?? false ? '1' : '0');
     return _ascending
         ? l.toLowerCase().compareTo(r.toLowerCase())
         : r.toLowerCase().compareTo(l.toLowerCase());
@@ -126,7 +122,13 @@ class _EnteringAppViewState extends State<EnteringAppView> {
       child: Row(children: [
         const SizedBox(width: 50),
         _head('client_name'.tr, 'name', 3),
-        _head('Password', 'password', 3),
+        const Expanded(
+            flex: 3,
+            child: Text('Password',
+                style: TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700))),
         _head('Admin', 'role', 2),
         if (widget.isAdmin) const SizedBox(width: 92)
       ]));
